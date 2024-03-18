@@ -1,7 +1,7 @@
 package by.salary.serviceagreement.entities;
 
 
-/*
+/**
 The row in the table of agreement states
 Example
 10.2.1 For high achievements in the field of It

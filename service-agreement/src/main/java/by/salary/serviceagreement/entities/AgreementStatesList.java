@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
-/*
+/**
 The list of agreement states
 Example
 For high achievements

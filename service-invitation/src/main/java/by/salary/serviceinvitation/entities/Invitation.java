@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 
-/*
+/**
 Invitation
 One table with all invitations.
 Invitation=

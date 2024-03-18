@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 
-/*
+/**
 User
 One table with all users
 User=

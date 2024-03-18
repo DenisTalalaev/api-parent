@@ -6,9 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
-/*
+/**
 Organisation
 One table with all organisations
 Organisation=
@@ -16,6 +17,7 @@ Organisation=
     organisationAddress
     organisationContactNumber
     organisationDirectorId - PRE created user id.
+    baseReward - BASE reward (usually from base value, ~209 BYN, set by admin)
 Director = user with * permissions. Created in time of creation of the organisation
 
  */
@@ -31,6 +33,6 @@ public class Organisation {
     private String organisationAddress;
     private String organisationContactNumber;
     private BigInteger organisationDirectorId;
-
+    private BigDecimal baseReward;
 
 }
