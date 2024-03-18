@@ -18,6 +18,6 @@ public class TestService {
                 .bodyToMono(Integer.class)
                 .block();
 
-        return "Hello " + id;
+        return "Test service " + id;
     }
 }

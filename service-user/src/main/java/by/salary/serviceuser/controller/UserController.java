@@ -1,4 +1,4 @@
-package by.salary.serveruser.controllers;
+package by.salary.serviceuser.controller;
 
 
 import lombok.AllArgsConstructor;
@@ -16,13 +16,9 @@ public class UserController {
     @GetMapping
     public String hello(){
 
-        return "Hello";
+        return "User Controller";
     }
 
-    @GetMapping("/hello")
-    public String hello2(){
 
-        return "Hello2";
-    }
 
 }

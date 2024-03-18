@@ -1,14 +1,14 @@
-package by.salary.serveruser;
+package by.salary.serviceuser;
 
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServerUserApplication {
+public class ServiceUserApplication {
 
 
     public static void main(String[] args) {
-        SpringApplication.run(ServerUserApplication.class, args);
+        SpringApplication.run(ServiceUserApplication.class, args);
     }
 }
