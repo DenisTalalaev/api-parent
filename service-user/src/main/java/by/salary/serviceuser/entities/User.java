@@ -20,6 +20,7 @@ User=
     userEmail - unique
     userIsBlocked - status
     userIsVerified - status, if user is verified its email
+    userIsSignedForNotifications - status if user signed for notifications
     userOrganisationId - FOR WHICH organisation id
 
  */
@@ -39,5 +40,6 @@ public class User {
     private String userEmail;
     private Boolean userIsBlocked;
     private Boolean userIsVerified;
+    private Boolean userIsSignedForNotifications;
     private BigInteger userOrganisationId;
 }
