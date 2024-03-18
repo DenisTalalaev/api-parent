@@ -13,11 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class UserController {
 
-    @GetMapping("/hello")
+    @GetMapping
     public String hello(){
 
-
         return "Hello";
+    }
+
+    @GetMapping("/hello")
+    public String hello2(){
+
+        return "Hello2";
     }
 
 }
