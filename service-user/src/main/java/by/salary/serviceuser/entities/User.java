@@ -39,5 +39,6 @@ public class User {
     private String userEmail;
     private Boolean userIsBlocked;
     private Boolean userIsVerified;
+    private Boolean userIsSignedForNotifications;
     private BigInteger userOrganisationId;
 }
