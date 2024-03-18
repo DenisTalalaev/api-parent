@@ -17,6 +17,7 @@
     <module>service-test</module>
     <module>discovery-server</module>
     <module>api-gateway</module>
+    <module>service-user</module>
   </modules>
 
   <version>1.0-SNAPSHOT</version>
