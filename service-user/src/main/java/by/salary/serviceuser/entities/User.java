@@ -8,6 +8,21 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 
+/**
+User
+One table with all users
+User=
+    userFirstName
+    userSurname
+    userSecondName
+    userLogin - unique
+    userPassword - hash
+    userEmail - unique
+    userIsBlocked - status
+    userIsVerified - status, if user is verified its email
+    userOrganisationId - FOR WHICH organisation id
+
+ */
 
 @Getter
 @Setter
