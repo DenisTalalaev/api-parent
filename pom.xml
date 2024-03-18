@@ -10,7 +10,7 @@
   </parent>
 
   <groupId>by.salary</groupId>
-  <artifactId>salaty-by-parent</artifactId>
+  <artifactId>salary-by-parent</artifactId>
   <packaging>pom</packaging>
 
   <modules>
