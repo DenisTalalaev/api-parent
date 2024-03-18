@@ -8,6 +8,17 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 
+/*
+Organisation
+One table with all organisations
+Organisation=
+    organisationName
+    organisationAddress
+    organisationContactNumber
+    organisationDirectorId - PRE created user id.
+Director = user with * permissions. Created in time of creation of the organisation
+
+ */
 
 @Getter
 @Setter
