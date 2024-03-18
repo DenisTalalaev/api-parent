@@ -8,6 +8,16 @@ import lombok.Setter;
 
 import java.math.BigInteger;
 
+/*
+Invitation
+One table with all invitations.
+Invitation=
+    userId - WHO id recipient
+    organisationId - FOR WHICH organisation id recipient
+    invitationCode - CODE
+UserId = User created in the time of creation of the invitation
+ */
+
 @Getter
 @Setter
 @NoArgsConstructor
