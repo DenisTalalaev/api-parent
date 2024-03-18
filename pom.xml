@@ -21,6 +21,7 @@
       <module>service-invitation</module>
       <module>service-auth</module>
     <module>service-agreement</module>
+      <module>service-user-agreement</module>
   </modules>
 
   <version>1.0-SNAPSHOT</version>
