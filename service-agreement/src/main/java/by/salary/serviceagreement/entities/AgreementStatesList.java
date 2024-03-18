@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 @Getter
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 public class AgreementStatesList {
 
-    private Long id;
+    private BigInteger id;
     private String StateListName;
     private ArrayList<AgreementState> StatesList;
 
