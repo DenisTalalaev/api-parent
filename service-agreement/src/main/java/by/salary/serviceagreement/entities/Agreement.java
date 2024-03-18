@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/*
+Container of agreement document for one organisation
+ */
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 
@@ -16,5 +20,5 @@ import java.util.ArrayList;
 public class Agreement {
 
     private BigInteger id;
-    private ArrayList<AgreementStatesList> AgreementStatesList;
+    private ArrayList<AgreementStatesList> agreementStatesList;
 }
