@@ -20,6 +20,7 @@ User=
     userEmail - unique
     userIsBlocked - status
     userIsVerified - status, if user is verified its email
+    userIsSignedForNotifications - status if user signed for notifications
     userOrganisationId - FOR WHICH organisation id
 
  */
