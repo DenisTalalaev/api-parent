@@ -9,6 +9,7 @@ Example
 For high achievements in the field of It - stateInfo
  */
 
+import by.salary.serviceagreement.model.AgreementStateRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,4 +30,11 @@ public class AgreementState {
     private String stateName;
     private String stateInfo;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    private AgreementStatesList agreementStatesList;
+
+    public AgreementState(AgreementStateRequestDTO agreementStateRequestDTO) {
+        this.stateName = agreementStateRequestDTO.getStateName();
+        this.stateInfo = agreementStateRequestDTO.getStateInfo();
+    }
 }

@@ -1,14 +1,19 @@
 package by.salary.serviceuser.entities;
 
 
+import by.salary.serviceuser.model.UserRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
 User
@@ -50,32 +55,66 @@ public class User {
 
     @Size(min = 8, max = 50)
     @Column(unique = true)
-    private String userLogin;
+    private String username;
 
     private String userPassword;
 
     @Email
     private String userEmail;
 
-    @Value("false")
-    private Boolean userIsBlocked;
+    @Value("true")
+    private Boolean isAccountNonExpired;
 
-    @Value("false")
-    private Boolean userIsVerified;
+    @Value("true")
+    private Boolean isAccountNonLocked;
 
-    @Value("false")
-    private Boolean userIsSignedForNotifications;
+    @Value("true")
+    private Boolean isCredentialsNonExpired;
+
+    @Value("true")
+    private Boolean isEnabled;
 
     @NotNull
     private BigInteger userOrganisationId;
 
-    public User(String userFirstName, String userSurname, String userSecondName, String userLogin, String userPassword, String userEmail, BigInteger userOrganisationId) {
-        this.userFirstName = userFirstName;
-        this.userSurname = userSurname;
-        this.userSecondName = userSecondName;
-        this.userLogin = userLogin;
-        this.userPassword = userPassword;
-        this.userEmail = userEmail;
-        this.userOrganisationId = userOrganisationId;
+    private String authorities;
+
+    public Boolean isAccountNonExpired() {
+        return isAccountNonExpired;
+    }
+
+    public Boolean isAccountNonLocked() {
+        return isAccountNonLocked;
+    }
+
+    public Boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
+
+    public Boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public User(UserRequestDTO userRequestDTO) {
+
+        this.userFirstName = userRequestDTO.getUserFirstName();
+        this.userSurname = userRequestDTO.getUserSurname();
+        this.userSecondName = userRequestDTO.getUserSecondName();
+        this.username = userRequestDTO.getUsername();
+        this.userPassword = userRequestDTO.getUserPassword();
+        this.userEmail = userRequestDTO.getUserEmail();
+        this.userOrganisationId = userRequestDTO.getUserOrganisationId();
+        this.authorities = userRequestDTO.getAuthorities();
+    }
+
+    public void update(UserRequestDTO userRequestDTO) {
+        this.userFirstName = userRequestDTO.getUserFirstName() == null? this.userFirstName : userRequestDTO.getUserFirstName();
+        this.userSurname = userRequestDTO.getUserSurname() == null? this.userSurname : userRequestDTO.getUserSurname();
+        this.userSecondName = userRequestDTO.getUserSecondName() == null? this.userSecondName : userRequestDTO.getUserSecondName();
+        this.username = userRequestDTO.getUsername() == null? this.username : userRequestDTO.getUsername();
+        this.userPassword = userRequestDTO.getUserPassword() == null? this.userPassword : userRequestDTO.getUserPassword();
+        this.userEmail = userRequestDTO.getUserEmail() == null? this.userEmail : userRequestDTO.getUserEmail();
+        this.userOrganisationId = userRequestDTO.getUserOrganisationId() == null? this.userOrganisationId : userRequestDTO.getUserOrganisationId();
+        this.authorities = userRequestDTO.getAuthorities() == null? this.authorities : userRequestDTO.getAuthorities();
     }
 }

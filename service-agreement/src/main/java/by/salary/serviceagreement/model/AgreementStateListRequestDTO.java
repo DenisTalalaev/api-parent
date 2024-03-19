@@ -1,6 +1,6 @@
 package by.salary.serviceagreement.model;
 
-import by.salary.serviceagreement.entities.AgreementStatesList;
+import by.salary.serviceagreement.entities.AgreementState;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,11 +10,15 @@ import lombok.Setter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
-public class AgreementRequestDTO {
+public class AgreementStateListRequestDTO {
+
     private BigInteger id;
-    private ArrayList<AgreementStatesList> agreementStatesList;
+    private String stateListName;
+    private ArrayList<AgreementState> statesList;
+
 }
