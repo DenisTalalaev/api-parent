@@ -9,10 +9,8 @@ Example
 For high achievements in the field of It - stateInfo
  */
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.math.BigInteger;
 
@@ -20,8 +18,14 @@ import java.math.BigInteger;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Data
 public class AgreementState {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
+    @Column(unique = true)
     private String stateName;
     private String stateInfo;
 

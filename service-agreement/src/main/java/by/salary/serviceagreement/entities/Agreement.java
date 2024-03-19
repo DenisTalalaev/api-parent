@@ -1,9 +1,7 @@
 package by.salary.serviceagreement.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 /**
 Container of agreement document for one organisation
@@ -17,8 +15,15 @@ import java.util.ArrayList;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Data
+@Entity
+@Table(name = "agreement")
 public class Agreement {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
+
+    @OneToMany(mappedBy = "agreement")
     private ArrayList<AgreementStatesList> agreementStatesList;
 }
