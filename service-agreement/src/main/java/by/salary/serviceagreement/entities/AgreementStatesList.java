@@ -29,7 +29,7 @@ public class AgreementStatesList {
     @Column(unique = true)
     private String stateListName;
 
-    @OneToMany(mappedBy = "agreementStatesList")
+    @OneToMany(fetch = FetchType.EAGER)
     private ArrayList<AgreementState> statesList;
 
     public void addState(AgreementState state){

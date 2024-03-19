@@ -17,13 +17,12 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "agreement")
 public class Agreement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
-    @OneToMany(mappedBy = "agreement")
+    @OneToMany(fetch = FetchType.EAGER)
     private ArrayList<AgreementStatesList> agreementStatesList;
 }
