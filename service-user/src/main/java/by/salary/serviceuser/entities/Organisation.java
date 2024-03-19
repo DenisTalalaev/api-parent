@@ -18,6 +18,7 @@ Organisation=
     organisationContactNumber
     organisationDirectorId - PRE created user id.
     baseReward - BASE reward (usually from base value, ~209 BYN, set by admin)
+    agreementId - organisations agreement ID
 Director = user with * permissions. Created in time of creation of the organisation
 
  */
@@ -34,5 +35,6 @@ public class Organisation {
     private String organisationContactNumber;
     private BigInteger organisationDirectorId;
     private BigDecimal baseReward;
+    private BigInteger agreementId;
 
 }

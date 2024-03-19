@@ -1,9 +1,7 @@
 package by.salary.serviceagreement.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 
 /**
@@ -21,10 +19,17 @@ import java.util.ArrayList;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Data
 public class AgreementStatesList {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
+    @Column(unique = true)
     private String stateListName;
+
+    @OneToMany(mappedBy = "agreementStatesList")
     private ArrayList<AgreementState> statesList;
 
     public void addState(AgreementState state){
