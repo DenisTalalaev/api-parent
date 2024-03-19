@@ -23,6 +23,10 @@ public class Agreement {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "agreement")
     private ArrayList<AgreementStatesList> agreementStatesList;
+
+    public Agreement(ArrayList<AgreementStatesList> agreementStatesList) {
+        this.agreementStatesList = agreementStatesList;
+    }
 }
