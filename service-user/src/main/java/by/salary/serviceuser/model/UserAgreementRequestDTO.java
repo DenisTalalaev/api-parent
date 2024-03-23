@@ -1,4 +1,4 @@
-package by.salary.serviceuseragreement.model;
+package by.salary.serviceuser.model;
 
 import lombok.*;
 

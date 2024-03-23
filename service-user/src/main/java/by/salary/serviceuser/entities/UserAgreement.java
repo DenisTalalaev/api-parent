@@ -1,12 +1,9 @@
-package by.salary.serviceuseragreement.entities;
+package by.salary.serviceuser.entities;
 
 
-import by.salary.serviceuseragreement.model.UserAgreementRequestDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jdk.jfr.Enabled;
+import by.salary.serviceuser.model.UserAgreementRequestDTO;
+import by.salary.serviceuser.model.UserAgreementResponseDTO;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +14,7 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
+import java.util.List;
 
 /**
 User agreement
@@ -56,6 +54,14 @@ public class UserAgreement {
     private Time time;
     @NotNull
     private BigDecimal currentBaseReward;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_agreement_user",
+            joinColumns = @JoinColumn(name = "user_agreement_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> users;
 
     public UserAgreement(UserAgreementRequestDTO userAgreementRequestDTO) {
         this.userId = userAgreementRequestDTO.getUserId();

@@ -83,6 +83,14 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "permission_id"))
     private List<Permission> permissions;
 
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_agreement_user",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_agreement_id"))
+    private List<UserAgreement> userAgreements;
+
+
     private String authorities;
 
     public Boolean isAccountNonExpired() {
