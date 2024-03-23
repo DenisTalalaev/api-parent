@@ -42,4 +42,21 @@ public class UserRequestDTO {
     private BigInteger userOrganisationId;
 
     private String authorities;
+
+
+    public Boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public Boolean isAccountNonExpired() {
+        return isAccountNonExpired;
+    }
+
+    public Boolean isAccountNonLocked() {
+        return isAccountNonLocked;
+    }
+
+    public Boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
 }
