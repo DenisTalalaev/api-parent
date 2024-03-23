@@ -1,6 +1,6 @@
-package by.salary.serviceuseragreement.model;
+package by.salary.serviceuser.model;
 
-import by.salary.serviceuseragreement.entities.UserAgreement;
+import by.salary.serviceuser.entities.UserAgreement;
 import lombok.*;
 
 import java.math.BigDecimal;
