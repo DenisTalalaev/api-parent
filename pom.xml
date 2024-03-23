@@ -18,10 +18,11 @@
     <module>discovery-server</module>
     <module>api-gateway</module>
     <module>service-user</module>
+      <module>authorization-server</module>
   </modules>
 
   <version>1.0-SNAPSHOT</version>
-  <name>salaty-by-parent Maven Webapp</name>
+  <name>salary-by-parent Maven Webapp</name>
   <url>http://maven.apache.org</url>
 
   <properties>
