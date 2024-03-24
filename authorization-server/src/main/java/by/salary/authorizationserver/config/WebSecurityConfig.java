@@ -3,33 +3,24 @@ package by.salary.authorizationserver.config;
 import by.salary.authorizationserver.filter.JWTAuthenticationFilter;
 import by.salary.authorizationserver.filter.JWTVerifierFilter;
 import by.salary.authorizationserver.filter.JwtAuthenticationProvider;
-import by.salary.authorizationserver.model.dto.AuthDto;
+import by.salary.authorizationserver.filter.OAuth2AuthenticationSuccessHandler;
 import by.salary.authorizationserver.service.AuthorizationService;
 import by.salary.authorizationserver.service.CustomUserService;
 import by.salary.authorizationserver.util.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.io.IOException;
 
 @Configuration
 @AllArgsConstructor
@@ -53,6 +44,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(
                         authz -> authz
                                 .requestMatchers("/auth/register", "/auth/token").permitAll()
+                                .requestMatchers("/oauth2/**").permitAll()
+                                .requestMatchers("/login/**").permitAll()
                                 .anyRequest().hasAuthority("USER")
                 )
                 .addFilter(new JWTAuthenticationFilter(
@@ -60,6 +53,8 @@ public class WebSecurityConfig {
                 .addFilterAfter(
                         new JWTVerifierFilter(jwtService, authorizationService, authenticationManagerBuilder.getOrBuild()),
                         JWTAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationService, jwtService)))
                 .build();
     }
 

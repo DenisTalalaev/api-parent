@@ -16,6 +16,8 @@ import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.toList;
+
 
 @Service
 public class JwtService {
@@ -59,7 +61,8 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof UserInfoDTO customUserDetails) {
             claims.put("email", customUserDetails.getEmail());
-            claims.put("authorities", customUserDetails.getAuthorities());
+            claims.put("authorities", customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+                    .collect(toList()));
         }
         return generateToken(claims, userDetails.getUsername());
     }
@@ -100,7 +103,6 @@ public class JwtService {
      * Генерация токена
      *
      * @param extraClaims дополнительные данные
-     * @param userDetails данные пользователя
      * @return токен
      */
     private String generateToken(Map<String, Object> extraClaims, String subject) {

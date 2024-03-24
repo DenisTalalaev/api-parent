@@ -1,7 +1,6 @@
 package by.salary.authorizationserver.service;
 
 
-import by.salary.authorizationserver.exception.UserAlreadyExistsException;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.RegisterDto;
 import lombok.extern.slf4j.Slf4j;
@@ -31,22 +30,26 @@ public class InMemoryAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public void save(RegisterDto newUser) throws UserAlreadyExistsException {
+    public Optional<UserInfoDTO> save(RegisterDto newUser){
         Optional<UserInfoDTO> user = repository.stream().filter(u -> u.getEmail().equals(newUser.getEmail())).findFirst();
         if (user.isPresent()){
-            throw new UserAlreadyExistsException("User already exists");
+            return Optional.empty();
         }
         UserInfoDTO userInfoDTO = mapToUserInfoDTO(newUser);
         userInfoDTO.setAuthorities(List.of("USER"));
         userInfoDTO.setId(newId++);
         repository.add(userInfoDTO);
+        return Optional.of(userInfoDTO);
     }
 
 
-    private UserInfoDTO mapToUserInfoDTO(RegisterDto registerDto){
+    private UserInfoDTO mapToUserInfoDTO(RegisterDto registerRequest){
         return UserInfoDTO.builder()
-                .email(registerDto.getEmail())
-                .password(registerDto.getPassword())
+                .email(registerRequest.getEmail())
+                .password(registerRequest.getPassword())
+                .authorities(registerRequest.getAuthorities())
+                .pictureUri(registerRequest.getPictureUri())
+                .registrationId(registerRequest.getAuthenticationRegistrationId().name())
                 .build();
     }
 
