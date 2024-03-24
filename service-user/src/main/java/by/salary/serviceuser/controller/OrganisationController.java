@@ -2,6 +2,7 @@ package by.salary.serviceuser.controller;
 
 import by.salary.serviceuser.model.OrganisationRequestDTO;
 import by.salary.serviceuser.model.OrganisationResponseDTO;
+import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.service.OrganisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,13 @@ import java.util.List;
 @RequestMapping("/organisations")
 public class OrganisationController {
 
+    private final OrganisationService organisationService;
+
+
     @Autowired
-    OrganisationService organisationService;
+    public OrganisationController(OrganisationService organisationService) {
+        this.organisationService = organisationService;
+    }
 
 
     @GetMapping
@@ -31,6 +37,12 @@ public class OrganisationController {
     @ResponseStatus(HttpStatus.OK)
     public OrganisationResponseDTO getOneOrganisation(@PathVariable BigInteger id) {
         return organisationService.getOneOrganisation(id);
+    }
+
+    @GetMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponseDTO> getOrganisationUsers(@PathVariable BigInteger id) {
+        return organisationService.getOrganisationUsers(id);
     }
 
 

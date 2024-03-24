@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.entities.UserAgreement;
 import lombok.*;
 
@@ -25,7 +26,7 @@ public class UserAgreementResponseDTO {
 
     public UserAgreementResponseDTO(UserAgreement userAgreement) {
         this.id = userAgreement.getId();
-        this.userId = userAgreement.getUserId();
+        this.userId = userAgreement.getUser().getId();
         this.agreementId = userAgreement.getAgreementId();
         this.moderatorName = userAgreement.getModeratorName();
         this.moderatorComment = userAgreement.getModeratorComment();

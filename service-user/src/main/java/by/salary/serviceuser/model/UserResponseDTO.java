@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +33,7 @@ public class UserResponseDTO {
 
     private Boolean isEnabled;
 
-    private BigInteger userOrganisationId;
+    private BigInteger organisationId;
 
     private String authorities;
 
@@ -49,7 +50,7 @@ public class UserResponseDTO {
         this.isAccountNonLocked = user.isAccountNonLocked();
         this.isCredentialsNonExpired = user.isCredentialsNonExpired();
         this.isEnabled = user.isEnabled();
-        this.userOrganisationId = user.getUserOrganisationId();
+        this.organisationId = user.getOrganisation().getId();
         this.authorities = user.getAuthorities();
     }
 }

@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,7 +27,7 @@ public class OrganisationRequestDTO {
     private String organisationAddress;
 
     private String organisationContactNumber;
-    private BigInteger organisationDirectorId;
+    private BigInteger directorId;
 
     private BigDecimal baseReward;
 

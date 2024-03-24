@@ -1,6 +1,7 @@
 package by.salary.serviceuser.entities;
 
 
+import by.salary.serviceuser.model.OrganisationRequestDTO;
 import by.salary.serviceuser.model.PermissionResponseDTO;
 import by.salary.serviceuser.model.UserRequestDTO;
 import jakarta.persistence.*;
@@ -74,8 +75,10 @@ public class User {
     @Value("true")
     private Boolean isEnabled;
 
+    @ManyToOne
+    @JoinColumn(name = "organisation_id")
     @NotNull
-    private BigInteger userOrganisationId;
+    private Organisation organisation;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_permission",
@@ -84,12 +87,9 @@ public class User {
     private List<Permission> permissions;
 
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_agreement_user",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_agreement_id"))
-    private List<UserAgreement> userAgreements;
-
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "useragreement_id")
+    private List<UserAgreement> userAgreementList;
 
     private String authorities;
 
@@ -109,7 +109,7 @@ public class User {
         return isEnabled;
     }
 
-    public User(UserRequestDTO userRequestDTO) {
+    public User(UserRequestDTO userRequestDTO, Organisation organisation) {
 
         this.userFirstName = userRequestDTO.getUserFirstName();
         this.userSurname = userRequestDTO.getUserSurname();
@@ -117,27 +117,28 @@ public class User {
         this.username = userRequestDTO.getUsername();
         this.userPassword = userRequestDTO.getUserPassword();
         this.userEmail = userRequestDTO.getUserEmail();
-        this.userOrganisationId = userRequestDTO.getUserOrganisationId();
+        this.organisation = organisation;
         this.authorities = userRequestDTO.getAuthorities() == null ? "USER" : userRequestDTO.getAuthorities();
-        this.isEnabled = userRequestDTO.isEnabled() == null ? false : userRequestDTO.isEnabled();
-        this.isAccountNonExpired = userRequestDTO.isAccountNonExpired() == null ? true : userRequestDTO.isAccountNonExpired();
-        this.isAccountNonLocked = userRequestDTO.isAccountNonLocked() == null ? true : userRequestDTO.isAccountNonLocked();
-        this.isCredentialsNonExpired = userRequestDTO.isCredentialsNonExpired() == null ? true : userRequestDTO.isCredentialsNonExpired();
+        this.isEnabled = userRequestDTO.isEnabled() != null && userRequestDTO.isEnabled();
+        this.isAccountNonExpired = userRequestDTO.isAccountNonExpired() == null || userRequestDTO.isAccountNonExpired();
+        this.isAccountNonLocked = userRequestDTO.isAccountNonLocked() == null || userRequestDTO.isAccountNonLocked();
+        this.isCredentialsNonExpired = userRequestDTO.isCredentialsNonExpired() == null || userRequestDTO.isCredentialsNonExpired();
 
     }
 
-    public void update(UserRequestDTO userRequestDTO) {
+    public void update(UserRequestDTO userRequestDTO, Organisation organisation) {
         this.userFirstName = userRequestDTO.getUserFirstName() == null ? this.userFirstName : userRequestDTO.getUserFirstName();
         this.userSurname = userRequestDTO.getUserSurname() == null ? this.userSurname : userRequestDTO.getUserSurname();
         this.userSecondName = userRequestDTO.getUserSecondName() == null ? this.userSecondName : userRequestDTO.getUserSecondName();
         this.username = userRequestDTO.getUsername() == null ? this.username : userRequestDTO.getUsername();
         this.userPassword = userRequestDTO.getUserPassword() == null ? this.userPassword : userRequestDTO.getUserPassword();
         this.userEmail = userRequestDTO.getUserEmail() == null ? this.userEmail : userRequestDTO.getUserEmail();
-        this.userOrganisationId = userRequestDTO.getUserOrganisationId() == null ? this.userOrganisationId : userRequestDTO.getUserOrganisationId();
+        this.organisation = organisation == null ? this.organisation : organisation;
         this.authorities = userRequestDTO.getAuthorities() == null ? this.authorities : userRequestDTO.getAuthorities();
         this.isEnabled = userRequestDTO.isEnabled() == null ? this.isEnabled : userRequestDTO.isEnabled();
         this.isAccountNonExpired = userRequestDTO.isAccountNonExpired() == null ? this.isAccountNonExpired : userRequestDTO.isAccountNonExpired();
         this.isAccountNonLocked = userRequestDTO.isAccountNonLocked() == null ? this.isAccountNonLocked : userRequestDTO.isAccountNonLocked();
         this.isCredentialsNonExpired = userRequestDTO.isCredentialsNonExpired() == null ? this.isCredentialsNonExpired : userRequestDTO.isCredentialsNonExpired();
     }
+
 }

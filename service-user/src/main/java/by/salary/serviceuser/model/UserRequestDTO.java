@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.Organisation;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,7 +40,7 @@ public class UserRequestDTO {
 
     private Boolean isEnabled;
 
-    private BigInteger userOrganisationId;
+    private BigInteger organisationId;
 
     private String authorities;
 

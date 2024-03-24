@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 
 /**
 Organisation
@@ -46,28 +47,34 @@ public class Organisation {
     private String organisationContactNumber;
 
     @NotNull
-    private BigInteger organisationDirectorId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User director;
 
     private BigDecimal baseReward;
 
     private BigInteger agreementId;
 
-    public Organisation(OrganisationRequestDTO organisationRequestDTO) {
+    @OneToMany
+    @JoinColumn(name = "organisation_id")
+    private List<User> users;
+
+    public Organisation(OrganisationRequestDTO organisationRequestDTO, User director) {
 
         this.organisationName = organisationRequestDTO.getOrganisationName();
         this.organisationAddress = organisationRequestDTO.getOrganisationAddress();
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber();
-        this.organisationDirectorId = organisationRequestDTO.getOrganisationDirectorId();
+        this.director = director;
         this.baseReward = organisationRequestDTO.getBaseReward();
         this.agreementId = organisationRequestDTO.getAgreementId();
     }
 
-    public void update(OrganisationRequestDTO organisationRequestDTO) {
+    public void update(OrganisationRequestDTO organisationRequestDTO, User director) {
 
         this.organisationName = organisationRequestDTO.getOrganisationName() == null? this.organisationName : organisationRequestDTO.getOrganisationName();
         this.organisationAddress = organisationRequestDTO.getOrganisationAddress() ==null? this.organisationAddress : organisationRequestDTO.getOrganisationAddress();
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber() == null? this.organisationContactNumber : organisationRequestDTO.getOrganisationContactNumber();
-        this.organisationDirectorId = organisationRequestDTO.getOrganisationDirectorId() == null? this.organisationDirectorId : organisationRequestDTO.getOrganisationDirectorId();
+        this.director = director == null? this.director : director;
         this.baseReward = organisationRequestDTO.getBaseReward() == null? this.baseReward : organisationRequestDTO.getBaseReward();
         this.agreementId = organisationRequestDTO.getAgreementId() == null? this.agreementId : organisationRequestDTO.getAgreementId();
     }
