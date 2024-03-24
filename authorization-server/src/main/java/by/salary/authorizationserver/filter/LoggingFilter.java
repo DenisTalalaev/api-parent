@@ -27,5 +27,11 @@ public class LoggingFilter extends OncePerRequestFilter {
 		log.info("**************************************************************************");
 
 		filterChain.doFilter(request, response);
+
+		log.info("**************************************************************************");
+		log.info("Path of the Response Status -----> " + response.getStatus());
+		log.info("Path of the Response Headers -----> " + response.getHeaderNames());
+		log.info("Path of the Response Authorization header -----> " + response.getHeaders("Authorization"));
+		log.info("**************************************************************************");
 	}
 }

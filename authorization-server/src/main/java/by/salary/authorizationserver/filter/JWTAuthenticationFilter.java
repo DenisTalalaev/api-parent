@@ -41,7 +41,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private AuthenticationManager authenticationManager;
     JwtService jwtService;
 
-    public JWTAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager, JwtService jwtService) {
+    public JWTAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager,
+                                   JwtService jwtService) {
         setFilterProcessesUrl("/auth/token");
         this.objectMapper = objectMapper;
         this.authenticationManager = authenticationManager;
@@ -82,7 +83,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .email(email)
                 .authorities(authorities)
                 .token(String.format("Bearer %s", token))
-                .methodType(HttpMethod.GET.name()).isAuthenticated(true)
+                .methodType(HttpMethod.GET.name())
+                .isAuthenticated(true)
                 .build();
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream().write(objectMapper.writeValueAsBytes(respModel));
