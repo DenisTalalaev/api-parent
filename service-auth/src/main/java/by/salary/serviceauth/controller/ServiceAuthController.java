@@ -1,5 +1,4 @@
-package by.salary.serveruser.controllers;
-
+package by.salary.serviceauth.controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -7,22 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Controller
 @RestController
-@RequestMapping("/users")
 @AllArgsConstructor
-public class UserController {
+@Controller
+@RequestMapping("/auth")
+public class ServiceAuthController {
 
     @GetMapping
-    public String hello(){
-
-        return "Hello";
+    public String index() {
+        return "Auth service";
     }
-
-    @GetMapping("/hello")
-    public String hello2(){
-
-        return "Hello2";
-    }
-
 }
