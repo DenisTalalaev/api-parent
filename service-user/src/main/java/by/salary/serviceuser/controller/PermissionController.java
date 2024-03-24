@@ -20,7 +20,7 @@ import java.util.ListResourceBundle;
 @RequestMapping("/permissions")
 public class PermissionController {
 
-    private PermissionService permissionService;
+    private final PermissionService permissionService;
 
     @Autowired
     public PermissionController(PermissionService permissionService) {

@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.User;
 import lombok.*;
 
 import java.math.BigDecimal;

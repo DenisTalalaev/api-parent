@@ -1,6 +1,7 @@
 package by.salary.serviceuser.model;
 
 import by.salary.serviceuser.entities.Organisation;
+import by.salary.serviceuser.entities.User;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ public class OrganisationResponseDTO {
     private String organisationAddress;
 
     private String organisationContactNumber;
-    private BigInteger organisationDirectorId;
+    private BigInteger directorId;
 
     private BigDecimal baseReward;
 
@@ -31,7 +32,7 @@ public class OrganisationResponseDTO {
         this.organisationName = organisation.getOrganisationName();
         this.organisationAddress = organisation.getOrganisationAddress();
         this.organisationContactNumber = organisation.getOrganisationContactNumber();
-        this.organisationDirectorId = organisation.getOrganisationDirectorId();
+        this.directorId = organisation.getDirector().getId();
         this.baseReward = organisation.getBaseReward();
         this.agreementId = organisation.getAgreementId();
     }
