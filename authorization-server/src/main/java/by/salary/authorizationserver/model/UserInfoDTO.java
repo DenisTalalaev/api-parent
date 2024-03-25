@@ -20,6 +20,7 @@ public class UserInfoDTO implements UserDetails {
     String password;
     Collection<String> authorities;
     String pictureUri;
+    String registrationId;
 
 
     @Override

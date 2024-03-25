@@ -1,14 +1,13 @@
-package by.salary.serveruser;
-
+package by.salary.serviceauth;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ServerUserApplication {
-
+public class ServiceAuthApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ServerUserApplication.class, args);
+
+        SpringApplication.run(ServiceAuthApplication.class, args);
     }
 }

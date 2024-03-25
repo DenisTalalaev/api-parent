@@ -1,23 +1,16 @@
 package by.salary.authorizationserver.controller;
 
-import by.salary.authorizationserver.exception.UserAlreadyExistsException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthDto;
 import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.RegisterRequest;
+import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.service.AuthorizationService;
 import by.salary.authorizationserver.util.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authorization.AuthorizationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,9 +32,9 @@ public class IdentityProviderController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(@RequestBody RegisterDto registerDto) throws UserAlreadyExistsException {
-        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-        authorizationService.save(registerDto);
+    public String register(@RequestBody RegisterRequest registerRequest) {
+        registerRequest.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        authorizationService.save(mapToRegisterDto(registerRequest));
         return "User created";
     }
 
@@ -88,6 +81,16 @@ public class IdentityProviderController {
                 .token(token)
                 .authorities(userInfoDTO.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
+    }
+
+    private RegisterDto mapToRegisterDto(RegisterRequest registerRequest){
+        return RegisterDto.builder()
+                .email(registerRequest.getEmail())
+                .password(registerRequest.getPassword())
+                .authorities(List.of("USER"))
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .build();
+
     }
 
 }
