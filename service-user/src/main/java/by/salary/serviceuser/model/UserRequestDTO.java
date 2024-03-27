@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Organisation;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Setter
@@ -42,7 +44,7 @@ public class UserRequestDTO {
 
     private BigInteger organisationId;
 
-    private String authorities;
+    private List<Authority> authorities;
 
 
     public Boolean isEnabled() {
