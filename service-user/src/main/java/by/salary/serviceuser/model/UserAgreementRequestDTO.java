@@ -21,5 +21,4 @@ public class UserAgreementRequestDTO {
     private BigDecimal count;
     private Time time;
     private BigDecimal currentBaseReward;
-
 }

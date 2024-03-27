@@ -1,20 +1,17 @@
 package by.salary.serviceuser.entities;
 
 
-import by.salary.serviceuser.model.OrganisationRequestDTO;
-import by.salary.serviceuser.model.PermissionResponseDTO;
+import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import by.salary.serviceuser.model.UserRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,6 +58,7 @@ public class User {
     private String userPassword;
 
     @Email
+    @Column(unique = true)
     private String userEmail;
 
     @Value("true")
@@ -74,6 +72,17 @@ public class User {
 
     @Value("true")
     private Boolean isEnabled;
+
+    private String imageURI;
+
+    @NotNull
+    @Column(unique = true)
+    private String authorisationAttributeKey;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private AuthenticationRegistrationId authenticationRegistrationId;
+
 
     @ManyToOne
     @JoinColumn(name = "organisation_id")
@@ -91,7 +100,8 @@ public class User {
     @JoinColumn(name = "useragreement_id")
     private List<UserAgreement> userAgreementList;
 
-    private String authorities;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Authority> authorities;
 
     public Boolean isAccountNonExpired() {
         return isAccountNonExpired;
@@ -118,7 +128,7 @@ public class User {
         this.userPassword = userRequestDTO.getUserPassword();
         this.userEmail = userRequestDTO.getUserEmail();
         this.organisation = organisation;
-        this.authorities = userRequestDTO.getAuthorities() == null ? "USER" : userRequestDTO.getAuthorities();
+        this.authorities = userRequestDTO.getAuthorities() == null ? new ArrayList<>(): userRequestDTO.getAuthorities();
         this.isEnabled = userRequestDTO.isEnabled() != null && userRequestDTO.isEnabled();
         this.isAccountNonExpired = userRequestDTO.isAccountNonExpired() == null || userRequestDTO.isAccountNonExpired();
         this.isAccountNonLocked = userRequestDTO.isAccountNonLocked() == null || userRequestDTO.isAccountNonLocked();
