@@ -34,6 +34,12 @@ public class InvitationController {
         return invitationService.getInvitationById(id);
     }
 
+    @GetMapping("/getuser/{userInvitationCode}")
+    @ResponseStatus(HttpStatus.OK)
+    public BigInteger getUserByInvitationCode(@PathVariable String userInvitationCode) {
+        return invitationService.getUserByInvitationCode(userInvitationCode);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO) {
@@ -46,10 +52,5 @@ public class InvitationController {
         return invitationService.deleteInvitation(id);
     }
 
-    @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public InvitationResponseDTO updateInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO) {
-        return invitationService.updateInvitation(invitationRequestDTO);
-    }
 
 }

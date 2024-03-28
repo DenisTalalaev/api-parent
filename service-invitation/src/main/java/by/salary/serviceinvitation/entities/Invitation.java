@@ -2,10 +2,7 @@ package by.salary.serviceinvitation.entities;
 
 
 import by.salary.serviceinvitation.model.InvitationRequestDTO;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -42,17 +39,12 @@ public class Invitation {
 
     @NotNull
     @Size(min = 9, max = 9)
+    @Column(unique = true)
     private String invitationCode;
 
-    public Invitation(InvitationRequestDTO invitationRequestDTO) {
-        this.userId = invitationRequestDTO.getUserId();
+    public Invitation(InvitationRequestDTO invitationRequestDTO, BigInteger userId, String invitationCode) {
+        this.userId = userId;
         this.organisationId = invitationRequestDTO.getOrganisationId();
-        this.invitationCode = invitationRequestDTO.getInvitationCode();
-    }
-
-    public void update(InvitationRequestDTO invitationRequestDTO) {
-        this.userId = invitationRequestDTO.getUserId() == null? this.userId : invitationRequestDTO.getUserId();
-        this.organisationId = invitationRequestDTO.getOrganisationId() == null? this.organisationId : invitationRequestDTO.getOrganisationId();
-        this.invitationCode = invitationRequestDTO.getInvitationCode() == null? this.invitationCode : invitationRequestDTO.getInvitationCode();
+        this.invitationCode = invitationCode;
     }
 }

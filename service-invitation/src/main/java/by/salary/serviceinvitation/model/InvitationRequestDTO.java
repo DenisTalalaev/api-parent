@@ -13,11 +13,8 @@ import java.math.BigInteger;
 @Data
 public class InvitationRequestDTO {
 
-    private BigInteger id;
-
-    private BigInteger userId;
-
+    private String userFirstName;
+    private String userSecondName;
+    private String userSurnameName;
     private BigInteger organisationId;
-
-    private String invitationCode;
 }
