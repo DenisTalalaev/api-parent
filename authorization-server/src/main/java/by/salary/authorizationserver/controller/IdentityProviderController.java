@@ -2,11 +2,11 @@ package by.salary.authorizationserver.controller;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.AuthDto;
-import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.RegisterRequest;
-import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
+import by.salary.authorizationserver.model.dto.RegisterResponseDto;
 import by.salary.authorizationserver.service.AuthorizationService;
+import by.salary.authorizationserver.service.RegistrationService;
 import by.salary.authorizationserver.util.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,21 +25,20 @@ public class IdentityProviderController {
 
     AuthorizationService authorizationService;
 
+    RegistrationService registrationService;
+
     JwtService jwtService;
 
-    PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public String register(@RequestBody RegisterRequest registerRequest) {
-        registerRequest.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        authorizationService.save(mapToRegisterDto(registerRequest));
-        return "User created";
+    public RegisterResponseDto register(@RequestBody RegisterRequest registerRequest) {
+        return registrationService.register(registerRequest);
     }
 
     @PostMapping("/token")
     @ResponseStatus(HttpStatus.OK)
-    public ConnValidationResponse token(@RequestBody AuthDto authDto) {
+    public ConnValidationResponse token(@RequestBody AuthenticationRequestDto authDto) {
         var optional = authorizationService.findByEmail(authDto.getEmail());
         if (optional.isEmpty()) {
             throw new UsernameNotFoundException("User not found");
@@ -81,16 +79,6 @@ public class IdentityProviderController {
                 .token(token)
                 .authorities(userInfoDTO.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
-    }
-
-    private RegisterDto mapToRegisterDto(RegisterRequest registerRequest){
-        return RegisterDto.builder()
-                .email(registerRequest.getEmail())
-                .password(registerRequest.getPassword())
-                .authorities(List.of("USER"))
-                .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .build();
-
     }
 
 }

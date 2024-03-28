@@ -1,7 +1,7 @@
 package by.salary.authorizationserver.config;
 
 
-import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.service.AuthorizationService;
 import by.salary.authorizationserver.service.InMemoryAuthorizationService;
@@ -18,10 +18,9 @@ public class AdditionalServiceConfig {
     @Bean
     AuthorizationService userService() {
         AuthorizationService service = new InMemoryAuthorizationService();
-        service.save(RegisterDto.builder()
+        service.save(RegisterRequestDto.builder()
                 .email("hotspot.by@gmail.com")
                 .password("123")
-                .authorities(List.of("USER"))
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
                 .build());
 

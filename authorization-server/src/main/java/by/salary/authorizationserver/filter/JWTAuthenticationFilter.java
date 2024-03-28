@@ -1,7 +1,7 @@
 package by.salary.authorizationserver.filter;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
-import by.salary.authorizationserver.model.dto.AuthDto;
+import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,8 +9,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -21,10 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,7 +48,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
-            AuthDto authDto = objectMapper.readValue(request.getInputStream(), AuthDto.class);
+            AuthenticationRequestDto authDto = objectMapper.readValue(request.getInputStream(), AuthenticationRequestDto.class);
             return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(),
                     authDto.getPassword()));
 

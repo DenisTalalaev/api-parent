@@ -15,6 +15,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.sql.SQLOutput;
 import java.util.function.Function;
 
 @Service
@@ -23,7 +24,8 @@ public class AuthenticationService {
 
     WebClient.Builder webClientBuilder;
 
-    public ConnValidationResponse authenticate(AuthorizationDto authorizationDto) {
+    public Mono<ConnValidationResponse> authenticate(AuthorizationDto authorizationDto) {
+
         return webClientBuilder.build()
                 .post()
                 .uri("lb://identity-server/auth/token")
@@ -32,8 +34,7 @@ public class AuthenticationService {
                 .onStatus(HttpStatusCode::isError,
                         errorHandler()
                 )
-                .bodyToMono(ConnValidationResponse.class)
-                .block();
+                .bodyToMono(ConnValidationResponse.class);
     }
 
     public Mono<ConnValidationResponse> validate(String token) {

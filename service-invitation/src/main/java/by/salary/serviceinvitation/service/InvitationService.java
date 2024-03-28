@@ -7,6 +7,7 @@ import by.salary.serviceinvitation.model.InvitationResponseDTO;
 import by.salary.serviceinvitation.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -26,7 +27,8 @@ public class InvitationService {
     private WebClient.Builder webClientBuilder;
 
     @Autowired
-    public InvitationService(InvitationRepository invitationRepository, WebClient.Builder webClientBuilder) {
+    public InvitationService(InvitationRepository invitationRepository,
+                             WebClient.Builder webClientBuilder) {
         this.invitationRepository = invitationRepository;
         this.webClientBuilder = webClientBuilder;
     }
@@ -66,7 +68,8 @@ public class InvitationService {
         return webClientBuilder.build()
                 .post()
                 .uri("lb://service-user/users")
-                .body(userRequestDTO, UserRequestDTO.class)
+                .body(Mono.just(userRequestDTO), UserRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(BigInteger.class).blockOptional();
     }

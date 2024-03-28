@@ -1,7 +1,7 @@
 package by.salary.authorizationserver.service;
 
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -11,7 +11,7 @@ public interface AuthorizationService {
 
 
     Optional<UserInfoDTO> findByEmail(String email);
-    Optional<UserInfoDTO> save(RegisterDto newUser);
+    Optional<UserInfoDTO> save(RegisterRequestDto newUser);
 
 
 }
