@@ -34,10 +34,11 @@ public class UserController {
         return userService.getOneUser(id);
     }
 
-    @PostMapping
+
+    @PostMapping("/createUser")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO createUser(@RequestBody UserRequestDTO userRequestDTO) {
-        return userService.createUser(userRequestDTO);
+    public String createUserByInvitation(@RequestBody UserRequestDTO userRequestDTO) {
+        return userService.createUser(userRequestDTO).getId().toString();
     }
 
     @PutMapping

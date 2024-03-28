@@ -11,12 +11,14 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.Objects;
@@ -30,8 +32,9 @@ public class UserAuthenticationService {
     WebClient.Builder webClientBuilder;
 
     @Autowired
-    public UserAuthenticationService(UserRepository userRepository) {
+    public UserAuthenticationService(UserRepository userRepository, WebClient.Builder webClientBuilder) {
         this.userRepository = userRepository;
+        this.webClientBuilder = webClientBuilder;
     }
 
 
@@ -49,13 +52,13 @@ public class UserAuthenticationService {
         );
     }
 
-    public BigInteger getUserIdByInvitation(String invitationCode) {
+    public String getUserIdByInvitation(String invitation) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://service-invitation/invitations/getuser/" + invitationCode, 1)
+                .uri("lb://service-invitation/invitations/getUser/" + invitation)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(BigInteger.class)
-                .block();
+                .bodyToMono(String.class).block();
     }
 
     public UserRegistrationResponseDTO reg(UserRegistrationRequestDTO userRegistrationRequestDTO) {
@@ -64,10 +67,12 @@ public class UserAuthenticationService {
         ) {
             return new UserRegistrationResponseDTO(HttpStatus.CONFLICT, "User already registered");
         }
-        BigInteger userId = getUserIdByInvitation(userRegistrationRequestDTO.getInvitationCode());
-        if(userId != null) {
+        String invitationCodeFindQuery = getUserIdByInvitation(userRegistrationRequestDTO.getInvitationCode());
+        if(invitationCodeFindQuery.equals("Invalid invitation code")) {
             return new UserRegistrationResponseDTO(HttpStatus.NO_CONTENT, "Invalid invitation code");
         }
+        BigInteger userId =new BigInteger(invitationCodeFindQuery);
+        System.out.println(userId);
         User user = userRepository.findById(userId).get();
         if(userRegistrationRequestDTO.getAuthenticationRegistrationId().equals(AuthenticationRegistrationId.local)) {
             user.setUsername(userRegistrationRequestDTO.getUsername());
@@ -81,6 +86,15 @@ public class UserAuthenticationService {
         user.setUsername(userRegistrationRequestDTO.getUserEmail());
         user.setImageURI(userRegistrationRequestDTO.getPictureUri());
         userRepository.save(user);
+        deleteInvitation(userRegistrationRequestDTO.getInvitationCode());
         return new UserRegistrationResponseDTO(user);
+    }
+
+    private void deleteInvitation(String invitationCode) {
+        webClientBuilder.build()
+                .delete()
+                .uri("lb://service-invitation/invitations/" + invitationCode)
+                .retrieve()
+                .bodyToMono(String.class).block();
     }
 }

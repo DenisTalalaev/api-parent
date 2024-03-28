@@ -46,6 +46,8 @@ public class UserRequestDTO {
 
     private List<Authority> authorities;
 
+    private String invitationCode;
+
 
     public Boolean isEnabled() {
         return isEnabled;

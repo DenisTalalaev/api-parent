@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +53,7 @@ public class InvitationService {
         }
     }
 
-    public Optional<BigInteger> createUser(String userFirstName, String userSecondName, String userSurnameName, BigInteger organisationId) {
+    public String createUser(String userFirstName, String userSecondName, String userSurnameName, BigInteger organisationId) {
         UserRequestDTO userRequestDTO = new UserRequestDTO(
                 userFirstName,
                 userSecondName,
@@ -67,27 +66,33 @@ public class InvitationService {
         );
         return webClientBuilder.build()
                 .post()
-                .uri("lb://service-user/users")
+                .uri("lb://service-user/users/createUser")
                 .body(Mono.just(userRequestDTO), UserRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(BigInteger.class).blockOptional();
+                .bodyToMono(String.class).block();
     }
     public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO) {
-        Optional<BigInteger> userId = createUser(invitationRequestDTO.getUserFirstName(), invitationRequestDTO.getUserSecondName(), invitationRequestDTO.getUserSurnameName(), invitationRequestDTO.getOrganisationId());
-        Invitation invitation = new Invitation(invitationRequestDTO, userId.get(), generateInvitationCode());
+        String userIdStr = createUser(invitationRequestDTO.getUserFirstName(), invitationRequestDTO.getUserSecondName(), invitationRequestDTO.getUserSurnameName(), invitationRequestDTO.getOrganisationId());
+        BigInteger userId = new BigInteger(userIdStr);
+        Invitation invitation = new Invitation(invitationRequestDTO, userId, generateInvitationCode());
         return new InvitationResponseDTO(invitationRepository.save(invitation));
     }
 
-    public InvitationResponseDTO deleteInvitation(BigInteger id) {
+    public InvitationResponseDTO deleteInvitation(String invitationCode) {
+        BigInteger id = invitationRepository.findByInvitationCode(invitationCode).get().getId();
         invitationRepository.deleteById(id);
         return new InvitationResponseDTO();
     }
 
-    public BigInteger getUserByInvitationCode(String userInvitationCode) {
+    public String getUserByInvitationCode(String userInvitationCode) {
+        System.out.println(userInvitationCode);
         if (!invitationRepository.existsByInvitationCode(userInvitationCode)) {
             throw new RuntimeException("Invitation not found");
         }
-        return new BigInteger(invitationRepository.findByInvitationCode(userInvitationCode).get().getInvitationCode());
+        BigInteger a = invitationRepository.findByInvitationCode(userInvitationCode).get().getUserId();
+        System.out.println(a);
+        return a.toString();
     }
+
 }
