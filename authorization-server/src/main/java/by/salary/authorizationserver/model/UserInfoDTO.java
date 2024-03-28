@@ -22,7 +22,6 @@ public class UserInfoDTO implements UserDetails {
     String pictureUri;
     String registrationId;
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities.stream().map(SimpleGrantedAuthority::new).toList();

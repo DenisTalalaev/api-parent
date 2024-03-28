@@ -2,7 +2,7 @@ package by.salary.authorizationserver.service;
 
 
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class InMemoryAuthorizationService implements AuthorizationService {
     }
 
     @Override
-    public Optional<UserInfoDTO> save(RegisterDto newUser){
+    public Optional<UserInfoDTO> save(RegisterRequestDto newUser){
         Optional<UserInfoDTO> user = repository.stream().filter(u -> u.getEmail().equals(newUser.getEmail())).findFirst();
         if (user.isPresent()){
             return Optional.empty();
@@ -43,11 +43,10 @@ public class InMemoryAuthorizationService implements AuthorizationService {
     }
 
 
-    private UserInfoDTO mapToUserInfoDTO(RegisterDto registerRequest){
+    private UserInfoDTO mapToUserInfoDTO(RegisterRequestDto registerRequest){
         return UserInfoDTO.builder()
                 .email(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
-                .authorities(registerRequest.getAuthorities())
                 .pictureUri(registerRequest.getPictureUri())
                 .registrationId(registerRequest.getAuthenticationRegistrationId().name())
                 .build();

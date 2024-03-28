@@ -1,7 +1,7 @@
 package by.salary.authorizationserver.filter;
 
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.RegisterDto;
+import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationUserInfo;
 import by.salary.authorizationserver.model.oauth2.FactoryAuthenticationRegistration;
 import by.salary.authorizationserver.service.AuthorizationService;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -97,13 +96,11 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         };
     }
 
-    RegisterDto mapToRegisterDto(AuthenticationUserInfo authUserInfo){
-        return RegisterDto.builder()
+    RegisterRequestDto mapToRegisterDto(AuthenticationUserInfo authUserInfo){
+        return RegisterRequestDto.builder()
                 .email(authUserInfo.getEmail())
-                .authorities(List.of("USER"))
                 .pictureUri(authUserInfo.getUri())
                 .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
                 .build();
-
     }
 }
