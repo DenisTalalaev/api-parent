@@ -77,7 +77,7 @@ public class User {
 
     @NotNull
     @Column(unique = true)
-    private String authorisationAttributeKey;
+    private String userAuthorisationAttributeKey;
 
     @NotNull
     @Enumerated(EnumType.STRING)

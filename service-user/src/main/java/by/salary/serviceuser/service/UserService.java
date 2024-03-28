@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -46,11 +47,9 @@ public class UserService {
     }
 
     public UserResponseDTO updateUser(UserRequestDTO userRequestDTO) {
-        User user = userRepository.findById(userRequestDTO.getId()).get();
-        if (user != null) {
-            user.update(userRequestDTO, organisationRepository.findById(userRequestDTO.getOrganisationId()).get());
-        }
-        return new UserResponseDTO(userRepository.save(user));
+        Optional<User> user = userRepository.findById(userRequestDTO.getId());
+        user.ifPresent(value -> value.update(userRequestDTO, organisationRepository.findById(userRequestDTO.getOrganisationId()).get()));
+        return new UserResponseDTO(userRepository.save(user.get()));
     }
 
     public void deleteUser(BigInteger id) {

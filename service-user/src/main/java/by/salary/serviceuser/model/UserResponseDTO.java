@@ -1,5 +1,6 @@
 package by.salary.serviceuser.model;
 
+import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.User;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigInteger;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,7 +37,7 @@ public class UserResponseDTO {
 
     private BigInteger organisationId;
 
-    private String authorities;
+    private List<Authority> authorities;
 
     public UserResponseDTO(User user) {
 
