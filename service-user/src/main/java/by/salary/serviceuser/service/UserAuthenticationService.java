@@ -72,13 +72,13 @@ public class UserAuthenticationService {
             return new UserRegistrationResponseDTO(HttpStatus.NO_CONTENT, "Invalid invitation code");
         }
         BigInteger userId =new BigInteger(invitationCodeFindQuery);
-        System.out.println(userId);
         User user = userRepository.findById(userId).get();
         if(userRegistrationRequestDTO.getAuthenticationRegistrationId().equals(AuthenticationRegistrationId.local)) {
             user.setUsername(userRegistrationRequestDTO.getUsername());
             user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
             userRepository.save(user);
+            deleteInvitation(userRegistrationRequestDTO.getInvitationCode());
             return new UserRegistrationResponseDTO(user);
         }
         user.setAuthenticationRegistrationId(userRegistrationRequestDTO.getAuthenticationRegistrationId());

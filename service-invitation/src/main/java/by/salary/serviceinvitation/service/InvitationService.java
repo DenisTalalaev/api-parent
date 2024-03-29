@@ -53,17 +53,14 @@ public class InvitationService {
         }
     }
 
-    public String createUser(String userFirstName, String userSecondName, String userSurnameName, BigInteger organisationId) {
+    public String createUser(String userFirstName, String userSecondName, String userSurname, BigInteger organisationId) {
         UserRequestDTO userRequestDTO = new UserRequestDTO(
                 userFirstName,
                 userSecondName,
-                userSurnameName,
-                true,
-                true,
-                true,
-                false,
+                userSurname,
                 organisationId
         );
+        System.out.println(userRequestDTO);
         return webClientBuilder.build()
                 .post()
                 .uri("lb://service-user/users/createUser")
@@ -73,7 +70,7 @@ public class InvitationService {
                 .bodyToMono(String.class).block();
     }
     public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO) {
-        String userIdStr = createUser(invitationRequestDTO.getUserFirstName(), invitationRequestDTO.getUserSecondName(), invitationRequestDTO.getUserSurnameName(), invitationRequestDTO.getOrganisationId());
+        String userIdStr = createUser(invitationRequestDTO.getUserFirstName(), invitationRequestDTO.getUserSecondName(), invitationRequestDTO.getUserSurname(), invitationRequestDTO.getOrganisationId());
         BigInteger userId = new BigInteger(userIdStr);
         Invitation invitation = new Invitation(invitationRequestDTO, userId, generateInvitationCode());
         return new InvitationResponseDTO(invitationRepository.save(invitation));
@@ -88,7 +85,7 @@ public class InvitationService {
     public String getUserByInvitationCode(String userInvitationCode) {
         System.out.println(userInvitationCode);
         if (!invitationRepository.existsByInvitationCode(userInvitationCode)) {
-            throw new RuntimeException("Invitation not found");
+            return ("Invitation not found");
         }
         BigInteger a = invitationRepository.findByInvitationCode(userInvitationCode).get().getUserId();
         System.out.println(a);
