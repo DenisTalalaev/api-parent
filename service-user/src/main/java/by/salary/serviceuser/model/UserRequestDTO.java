@@ -46,6 +46,8 @@ public class UserRequestDTO {
 
     private List<Authority> authorities;
 
+    private String invitationCode;
+
 
     public Boolean isEnabled() {
         return isEnabled;
@@ -61,5 +63,25 @@ public class UserRequestDTO {
 
     public Boolean isCredentialsNonExpired() {
         return isCredentialsNonExpired;
+    }
+
+    @Override
+    public String toString() {
+        return "UserRequestDTO{" +
+                "id=" + id +
+                ", userFirstName='" + userFirstName + '\'' +
+                ", userSurname='" + userSurname + '\'' +
+                ", userSecondName='" + userSecondName + '\'' +
+                ", username='" + username + '\'' +
+                ", userPassword='" + userPassword + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", isAccountNonExpired=" + isAccountNonExpired +
+                ", isAccountNonLocked=" + isAccountNonLocked +
+                ", isCredentialsNonExpired=" + isCredentialsNonExpired +
+                ", isEnabled=" + isEnabled +
+                ", organisationId=" + organisationId +
+                ", authorities=" + authorities +
+                ", invitationCode='" + invitationCode + '\'' +
+                '}';
     }
 }

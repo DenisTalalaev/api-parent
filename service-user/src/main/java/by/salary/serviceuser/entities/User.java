@@ -75,18 +75,15 @@ public class User {
 
     private String imageURI;
 
-    @NotNull
     @Column(unique = true)
     private String userAuthorisationAttributeKey;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     private AuthenticationRegistrationId authenticationRegistrationId;
 
 
     @ManyToOne
     @JoinColumn(name = "organisation_id")
-    @NotNull
     private Organisation organisation;
 
     @ManyToMany(fetch = FetchType.EAGER)

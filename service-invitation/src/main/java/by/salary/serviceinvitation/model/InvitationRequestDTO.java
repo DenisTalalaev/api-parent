@@ -15,6 +15,6 @@ public class InvitationRequestDTO {
 
     private String userFirstName;
     private String userSecondName;
-    private String userSurnameName;
+    private String userSurname;
     private BigInteger organisationId;
 }

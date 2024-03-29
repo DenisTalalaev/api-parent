@@ -21,4 +21,27 @@ public class UserRequestDTO {
     private Boolean isCredentialsNonExpired;
     private Boolean isEnabled;
     private BigInteger organisationId;
+
+    public UserRequestDTO(String userFirstName, String userSecondName, String userSurname, BigInteger organisationId) {
+
+        this.userFirstName = userFirstName;
+        this.userSecondName = userSecondName;
+        this.userSurname = userSurname;
+        this.organisationId = organisationId;
+
+        this.isAccountNonExpired = true;
+        this.isAccountNonLocked = true;
+        this.isCredentialsNonExpired = true;
+        this.isEnabled = false;
+    }
+
+    @Override
+    public String toString() {
+        return "UserRequestDTO{" +
+                "userFirstName='" + userFirstName + '\'' +
+                ", userSecondName='" + userSecondName + '\'' +
+                ", userSurname='" + userSurname + '\'' +
+                ", organisationId=" + organisationId +
+                '}';
+    }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UserResponseDTO {
+
     private BigInteger id;
     private String userFirstName;
 
@@ -54,5 +55,24 @@ public class UserResponseDTO {
         this.isEnabled = user.isEnabled();
         this.organisationId = user.getOrganisation().getId();
         this.authorities = user.getAuthorities();
+    }
+
+    @Override
+    public String toString() {
+        return "UserResponseDTO{" +
+                "id=" + id +
+                ", userFirstName='" + userFirstName + '\'' +
+                ", userSurname='" + userSurname + '\'' +
+                ", userSecondName='" + userSecondName + '\'' +
+                ", username='" + username + '\'' +
+                ", userPassword='" + userPassword + '\'' +
+                ", userEmail='" + userEmail + '\'' +
+                ", isAccountNonExpired=" + isAccountNonExpired +
+                ", isAccountNonLocked=" + isAccountNonLocked +
+                ", isCredentialsNonExpired=" + isCredentialsNonExpired +
+                ", isEnabled=" + isEnabled +
+                ", organisationId=" + organisationId +
+                ", authorities=" + authorities +
+                '}';
     }
 }
