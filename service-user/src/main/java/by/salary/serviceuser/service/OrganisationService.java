@@ -63,9 +63,12 @@ public class OrganisationService {
         );
     }
 
-    public OrganisationResponseDTO createOrganisation(OrganisationRequestDTO organisationRequestDTO) {
-        User director = userRepository.findByUserEmail(getEmail()).get();
+    public OrganisationResponseDTO createOrganisation(OrganisationRequestDTO organisationRequestDTO,
+                                                      String email) {
+        User director = userRepository.findByUserEmail(email).get();
         Organisation organisation = new Organisation(organisationRequestDTO, director);
+        director.setOrganisation(organisation);
+        userRepository.save(director);
         organisation.setAgreementId(createNewAgreementId());
         return new OrganisationResponseDTO(organisationRepository.save(organisation));
     }

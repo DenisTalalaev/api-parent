@@ -47,8 +47,9 @@ public class OrganisationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public OrganisationResponseDTO createOrganisation(@RequestBody OrganisationRequestDTO organisationRequestDTO) {
-        return organisationService.createOrganisation(organisationRequestDTO);
+    public OrganisationResponseDTO createOrganisation(@RequestBody OrganisationRequestDTO organisationRequestDTO,
+                                                      @RequestAttribute String email) {
+        return organisationService.createOrganisation(organisationRequestDTO, email);
     }
 
 

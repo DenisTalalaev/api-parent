@@ -86,14 +86,8 @@ public class UserAuthenticationService {
                 .bodyToMono(String.class).block();
     }
 
-    private String getEmail(){
-
-        //TODO Написать функцию, которая получает email из запроса
-        return "hotspot.by@gmail.com";
-    }
-
-    public UserJoinOrganisationResponseDTO joinOrganisation(UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO) {
-        Optional<User> userOpt = userRepository.findByUserEmail(getEmail());
+    public UserJoinOrganisationResponseDTO joinOrganisation(UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO, String email) {
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
         if(userOpt.isEmpty()){
             throw new RuntimeException("No user found");
         }
