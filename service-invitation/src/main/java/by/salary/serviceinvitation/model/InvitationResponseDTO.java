@@ -14,7 +14,10 @@ public class InvitationResponseDTO {
 
     private BigInteger id;
 
-    private BigInteger userId;
+
+    private String userFirstName;
+    private String userSecondName;
+    private String userSurname;
 
     private BigInteger organisationId;
 
@@ -22,7 +25,6 @@ public class InvitationResponseDTO {
 
     public InvitationResponseDTO(Invitation invitation) {
         this.id = invitation.getId();
-        this.userId = invitation.getUserId();
         this.organisationId = invitation.getOrganisationId();
         this.invitationCode = invitation.getInvitationCode();
     }

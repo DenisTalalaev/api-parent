@@ -59,4 +59,8 @@ public class AgreementService {
                 agreementStateRepository.save(new AgreementState(agreementStateRequestDTO))
         );
     }
+
+    public BigInteger createDefaultAgreementList() {
+        return agreementRepository.save(new Agreement()).getId();
+    }
 }

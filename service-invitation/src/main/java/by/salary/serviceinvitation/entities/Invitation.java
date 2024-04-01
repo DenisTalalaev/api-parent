@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.math.BigInteger;
 
 /**
@@ -32,19 +31,27 @@ public class Invitation {
     private BigInteger id;
 
     @NotNull
-    private BigInteger userId;
-
-    @NotNull
     private BigInteger organisationId;
 
+    private String userFirstName;
+    private String userSecondName;
+    private String userSurname;
+
     @NotNull
-    @Size(min = 9, max = 9)
     @Column(unique = true)
     private String invitationCode;
 
-    public Invitation(InvitationRequestDTO invitationRequestDTO, BigInteger userId, String invitationCode) {
-        this.userId = userId;
+
+    public Invitation(InvitationRequestDTO invitationRequestDTO, String s) {
         this.organisationId = invitationRequestDTO.getOrganisationId();
-        this.invitationCode = invitationCode;
+        this.userFirstName = invitationRequestDTO.getUserFirstName();
+        this.userSecondName = invitationRequestDTO.getUserSecondName();
+        this.userSurname = invitationRequestDTO.getUserSurname();
+        this.invitationCode = s;
+    }
+
+    @Override
+    public String toString() {
+        return id + ";" + organisationId + ";" + userFirstName + ";" + userSecondName + ";" + userSurname + ";" + invitationCode;
     }
 }

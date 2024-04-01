@@ -1,9 +1,7 @@
 package by.salary.serviceuser.controller;
 
-import by.salary.serviceuser.model.UserAuthenticationRequestDTO;
-import by.salary.serviceuser.model.UserAuthenticationResponseDTO;
-import by.salary.serviceuser.model.UserRegistrationRequestDTO;
-import by.salary.serviceuser.model.UserRegistrationResponseDTO;
+import by.salary.serviceuser.entities.Organisation;
+import by.salary.serviceuser.model.*;
 import by.salary.serviceuser.service.UserAuthenticationService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -38,5 +36,9 @@ public class UserAuthenticationController {
         return userAuthenticationService.reg(userRegistrationRequestDTO);
     }
 
+    @PostMapping("/joinorganisation")
+    public UserJoinOrganisationResponseDTO joinOrganisation(@RequestBody UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO) {
+        return userAuthenticationService.joinOrganisation(userJoinOrganisationRequestDTO);
+    }
 
 }

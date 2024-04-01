@@ -1,11 +1,10 @@
 package by.salary.serviceuser.service;
 
+import by.salary.serviceuser.entities.Invitation;
 import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
-import by.salary.serviceuser.model.UserAuthenticationRequestDTO;
-import by.salary.serviceuser.model.UserAuthenticationResponseDTO;
-import by.salary.serviceuser.model.UserRegistrationRequestDTO;
-import by.salary.serviceuser.model.UserRegistrationResponseDTO;
+import by.salary.serviceuser.model.*;
+import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -22,17 +21,20 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @NoArgsConstructor
 public class UserAuthenticationService {
 
     private UserRepository userRepository;
+    private OrganisationRepository organisationRepository;
 
     WebClient.Builder webClientBuilder;
 
     @Autowired
-    public UserAuthenticationService(UserRepository userRepository, WebClient.Builder webClientBuilder) {
+    public UserAuthenticationService(UserRepository userRepository, WebClient.Builder webClientBuilder, OrganisationRepository organisationRepository) {
+        this.organisationRepository = organisationRepository;
         this.userRepository = userRepository;
         this.webClientBuilder = webClientBuilder;
     }
@@ -52,14 +54,6 @@ public class UserAuthenticationService {
         );
     }
 
-    public String getUserIdByInvitation(String invitation) {
-        return webClientBuilder.build()
-                .get()
-                .uri("lb://service-invitation/invitations/getUser/" + invitation)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class).block();
-    }
 
     public UserRegistrationResponseDTO reg(UserRegistrationRequestDTO userRegistrationRequestDTO) {
         if (userRepository.findByUserEmail(userRegistrationRequestDTO.getUserEmail()).isPresent()
@@ -67,18 +61,13 @@ public class UserAuthenticationService {
         ) {
             return new UserRegistrationResponseDTO(HttpStatus.CONFLICT, "User already registered");
         }
-        String invitationCodeFindQuery = getUserIdByInvitation(userRegistrationRequestDTO.getInvitationCode());
-        if(invitationCodeFindQuery.equals("Invalid invitation code")) {
-            return new UserRegistrationResponseDTO(HttpStatus.NO_CONTENT, "Invalid invitation code");
-        }
-        BigInteger userId =new BigInteger(invitationCodeFindQuery);
-        User user = userRepository.findById(userId).get();
+        User user = new User();
+        user.setAuthenticationRegistrationId(userRegistrationRequestDTO.getAuthenticationRegistrationId());
         if(userRegistrationRequestDTO.getAuthenticationRegistrationId().equals(AuthenticationRegistrationId.local)) {
             user.setUsername(userRegistrationRequestDTO.getUsername());
             user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
             userRepository.save(user);
-            deleteInvitation(userRegistrationRequestDTO.getInvitationCode());
             return new UserRegistrationResponseDTO(user);
         }
         user.setAuthenticationRegistrationId(userRegistrationRequestDTO.getAuthenticationRegistrationId());
@@ -86,7 +75,6 @@ public class UserAuthenticationService {
         user.setUsername(userRegistrationRequestDTO.getUserEmail());
         user.setImageURI(userRegistrationRequestDTO.getPictureUri());
         userRepository.save(user);
-        deleteInvitation(userRegistrationRequestDTO.getInvitationCode());
         return new UserRegistrationResponseDTO(user);
     }
 
@@ -96,5 +84,40 @@ public class UserAuthenticationService {
                 .uri("lb://service-invitation/invitations/" + invitationCode)
                 .retrieve()
                 .bodyToMono(String.class).block();
+    }
+
+    private String getEmail(){
+
+        //TODO Написать функцию, которая получает email из запроса
+        return "hotspot.by@gmail.com";
+    }
+
+    public UserJoinOrganisationResponseDTO joinOrganisation(UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO) {
+        Optional<User> userOpt = userRepository.findByUserEmail(getEmail());
+        if(userOpt.isEmpty()){
+            throw new RuntimeException("No user found");
+        }
+        User user = userOpt.get();
+        Invitation invitation = getInvitation(userJoinOrganisationRequestDTO.getInvitationCode());
+
+        user.setOrganisation(organisationRepository.findById(invitation.getOrganisationId()).get());
+        user.setUserFirstName(invitation.getUserFirstName());
+        user.setUserSurname(invitation.getUserSurname());
+        user.setUserSecondName(invitation.getUserSecondName());
+
+
+        userRepository.save(user);
+        deleteInvitation(userJoinOrganisationRequestDTO.getInvitationCode());
+        return new UserJoinOrganisationResponseDTO(user);
+
+    }
+
+    private Invitation getInvitation(String invitationCode) {
+        return new Invitation(webClientBuilder.build()
+                .get()
+                .uri("lb://service-invitation/invitations/" + invitationCode)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block());
     }
 }

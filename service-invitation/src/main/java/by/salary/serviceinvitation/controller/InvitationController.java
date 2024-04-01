@@ -28,12 +28,12 @@ public class InvitationController {
         return invitationService.getAllInvitations();
     }
 
-
-    @GetMapping("/getUser/{userInvitationCode}")
+    @GetMapping("/{invitationCode}")
     @ResponseStatus(HttpStatus.OK)
-    public String getUserByInvitationCode(@PathVariable String userInvitationCode) {
-        return invitationService.getUserByInvitationCode(userInvitationCode);
+    public String getInvitations(@PathVariable String invitationCode) {
+        return invitationService.getInvitation(invitationCode);
     }
+
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

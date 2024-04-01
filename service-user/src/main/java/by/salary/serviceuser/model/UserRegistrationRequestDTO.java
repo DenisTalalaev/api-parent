@@ -24,8 +24,6 @@ public class UserRegistrationRequestDTO {
     //local
     String userPassword;
 
-    //always
-    String invitationCode;
 
     //oatuth2
     String authenticationRegistrationKey;

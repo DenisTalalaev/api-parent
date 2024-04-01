@@ -29,5 +29,4 @@ public class OrganisationRequestDTO {
     private String organisationContactNumber;
     private BigInteger directorId;
     private BigDecimal baseReward;
-    private BigInteger agreementId;
 }

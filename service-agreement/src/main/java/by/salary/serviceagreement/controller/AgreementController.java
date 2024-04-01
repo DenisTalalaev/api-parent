@@ -11,12 +11,15 @@ import java.math.BigInteger;
 
 @RestController
 @Controller
-@AllArgsConstructor
 @RequestMapping("/agreements")
 public class AgreementController {
 
-    @Autowired
-    AgreementService agreementService;
+
+    private final AgreementService agreementService;
+
+    public AgreementController(AgreementService agreementService) {
+        this.agreementService = agreementService;
+    }
 
     @GetMapping()
     public AgreementResponseDTO getAgreement(AgreementRequestDTO agreementRequestDTO) {
@@ -37,6 +40,11 @@ public class AgreementController {
     @PostMapping("/")
     public AgreementStateListResponseDTO createAgreementStateList(AgreementStateListRequestDTO agreementStateListRequestDTO) {
         return agreementService.createAgreementList(agreementStateListRequestDTO);
+    }
+
+    @PostMapping("/createdefaultagreement")
+    public String createDefaultAgreement() {
+        return agreementService.createDefaultAgreementList().toString();
     }
 
     @PostMapping("/{list_id}/{state_id}")
