@@ -13,12 +13,10 @@ import java.util.Collection;
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private String jwt;
-
     public JwtAuthenticationToken(String jwt, JwtService jwtService) {
         super(jwtService.extractAuthorities(jwt));
         this.jwt = jwt;
     }
-
     @Override
     public Object getCredentials() {
         return jwt;

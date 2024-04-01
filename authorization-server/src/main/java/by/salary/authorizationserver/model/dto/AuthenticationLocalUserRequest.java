@@ -5,10 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+
 @Builder
 @Getter
 @Setter
-public class AuthenticationRequestDto {
+public class AuthenticationLocalUserRequest {
 
     private AuthenticationRegistrationId authenticationRegistrationId;
 
@@ -18,4 +19,5 @@ public class AuthenticationRequestDto {
 
     private String userEmail;
 
+    private String password;
 }

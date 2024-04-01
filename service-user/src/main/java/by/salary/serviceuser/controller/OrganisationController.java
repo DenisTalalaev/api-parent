@@ -19,7 +19,6 @@ public class OrganisationController {
 
     private final OrganisationService organisationService;
 
-
     @Autowired
     public OrganisationController(OrganisationService organisationService) {
         this.organisationService = organisationService;

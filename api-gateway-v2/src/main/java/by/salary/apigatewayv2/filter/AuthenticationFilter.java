@@ -1,14 +1,31 @@
 package by.salary.apigatewayv2.filter;
 
 import by.salary.apigatewayv2.service.AuthenticationService;
+import jakarta.ws.rs.core.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.ServerHttpAsyncRequestControl;
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
+import org.springframework.util.MultiValueMap;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.naming.AuthenticationException;
+import java.awt.image.DataBuffer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.Principal;
+import java.util.LinkedList;
+import java.util.List;
 
 @Component
 @Slf4j
@@ -42,10 +59,12 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                 //sending token to validation service
                 return authenticationService.validate(authHeader)
                         .flatMap(response -> {
+
                             log.info("Authentication response: {}", response);
                             if (!response.isAuthenticated()) {
                                 return Mono.error(new AuthenticationException("Unauthorized access to application"));
                             }
+
                             return chain.filter(exchange);
                         })
                         .onErrorResume(e -> {

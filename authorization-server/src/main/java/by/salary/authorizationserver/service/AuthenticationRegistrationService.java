@@ -1,0 +1,78 @@
+package by.salary.authorizationserver.service;
+
+import by.salary.authorizationserver.exception.UserNotFoundException;
+import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.dto.*;
+import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
+import by.salary.authorizationserver.repository.AuthorizationRepository;
+import by.salary.authorizationserver.util.JwtService;
+import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+@AllArgsConstructor
+public class AuthenticationRegistrationService {
+
+    JwtService jwtService;
+
+    AuthorizationRepository authorizationRepository;
+
+    PasswordEncoder passwordEncoder;
+
+    public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
+        registerLocalUserRequest.setPassword(passwordEncoder.encode(registerLocalUserRequest.getPassword()));
+        return authorizationRepository.save(mapToRegisterDto(registerLocalUserRequest));
+    }
+
+    public ConnValidationResponse authenticate(AuthenticationLocalUserRequest authenticationRequestDto) {
+        AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .username(authenticationRequestDto.getUsername())
+                .userEmail(authenticationRequestDto.getUserEmail())
+                .build();
+
+        Optional<AuthenticationResponseDto> authentication = authorizationRepository.find(authenticationRequest);
+
+        if (authentication.isEmpty()){
+            throw new UserNotFoundException("Authentication failed");
+        }
+
+        if (!passwordEncoder.matches(authenticationRequestDto.getPassword(), authentication.get().getPassword())){
+            //TODO: exception handling
+            throw new UserNotFoundException("Authentication failed");
+        }
+
+        return mapToConnValidationResponse(authentication.get());
+    }
+
+
+    private RegisterRequestDto mapToRegisterDto(RegisterLocalUserRequest registerLocalUserRequest){
+        return RegisterRequestDto.builder()
+                .username(registerLocalUserRequest.getUsername())
+                .userEmail(registerLocalUserRequest.getEmail())
+                .userPassword(registerLocalUserRequest.getPassword())
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .invitationCode(registerLocalUserRequest.getInvitationCode())
+                .build();
+    }
+
+
+    private ConnValidationResponse mapToConnValidationResponse(AuthenticationResponseDto authentication) {
+        return mapToConnValidationResponse(authentication, jwtService.generateToken(authentication));
+    }
+
+
+    private ConnValidationResponse mapToConnValidationResponse(AuthenticationResponseDto authentication, String token) {
+        return ConnValidationResponse.builder()
+                .status("OK")
+                .isAuthenticated(true)
+                .methodType("Bearer")
+                .email(authentication.getUserEmail())
+                .token(token)
+                .authorities(authentication.getAuthorities())
+                .build();
+    }
+}

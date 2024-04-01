@@ -1,7 +1,9 @@
 package by.salary.authorizationserver.model;
 
+import by.salary.authorizationserver.model.entity.Authority;
 import lombok.*;
 
+import java.util.Collection;
 import java.util.List;
 
 @Getter
@@ -14,6 +16,6 @@ public class ConnValidationResponse {
     private boolean isAuthenticated;
     private String methodType;
     private String email;
-    private List<String> authorities;
+    private Collection<Authority> authorities;
     private String token;
 }

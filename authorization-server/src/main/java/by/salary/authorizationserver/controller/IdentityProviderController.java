@@ -1,19 +1,17 @@
 package by.salary.authorizationserver.controller;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
-import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
-import by.salary.authorizationserver.model.dto.RegisterRequest;
+import by.salary.authorizationserver.model.dto.AuthenticationLocalUserRequest;
+import by.salary.authorizationserver.model.dto.RegisterLocalUserRequest;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
-import by.salary.authorizationserver.service.AuthorizationService;
-import by.salary.authorizationserver.service.RegistrationService;
+import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.repository.AuthorizationRepository;
+import by.salary.authorizationserver.service.AuthenticationRegistrationService;
 import by.salary.authorizationserver.util.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,29 +21,23 @@ import java.util.List;
 @RequestMapping("/auth")
 public class IdentityProviderController {
 
-    AuthorizationService authorizationService;
+    AuthorizationRepository authorizationRepository;
 
-    RegistrationService registrationService;
+    AuthenticationRegistrationService authenticationRegistrationService;
 
     JwtService jwtService;
 
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public RegisterResponseDto register(@RequestBody RegisterRequest registerRequest) {
-        return registrationService.register(registerRequest);
+    public RegisterResponseDto register(@RequestBody RegisterLocalUserRequest registerLocalUserRequest) {
+        return authenticationRegistrationService.register(registerLocalUserRequest);
     }
 
     @PostMapping("/token")
     @ResponseStatus(HttpStatus.OK)
-    public ConnValidationResponse token(@RequestBody AuthenticationRequestDto authDto) {
-        var optional = authorizationService.findByEmail(authDto.getEmail());
-        if (optional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found");
-        }
-        var userInfoDTO = optional.get();
-
-        return mapToConnValidationResponse(userInfoDTO);
+    public ConnValidationResponse token(@RequestBody AuthenticationLocalUserRequest authDto) {
+        return authenticationRegistrationService.authenticate(authDto);
     }
 
     @GetMapping(value = "/valid")
@@ -61,23 +53,7 @@ public class IdentityProviderController {
                 .methodType("Bearer")
                 .email(email)
                 .token(jwt)
-                .authorities(authorities.stream().map(GrantedAuthority::getAuthority).toList())
-                .build();
-    }
-
-    private ConnValidationResponse mapToConnValidationResponse(UserInfoDTO userInfoDTO) {
-        return mapToConnValidationResponse(userInfoDTO, jwtService.generateToken(userInfoDTO));
-
-    }
-
-    private ConnValidationResponse mapToConnValidationResponse(UserInfoDTO userInfoDTO, String token) {
-        return ConnValidationResponse.builder()
-                .status("OK")
-                .isAuthenticated(true)
-                .methodType("Bearer")
-                .email(userInfoDTO.getEmail())
-                .token(token)
-                .authorities(userInfoDTO.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList())
+                .authorities(authorities.stream().map((ga) -> new Authority(ga.getAuthority())).toList())
                 .build();
     }
 

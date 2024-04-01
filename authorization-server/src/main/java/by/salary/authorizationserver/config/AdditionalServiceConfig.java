@@ -1,31 +1,33 @@
 package by.salary.authorizationserver.config;
 
 
-import by.salary.authorizationserver.model.dto.RegisterRequestDto;
-import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
-import by.salary.authorizationserver.service.AuthorizationService;
-import by.salary.authorizationserver.service.InMemoryAuthorizationService;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.autoconfigure.web.WebProperties;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @AllArgsConstructor
 public class AdditionalServiceConfig {
 
     @Bean
-    AuthorizationService userService() {
-        AuthorizationService service = new InMemoryAuthorizationService();
-        service.save(RegisterRequestDto.builder()
-                .email("hotspot.by@gmail.com")
-                .password("123")
-                .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .build());
-
-        return service;
+    @LoadBalanced
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
     }
+
+    @Bean
+    public WebProperties.Resources resources() {
+        return new WebProperties.Resources();
+    }
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
 
 
 

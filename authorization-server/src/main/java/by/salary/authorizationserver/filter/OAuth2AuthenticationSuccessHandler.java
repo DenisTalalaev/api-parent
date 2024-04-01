@@ -1,10 +1,13 @@
 package by.salary.authorizationserver.filter;
 
-import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
+import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.dto.RegisterRequestDto;
+import by.salary.authorizationserver.model.dto.RegisterResponseDto;
+import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.model.oauth2.AuthenticationUserInfo;
 import by.salary.authorizationserver.model.oauth2.FactoryAuthenticationRegistration;
-import by.salary.authorizationserver.service.AuthorizationService;
+import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
@@ -24,17 +28,18 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     private final String frontendUrl;
-    private final AuthorizationService authorizationService;
+    private final AuthorizationRepository authorizationRepository;
     private final JwtService jwtService;
     @Autowired
-    public OAuth2AuthenticationSuccessHandler(AuthorizationService authorizationService,
+    public OAuth2AuthenticationSuccessHandler(AuthorizationRepository authorizationRepository,
                                               JwtService jwtService) {
-        this.authorizationService = authorizationService;
+        this.authorizationRepository = authorizationRepository;
         this.jwtService = jwtService;
         this.frontendUrl = "http://localhost:8080";
     }
@@ -52,18 +57,39 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 attributes
         );
 
-        Optional<UserInfoDTO> user = authorizationService.findByEmail(authUserInfo.getEmail());
-        if (user.isPresent()) {
-            authenticatedUser(response, token, authUserInfo, attributes).accept(user.get());
-        }else {
-            user = authorizationService.save(this.mapToRegisterDto(authUserInfo));
-            user.ifPresent(userInfoDTO -> authenticatedUser(response, token, authUserInfo, attributes).accept(userInfoDTO));
-        }
+        AuthenticationRequestDto authenticationRequestDto = AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
+                .authorizationRegistrationKey(authUserInfo.getId())
+                .userEmail(authUserInfo.getEmail())
+                .build();
 
-        if (user.isEmpty()) {
-            throw new RuntimeException("User not found");
+        Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequestDto);
+        //if user already exists
+        if (responseDto.isPresent()) {
+            authenticatedUser(response, token, authUserInfo, attributes).accept(responseDto.get());
+        //registration
+        }else {
+            //creating request for registration
+            RegisterRequestDto registerRequestDto = mapToRegisterDto(authUserInfo);
+
+            //saving user
+            RegisterResponseDto registerResponseDto = authorizationRepository.save(registerRequestDto);
+
+            //if user registered
+            if (registerResponseDto.getHttpStatus().is2xxSuccessful()){
+                Optional<AuthenticationResponseDto> afterSaveResponseDto = authorizationRepository.find(authenticationRequestDto);
+                //if user found
+                if (afterSaveResponseDto.isPresent()){
+                    authenticatedUser(response, token, authUserInfo, attributes).accept(afterSaveResponseDto.get());
+                    responseDto = afterSaveResponseDto;
+                } else {
+                    throw new RuntimeException("Internal server error. User registered successfully but not found.");
+                }
+            }else {
+                throw new RuntimeException(registerResponseDto.getMessage());
+            }
         }
-        String jwt = jwtService.generateToken(user.get());
+        String jwt = jwtService.generateToken(responseDto.get());
 
         this.setAlwaysUseDefaultTargetUrl(true);
         this.setDefaultTargetUrl(frontendUrl);
@@ -77,11 +103,13 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         super.onAuthenticationSuccess(request, response, authentication);
     }
 
-    Consumer<UserInfoDTO> authenticatedUser(HttpServletResponse response, OAuth2AuthenticationToken token,
+    Consumer<AuthenticationResponseDto> authenticatedUser(HttpServletResponse response, OAuth2AuthenticationToken token,
                                             AuthenticationUserInfo authUserInfo,
                                             Map<String, Object> attributes) {
         return user -> {
-            Collection<? extends GrantedAuthority> roles = user.getAuthorities();
+            Collection<? extends GrantedAuthority> roles = user.getAuthorities().stream().map(
+                    (a) -> new SimpleGrantedAuthority(a.getAuthority())
+            ).collect(Collectors.toList());
             DefaultOAuth2User defaultOAuth2User = new DefaultOAuth2User(
                     roles,
                     attributes,
@@ -98,7 +126,9 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     RegisterRequestDto mapToRegisterDto(AuthenticationUserInfo authUserInfo){
         return RegisterRequestDto.builder()
-                .email(authUserInfo.getEmail())
+                .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
+                .authenticationRegistrationKey(authUserInfo.getId())
+                .userEmail(authUserInfo.getEmail())
                 .pictureUri(authUserInfo.getUri())
                 .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
                 .build();
