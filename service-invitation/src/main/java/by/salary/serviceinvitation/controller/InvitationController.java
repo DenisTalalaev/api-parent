@@ -37,7 +37,9 @@ public class InvitationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO) {
+    public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO,
+                                                  @RequestAttribute String email,
+                                                  @RequestAttribute List<String> authorities) {
         return invitationService.createInvitation(invitationRequestDTO);
     }
 

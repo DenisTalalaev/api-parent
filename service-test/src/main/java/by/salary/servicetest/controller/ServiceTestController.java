@@ -17,8 +17,8 @@ public class ServiceTestController {
 
     TestService testService;
     @GetMapping
-    public String index(HttpServletRequest request) {
-        log.info(request.getAttributeNames().toString());
+    public String get(@RequestAttribute String email) {
+        log.info(email);
 
         return testService.test();
     }

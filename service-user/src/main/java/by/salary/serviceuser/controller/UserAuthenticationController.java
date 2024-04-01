@@ -7,10 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Controller
@@ -37,8 +34,9 @@ public class UserAuthenticationController {
     }
 
     @PostMapping("/joinorganisation")
-    public UserJoinOrganisationResponseDTO joinOrganisation(@RequestBody UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO) {
-        return userAuthenticationService.joinOrganisation(userJoinOrganisationRequestDTO);
+    public UserJoinOrganisationResponseDTO joinOrganisation(@RequestBody UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO,
+                                                            @RequestAttribute String email) {
+        return userAuthenticationService.joinOrganisation(userJoinOrganisationRequestDTO, email);
     }
 
 }
