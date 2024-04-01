@@ -1,10 +1,7 @@
 package by.salary.authorizationserver.config;
 
-import by.salary.authorizationserver.filter.JWTAuthenticationFilter;
-import by.salary.authorizationserver.filter.JWTVerifierFilter;
-import by.salary.authorizationserver.filter.JwtAuthenticationProvider;
-import by.salary.authorizationserver.filter.OAuth2AuthenticationSuccessHandler;
-import by.salary.authorizationserver.service.AuthorizationService;
+import by.salary.authorizationserver.filter.*;
+import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.CustomUserService;
 import by.salary.authorizationserver.util.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,13 +28,13 @@ public class WebSecurityConfig {
     ObjectMapper objectMapper;
     JwtService jwtService;
     AuthenticationManagerBuilder authenticationManagerBuilder;
-    AuthorizationService authorizationService;
+    AuthorizationRepository authorizationRepository;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authenticationManagerBuilder
-                .authenticationProvider(new JwtAuthenticationProvider(jwtService, authorizationService))
-                .authenticationProvider(authenticationProvider());
+                .authenticationProvider(new UsernameEmailPasswordAuthenticationProvider(authorizationRepository, passwordEncoder()))
+                .authenticationProvider(new JwtAuthenticationProvider(jwtService, authorizationRepository));
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -46,15 +43,17 @@ public class WebSecurityConfig {
                                 .requestMatchers("/auth/register", "/auth/token").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/login/**").permitAll()
-                                .anyRequest().hasAuthority("USER")
+                                .anyRequest().authenticated()
                 )
                 .addFilter(new JWTAuthenticationFilter(
                         objectMapper, authenticationManagerBuilder.getOrBuild(), jwtService))
                 .addFilterAfter(
-                        new JWTVerifierFilter(jwtService, authorizationService, authenticationManagerBuilder.getOrBuild()),
+                        new JWTVerifierFilter(jwtService, authorizationRepository, authenticationManagerBuilder.getOrBuild()),
                         JWTAuthenticationFilter.class)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationService, jwtService)))
+                        .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
+                )
                 .build();
     }
 
@@ -64,11 +63,4 @@ public class WebSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
 }

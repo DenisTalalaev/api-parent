@@ -13,13 +13,16 @@ public class RegisterRequestDto {
     AuthenticationRegistrationId authenticationRegistrationId;
 
     //local/oauth2
-    String email;
+    String userEmail;
 
     //local
     String username;
 
     //local
-    String password;
+    String userPassword;
+
+    //always
+    String invitationCode;
 
     //oatuth2
     String authenticationRegistrationKey;

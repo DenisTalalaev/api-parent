@@ -1,7 +1,7 @@
 package by.salary.authorizationserver.filter;
 
 import by.salary.authorizationserver.model.JwtAuthenticationToken;
-import by.salary.authorizationserver.service.AuthorizationService;
+import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import jakarta.servlet.FilterChain;
@@ -23,7 +23,7 @@ import java.io.IOException;
 @Slf4j
 public class JWTVerifierFilter extends OncePerRequestFilter {
     JwtService service;
-    AuthorizationService authorizationService;
+    AuthorizationRepository authorizationRepository;
 
     AuthenticationManager authenticationManager;
 
@@ -46,17 +46,18 @@ public class JWTVerifierFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-
         String authToken = bearerToken.replace(SecurityConstants.PREFIX, "");
+
         try {
             Authentication auth = authenticationManager.authenticate(new JwtAuthenticationToken(authToken, service));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }catch (AuthenticationException e){
             log.error("Jwt Authentication failed {}", e.getMessage());
+            filterChain.doFilter(request, response);
             return;
         }
 
-        request.setAttribute("email", service.extractUserName(authToken));
+        request.setAttribute("email", service.extractEmail(authToken));
         request.setAttribute("authorities", service.extractAuthorities(authToken));
         request.setAttribute("jwt", authToken);
 

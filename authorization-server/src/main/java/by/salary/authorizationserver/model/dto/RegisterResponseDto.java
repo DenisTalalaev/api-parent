@@ -1,6 +1,7 @@
 package by.salary.authorizationserver.model.dto;
 
 import lombok.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Builder
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Setter
 public class RegisterResponseDto {
 
-    boolean isRegistrationCompleted;
+    HttpStatus httpStatus;
     String message;
 
 }

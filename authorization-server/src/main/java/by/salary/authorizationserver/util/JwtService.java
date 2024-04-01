@@ -1,6 +1,8 @@
 package by.salary.authorizationserver.util;
 
 import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
+import by.salary.authorizationserver.model.entity.Authority;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -34,6 +37,11 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    public String extractEmail(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("email", String.class);
+    }
+
     /**
      * Извлечение списка authorities из токена JWT.
      *
@@ -43,12 +51,16 @@ public class JwtService {
     public List<GrantedAuthority> extractAuthorities(String token) {
         List<String> authoritiesStrings = extractClaim(token, claims -> claims.get("authorities", List.class));
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if (authoritiesStrings != null) {
+        if (authoritiesStrings != null && !authoritiesStrings.isEmpty()) {
             for (String authority : authoritiesStrings) {
                 authorities.add(new SimpleGrantedAuthority(authority));
             }
         }
         return authorities;
+    }
+
+    public String generateToken(AuthenticationResponseDto authenticationResponseDto) {
+        return generateToken(mapToUserInfoDto(authenticationResponseDto));
     }
 
     /**
@@ -67,11 +79,21 @@ public class JwtService {
         return generateToken(claims, userDetails.getUsername());
     }
 
-    public String generateToken(String email, List<String> authorities) {
+    public String generateToken(String userName, String email, List<String> authorities) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
         claims.put("authorities", authorities);
         return generateToken(claims, email);
+    }
+    public boolean isTokenValid(String token, AuthenticationResponseDto authenticationResponseDto) {
+        return isTokenValid(token, mapToUserInfoDto(authenticationResponseDto));
+    }
+    private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto authenticationResponseDto) {
+        return UserInfoDTO.builder()
+                .name(authenticationResponseDto.getUserName())
+                .email(authenticationResponseDto.getUserEmail())
+                .authorities(authenticationResponseDto.getAuthorities().stream().map(Authority::getAuthority).collect(Collectors.toList()))
+                .build();
     }
 
     /**

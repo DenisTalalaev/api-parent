@@ -1,61 +1,59 @@
 package by.salary.authorizationserver.filter;
 
-import by.salary.authorizationserver.model.JwtAuthenticationToken;
+import by.salary.authorizationserver.exception.UserNotFoundException;
+import by.salary.authorizationserver.model.UsernameEmailPasswordAuthenticationToken;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
-import by.salary.authorizationserver.util.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
-public class JwtAuthenticationProvider implements AuthenticationProvider {
+public class UsernameEmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
-    JwtService service;
     AuthorizationRepository authorizationRepository;
+    PasswordEncoder passwordEncoder;
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
-
-        String jwt = (String) jwtAuthenticationToken.getCredentials();
-
-        String userName = service.extractUserName(jwt);
+        UsernameEmailPasswordAuthenticationToken token = (UsernameEmailPasswordAuthenticationToken) authentication;
 
         AuthenticationRequestDto authenticationRequestDto = AuthenticationRequestDto.builder()
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .username(userName)
-                .userEmail(service.extractEmail(jwt))
+                .userEmail(token.getUserEmail())
+                .username(token.getUsername())
                 .build();
-
         Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequestDto);
 
         if (responseDto.isEmpty()){
-            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
+            throw new AuthenticationCredentialsNotFoundException("User not found");
         }
-        if (service.isTokenValid(jwt, responseDto.get())) {
-            Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
-                    new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());
 
-            if (grantedAuthorities.equals(jwtAuthenticationToken.getAuthorities())) {
-                return new UsernamePasswordAuthenticationToken(userName, null, grantedAuthorities);
-            }
+        if (!passwordEncoder.matches(token.getPassword(), responseDto.get().getPassword())){
+            //TODO: exception handling
+            throw new UserNotFoundException("Authentication failed");
         }
-        throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
+
+        return new UsernameEmailPasswordAuthenticationToken(
+                responseDto.get().getUserName(),
+                responseDto.get().getUserEmail(),
+                responseDto.get().getPassword(),
+                responseDto.get().getAuthorities().stream().map((a) -> new SimpleGrantedAuthority(a.getAuthority()))
+                        .collect(Collectors.toList()));
+
     }
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return JwtAuthenticationToken.class.isAssignableFrom(authentication);
+        return UsernameEmailPasswordAuthenticationToken.class.isAssignableFrom(authentication);
     }
 }

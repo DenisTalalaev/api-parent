@@ -10,11 +10,9 @@ public class FactoryAuthenticationRegistration {
 
         if(authenticationRegistrationId.equals(AuthenticationRegistrationId.google.name())){
             return new GoogleAuthentication(attributes);
-        }else if(authenticationRegistrationId.equals(AuthenticationRegistrationId.github.name())){
+        }else if(authenticationRegistrationId.equals(AuthenticationRegistrationId.github.name())) {
             return new GithubAuthentication(attributes);
         }
-        //TODO: add local authentication
-
         throw new IllegalArgumentException("Unknown authentication registration id: " + authenticationRegistrationId);
     }
 }

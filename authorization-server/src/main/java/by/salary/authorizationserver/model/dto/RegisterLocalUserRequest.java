@@ -8,10 +8,11 @@ import lombok.Setter;
 @Builder
 @Getter
 @Setter
-public class RegisterRequest {
+public class RegisterLocalUserRequest {
 
     String username;
     String email;
     String password;
+    String invitationCode;
 
 }

@@ -1,7 +1,12 @@
 package by.salary.authorizationserver.filter;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.UsernameEmailPasswordAuthenticationToken;
+import by.salary.authorizationserver.model.dto.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
+import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,10 +53,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
         try {
-            AuthenticationRequestDto authDto = objectMapper.readValue(request.getInputStream(), AuthenticationRequestDto.class);
-            return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authDto.getEmail(),
+            AuthenticationLocalUserRequest authDto = objectMapper.readValue(request.getInputStream(),
+                    AuthenticationLocalUserRequest.class);
+            return authenticationManager.authenticate(new UsernameEmailPasswordAuthenticationToken(authDto.getUsername(),
+                    authDto.getUserEmail(),
                     authDto.getPassword()));
-
         } catch (IOException e) {
             throw new AuthenticationCredentialsNotFoundException("Could not found user", e);
         }
@@ -62,20 +68,21 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
-        String email = authResult.getName();
-        List<String> authorities = authResult.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).collect(toList());
+        UsernameEmailPasswordAuthenticationToken authToken = (UsernameEmailPasswordAuthenticationToken) authResult;
 
-        String token = jwtService.generateToken(email, authorities);
+        List<Authority> authorities = authResult.getAuthorities().stream()
+                .map((a) -> new Authority(a.getAuthority())).collect(toList());
+
+
+        String token = jwtService.generateToken(mapToUserDetails(authToken));
 
         //TODO: save token in database
 
         response.addHeader(SecurityConstants.HEADER, String.format("Bearer %s", token));
-        response.addHeader("Expiration", String.valueOf(30*60));
 
         ConnValidationResponse respModel = ConnValidationResponse.builder()
                 .status(HttpStatus.OK.name())
-                .email(email)
+                .email(authToken.getUserEmail())
                 .authorities(authorities)
                 .token(String.format("Bearer %s", token))
                 .methodType(HttpMethod.GET.name())
@@ -83,5 +90,13 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .build();
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream().write(objectMapper.writeValueAsBytes(respModel));
+    }
+
+    private UserInfoDTO mapToUserDetails(UsernameEmailPasswordAuthenticationToken authentication) {
+        return UserInfoDTO.builder()
+                .name(authentication.getUsername())
+                .email(authentication.getUserEmail())
+                .authorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toList()))
+                .build();
     }
 }
