@@ -11,10 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +24,11 @@ public class OrganisationService {
 
     private OrganisationRepository organisationRepository;
     private UserRepository userRepository;
+    private WebClient.Builder webClientBuilder;
 
     @Autowired
-    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository) {
+    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository, WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
         this.organisationRepository = organisationRepository;
         this.userRepository = userRepository;
     }
@@ -44,17 +48,26 @@ public class OrganisationService {
         return new OrganisationResponseDTO(organisationRepository.findById(id).get());
     }
 
+    private String getEmail(){
+        return "hotspot.by@gmail.com";
+    }
+
+    private BigInteger createNewAgreementId() {
+        return new BigInteger(
+                Objects.requireNonNull(webClientBuilder.build()
+                        .post()
+                        .uri("lb://service-agreement/agreements/createdefaultagreement")
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block())
+        );
+    }
 
     public OrganisationResponseDTO createOrganisation(OrganisationRequestDTO organisationRequestDTO) {
-        User director = userRepository.save(new User());
-        OrganisationResponseDTO organisationResponseDTO = new OrganisationResponseDTO(
-                organisationRepository.save(new Organisation(organisationRequestDTO,
-                        userRepository.findById(director.getId()).get()
-                ))
-        );
-        director.setOrganisation(organisationRepository.findById(organisationResponseDTO.getId()).get());
-        userRepository.save(director);
-        return organisationResponseDTO;
+        User director = userRepository.findByUserEmail(getEmail()).get();
+        Organisation organisation = new Organisation(organisationRequestDTO, director);
+        organisation.setAgreementId(createNewAgreementId());
+        return new OrganisationResponseDTO(organisationRepository.save(organisation));
     }
 
 

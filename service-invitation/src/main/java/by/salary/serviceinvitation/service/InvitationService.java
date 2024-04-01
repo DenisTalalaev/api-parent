@@ -1,16 +1,13 @@
 package by.salary.serviceinvitation.service;
 
 import by.salary.serviceinvitation.entities.Invitation;
-import by.salary.serviceinvitation.interfaces.UserRequestDTO;
 import by.salary.serviceinvitation.model.InvitationRequestDTO;
 import by.salary.serviceinvitation.model.InvitationResponseDTO;
 import by.salary.serviceinvitation.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -53,26 +50,8 @@ public class InvitationService {
         }
     }
 
-    public String createUser(String userFirstName, String userSecondName, String userSurname, BigInteger organisationId) {
-        UserRequestDTO userRequestDTO = new UserRequestDTO(
-                userFirstName,
-                userSecondName,
-                userSurname,
-                organisationId
-        );
-        System.out.println(userRequestDTO);
-        return webClientBuilder.build()
-                .post()
-                .uri("lb://service-user/users/createUser")
-                .body(Mono.just(userRequestDTO), UserRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToMono(String.class).block();
-    }
     public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO) {
-        String userIdStr = createUser(invitationRequestDTO.getUserFirstName(), invitationRequestDTO.getUserSecondName(), invitationRequestDTO.getUserSurname(), invitationRequestDTO.getOrganisationId());
-        BigInteger userId = new BigInteger(userIdStr);
-        Invitation invitation = new Invitation(invitationRequestDTO, userId, generateInvitationCode());
+        Invitation invitation = new Invitation(invitationRequestDTO, generateInvitationCode());
         return new InvitationResponseDTO(invitationRepository.save(invitation));
     }
 
@@ -82,14 +61,7 @@ public class InvitationService {
         return new InvitationResponseDTO();
     }
 
-    public String getUserByInvitationCode(String userInvitationCode) {
-        System.out.println(userInvitationCode);
-        if (!invitationRepository.existsByInvitationCode(userInvitationCode)) {
-            return ("Invitation not found");
-        }
-        BigInteger a = invitationRepository.findByInvitationCode(userInvitationCode).get().getUserId();
-        System.out.println(a);
-        return a.toString();
+    public String getInvitation(String invitationCode) {
+        return invitationRepository.findByInvitationCode(invitationCode).get().toString();
     }
-
 }

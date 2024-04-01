@@ -60,13 +60,11 @@ public class Organisation {
     private List<User> users;
 
     public Organisation(OrganisationRequestDTO organisationRequestDTO, User director) {
-
         this.organisationName = organisationRequestDTO.getOrganisationName();
         this.organisationAddress = organisationRequestDTO.getOrganisationAddress();
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber();
         this.director = director;
         this.baseReward = organisationRequestDTO.getBaseReward();
-        this.agreementId = organisationRequestDTO.getAgreementId();
     }
 
     public void update(OrganisationRequestDTO organisationRequestDTO, User director) {
@@ -76,6 +74,5 @@ public class Organisation {
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber() == null? this.organisationContactNumber : organisationRequestDTO.getOrganisationContactNumber();
         this.director = director == null? this.director : director;
         this.baseReward = organisationRequestDTO.getBaseReward() == null? this.baseReward : organisationRequestDTO.getBaseReward();
-        this.agreementId = organisationRequestDTO.getAgreementId() == null? this.agreementId : organisationRequestDTO.getAgreementId();
     }
 }
