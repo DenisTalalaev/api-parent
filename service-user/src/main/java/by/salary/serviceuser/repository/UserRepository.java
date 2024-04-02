@@ -14,4 +14,5 @@ public interface UserRepository extends CrudRepository<User, BigInteger> {
     Optional<User> findByUserAuthorisationAttributeKey(AuthenticationRegistrationId authenticationRegistrationId);
 
     Optional<User> findByUsername(String username);
+
 }

@@ -59,12 +59,12 @@ public class Organisation {
     @JoinColumn(name = "organisation_id")
     private List<User> users;
 
-    public Organisation(OrganisationRequestDTO organisationRequestDTO, User director) {
+    public Organisation(OrganisationRequestDTO organisationRequestDTO) {
         this.organisationName = organisationRequestDTO.getOrganisationName();
         this.organisationAddress = organisationRequestDTO.getOrganisationAddress();
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber();
-        this.director = director;
         this.baseReward = organisationRequestDTO.getBaseReward();
+        this.director = null;
     }
 
     public void update(OrganisationRequestDTO organisationRequestDTO, User director) {

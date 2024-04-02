@@ -27,5 +27,9 @@ public class InvitationResponseDTO {
         this.id = invitation.getId();
         this.organisationId = invitation.getOrganisationId();
         this.invitationCode = invitation.getInvitationCode();
+
+        this.userFirstName = invitation.getUserFirstName();
+        this.userSecondName = invitation.getUserSecondName();
+        this.userSurname = invitation.getUserSurname();
     }
 }

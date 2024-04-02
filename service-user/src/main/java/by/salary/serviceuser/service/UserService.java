@@ -1,6 +1,8 @@
 package by.salary.serviceuser.service;
 
+import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.OrganisationRepository;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,13 +31,10 @@ public class UserService {
     UserRepository userRepository;
     private OrganisationRepository organisationRepository;
 
-    private WebClient.Builder webClientBuilder;
-
     @Autowired
-    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository, WebClient.Builder webClientBuilder) {
+    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository) {
         this.userRepository = userRepository;
         this.organisationRepository = organisationRepository;
-        this.webClientBuilder = webClientBuilder;
     }
 
     public List<UserResponseDTO> getAllUsers() {
@@ -47,22 +47,44 @@ public class UserService {
     }
 
     public UserResponseDTO getOneUser(BigInteger id) {
-        return new UserResponseDTO(userRepository.findById(id).get());
+        Optional<User> optUser = userRepository.findById(id);
+        if (optUser.isEmpty()) {
+            throw new UserNotFoundException("User with id " + id + " not found", HttpStatus.NOT_FOUND);
+        }
+        return new UserResponseDTO(optUser.get());
     }
-
 
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        return new UserResponseDTO(userRepository.save(new User(userRequestDTO, organisationRepository.findById(userRequestDTO.getOrganisationId()).get())));
-    }
-
-    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO) {
-        Optional<User> user = userRepository.findById(userRequestDTO.getId());
-        user.ifPresent(value -> value.update(userRequestDTO, organisationRepository.findById(userRequestDTO.getOrganisationId()).get()));
-        return new UserResponseDTO(userRepository.save(user.get()));
+        Optional<Organisation> optionalOrganisation = organisationRepository.findById(userRequestDTO.getOrganisationId());
+        if (optionalOrganisation.isEmpty()) {
+            throw new UserNotFoundException("Organisation with id " + userRequestDTO.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
+        }
+        return new UserResponseDTO(userRepository.save(new User(userRequestDTO, optionalOrganisation.get())));
     }
 
     public void deleteUser(BigInteger id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("User with id " + id + " not found", HttpStatus.NOT_FOUND);
+        }
         userRepository.deleteById(id);
+    }
+
+    public String getOrganisationId(String email) {
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if (optUser.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        return optUser.get().getOrganisation().getId().toString();
+
+    }
+
+    public String getOrganisationAgreementId(String email) {
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if (optUser.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        return optUser.get().getOrganisation().getAgreementId().toString();
+
     }
 }
