@@ -1,11 +1,13 @@
 package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.Organisation;
+import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.model.OrganisationRequestDTO;
 import by.salary.serviceuser.model.OrganisationResponseDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.OrganisationRepository;
+import by.salary.serviceuser.repository.PermissionRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
@@ -23,14 +25,19 @@ import java.util.Objects;
 public class OrganisationService {
 
     private OrganisationRepository organisationRepository;
+
+    private PermissionRepository permissionRepository;
+
     private UserRepository userRepository;
     private WebClient.Builder webClientBuilder;
 
     @Autowired
-    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository, WebClient.Builder webClientBuilder) {
+    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository, WebClient.Builder webClientBuilder, PermissionRepository permissionRepository) {
+        this.permissionRepository = permissionRepository;
         this.webClientBuilder = webClientBuilder;
         this.organisationRepository = organisationRepository;
         this.userRepository = userRepository;
+
     }
 
 
@@ -46,10 +53,6 @@ public class OrganisationService {
 
     public OrganisationResponseDTO getOneOrganisation(BigInteger id) {
         return new OrganisationResponseDTO(organisationRepository.findById(id).get());
-    }
-
-    private String getEmail(){
-        return "hotspot.by@gmail.com";
     }
 
     private BigInteger createNewAgreementId() {
@@ -68,21 +71,18 @@ public class OrganisationService {
         User director = userRepository.findByUserEmail(email).get();
         Organisation organisation = new Organisation(organisationRequestDTO, director);
         director.setOrganisation(organisation);
+        director.setUserFirstName(organisationRequestDTO.getDirectorFirstName());
+        director.setUserSurname(organisationRequestDTO.getDirectorSurname());
+        director.setUserSecondName(organisationRequestDTO.getDirectorSecondName());
+
+        //grant all permissions to Director
+        director.addPermission(permissionRepository.findByName("*").get());
+
         userRepository.save(director);
         organisation.setAgreementId(createNewAgreementId());
         return new OrganisationResponseDTO(organisationRepository.save(organisation));
     }
 
-
-    public OrganisationResponseDTO updateOrganisation(OrganisationRequestDTO organisationRequestDTO) {
-        Organisation organisation = organisationRepository.findById(organisationRequestDTO.getId()).get();
-        organisation.update(organisationRequestDTO,
-                organisationRequestDTO.getDirectorId() == null ?
-                        null :
-                        userRepository.findById(organisationRequestDTO.getDirectorId()).get()
-                );
-        return new OrganisationResponseDTO(organisationRepository.save(organisation));
-    }
 
 
     public void deleteOrganisation(BigInteger id) {

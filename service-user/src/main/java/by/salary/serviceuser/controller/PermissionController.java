@@ -25,6 +25,7 @@ public class PermissionController {
     @Autowired
     public PermissionController(PermissionService permissionService) {
         this.permissionService = permissionService;
+
     }
 
 

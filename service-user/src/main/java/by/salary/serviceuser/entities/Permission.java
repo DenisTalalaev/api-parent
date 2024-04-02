@@ -40,4 +40,9 @@ public class Permission {
         this.name = permissionResponseDTO.getName();
         this.description = permissionResponseDTO.getDescription();
     }
+
+    public Permission(String s) {
+        this.name = s;
+        this.description = "All permissions";
+    }
 }

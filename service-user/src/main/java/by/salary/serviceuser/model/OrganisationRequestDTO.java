@@ -27,6 +27,9 @@ public class OrganisationRequestDTO {
     private String organisationAddress;
 
     private String organisationContactNumber;
-    private BigInteger directorId;
     private BigDecimal baseReward;
+
+    private String directorFirstName;
+    private String directorSurname;
+    private String directorSecondName;
 }

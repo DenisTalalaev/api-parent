@@ -53,12 +53,6 @@ public class OrganisationController {
     }
 
 
-    @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public OrganisationResponseDTO updateOrganisation(@RequestBody OrganisationRequestDTO organisationRequestDTO) {
-        return organisationService.updateOrganisation(organisationRequestDTO);
-    }
-
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
