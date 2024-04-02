@@ -148,4 +148,7 @@ public class User {
         this.isCredentialsNonExpired = userRequestDTO.isCredentialsNonExpired() == null ? this.isCredentialsNonExpired : userRequestDTO.isCredentialsNonExpired();
     }
 
+    public void addPermission(Permission permission) {
+        permissions.add(permission);
+    }
 }

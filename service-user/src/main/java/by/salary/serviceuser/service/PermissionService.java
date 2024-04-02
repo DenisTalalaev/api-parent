@@ -22,6 +22,12 @@ public class PermissionService {
     public PermissionService(PermissionRepository permissionRepository, UserRepository userRepository) {
         this.permissionRepository = permissionRepository;
         this.userRepository = userRepository;
+
+        //default permission for all permissions
+        if(!permissionRepository.existsByName("*")){
+            permissionRepository.save(new Permission("*"));
+        }
+
     }
 
     public List<PermissionResponseDTO> getUserPermissions(BigInteger id) {
