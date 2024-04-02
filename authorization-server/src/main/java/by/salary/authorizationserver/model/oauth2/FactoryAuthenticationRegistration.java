@@ -7,7 +7,6 @@ public class FactoryAuthenticationRegistration {
 
 
     public static AuthenticationUserInfo create(String authenticationRegistrationId, Map<String, Object> attributes){
-
         if(authenticationRegistrationId.equals(AuthenticationRegistrationId.google.name())){
             return new GoogleAuthentication(attributes);
         }else if(authenticationRegistrationId.equals(AuthenticationRegistrationId.github.name())) {

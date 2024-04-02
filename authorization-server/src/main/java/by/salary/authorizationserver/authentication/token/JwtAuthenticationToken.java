@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.model;
+package by.salary.authorizationserver.authentication.token;
 
 import by.salary.authorizationserver.util.JwtService;
 import lombok.AllArgsConstructor;

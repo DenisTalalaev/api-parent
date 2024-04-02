@@ -1,23 +1,32 @@
 package by.salary.authorizationserver.config;
 
-import by.salary.authorizationserver.filter.*;
+import by.salary.authorizationserver.authentication.OAuth2AuthenticationSuccessHandler;
+import by.salary.authorizationserver.authentication.filter.JWTAuthenticationFilter;
+import by.salary.authorizationserver.authentication.filter.JWTVerifierFilter;
+import by.salary.authorizationserver.authentication.provider.JwtAuthenticationProvider;
+import by.salary.authorizationserver.authentication.provider.UsernameEmailPasswordAuthenticationProvider;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.CustomUserService;
 import by.salary.authorizationserver.util.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+import java.io.IOException;
 
 @Configuration
 @AllArgsConstructor
@@ -53,6 +62,7 @@ public class WebSecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
+                        .failureHandler((request, response, exception) -> { throw exception; })
                 )
                 .build();
     }

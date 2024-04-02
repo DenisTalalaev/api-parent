@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.model.dto;
+package by.salary.authorizationserver.model.userrequest;
 
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import lombok.Builder;

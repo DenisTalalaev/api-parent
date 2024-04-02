@@ -1,8 +1,8 @@
 package by.salary.authorizationserver.controller;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
-import by.salary.authorizationserver.model.dto.AuthenticationLocalUserRequest;
-import by.salary.authorizationserver.model.dto.RegisterLocalUserRequest;
+import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
+import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
 import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
