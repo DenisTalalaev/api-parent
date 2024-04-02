@@ -40,7 +40,7 @@ public class InvitationController {
     public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO,
                                                   @RequestAttribute String email,
                                                   @RequestAttribute List<String> authorities) {
-        return invitationService.createInvitation(invitationRequestDTO);
+        return invitationService.createInvitation(invitationRequestDTO, email);
     }
 
     @DeleteMapping("/{invitationCode}")

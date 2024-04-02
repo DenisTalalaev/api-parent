@@ -1,40 +1,39 @@
 package by.salary.serviceagreement.entities;
 
-
-/**
-The row in the table of agreement states
-Example
-10.2.1 For high achievements in the field of It
-10.2.1 - stateName
-For high achievements in the field of It - stateInfo
- */
-
 import by.salary.serviceagreement.model.AgreementStateRequestDTO;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigInteger;
 
+@Entity
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Data
+@NoArgsConstructor
 public class AgreementState {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
-    @Column(unique = true)
+
+    @ManyToOne
+    private AgreementList agreementLists;
+
     private String stateName;
     private String stateInfo;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    private AgreementStatesList agreementStatesList;
+    public AgreementState(String stateName, String stateInfo, AgreementList agreementList) {
+        this.stateName = stateName;
+        this.stateInfo = stateInfo;
+        this.agreementLists = agreementList;
+    }
 
-    public AgreementState(AgreementStateRequestDTO agreementStateRequestDTO) {
-        this.stateName = agreementStateRequestDTO.getStateName();
-        this.stateInfo = agreementStateRequestDTO.getStateInfo();
+    public AgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, AgreementList agreementList) {
+        this.stateName = agreementStateListRequestDTO.getStateName();
+        this.stateInfo = agreementStateListRequestDTO.getStateInfo();
+        this.agreementLists = agreementList;
     }
 }

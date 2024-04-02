@@ -1,7 +1,10 @@
 package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.Invitation;
+import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
+import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import by.salary.serviceuser.model.*;
 import by.salary.serviceuser.repository.OrganisationRepository;
@@ -47,7 +50,6 @@ public class UserAuthenticationService {
             } else if (userAuthenticationRequestDTO.getUsername() != null) {
                 return new UserAuthenticationResponseDTO(userRepository.findByUsername(userAuthenticationRequestDTO.getUsername()));
             }
-            throw new RuntimeException();
         }
         return new UserAuthenticationResponseDTO(
                 userRepository.findByUserAuthorisationAttributeKey(userAuthenticationRequestDTO.getAuthenticationRegistrationId())
@@ -89,12 +91,15 @@ public class UserAuthenticationService {
     public UserJoinOrganisationResponseDTO joinOrganisation(UserJoinOrganisationRequestDTO userJoinOrganisationRequestDTO, String email) {
         Optional<User> userOpt = userRepository.findByUserEmail(email);
         if(userOpt.isEmpty()){
-            throw new RuntimeException("No user found");
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
         Invitation invitation = getInvitation(userJoinOrganisationRequestDTO.getInvitationCode());
-
-        user.setOrganisation(organisationRepository.findById(invitation.getOrganisationId()).get());
+        Optional<Organisation> optionalOrganisation = organisationRepository.findById(invitation.getOrganisationId());
+        if(optionalOrganisation.isEmpty()){
+            throw new OrganisationNotFoundException("Organisation with id " + invitation.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
+        }
+        user.setOrganisation(optionalOrganisation.get());
         user.setUserFirstName(invitation.getUserFirstName());
         user.setUserSurname(invitation.getUserSurname());
         user.setUserSecondName(invitation.getUserSecondName());
@@ -107,11 +112,11 @@ public class UserAuthenticationService {
     }
 
     private Invitation getInvitation(String invitationCode) {
-        return new Invitation(webClientBuilder.build()
+        return new Invitation(Objects.requireNonNull(webClientBuilder.build()
                 .get()
                 .uri("lb://service-invitation/invitations/" + invitationCode)
                 .retrieve()
                 .bodyToMono(String.class)
-                .block());
+                .block()));
     }
 }

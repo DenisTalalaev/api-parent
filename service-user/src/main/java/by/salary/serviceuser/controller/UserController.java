@@ -45,10 +45,15 @@ public class UserController {
         return user.getId().toString();
     }
 
-    @PutMapping
+    @PostMapping("/getorganisationid/{email}")
     @ResponseStatus(HttpStatus.OK)
-    public UserResponseDTO updateUser(@RequestBody UserRequestDTO userRequestDTO) {
-        return userService.updateUser(userRequestDTO);
+    public String getOrganisationId(@PathVariable String email) {
+        return userService.getOrganisationId(email);
+    }
+    @PostMapping("/getorganisationagreementid/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    public String getOrganisationAgreementId(@PathVariable String email) {
+        return userService.getOrganisationAgreementId(email);
     }
 
     @DeleteMapping("/{id}")

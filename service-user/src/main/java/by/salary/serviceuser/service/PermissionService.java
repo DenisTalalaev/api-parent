@@ -1,16 +1,21 @@
 package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.Permission;
+import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.exceptions.PermissionNotFoundException;
+import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.PermissionResponseDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.PermissionRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PermissionService {
@@ -33,7 +38,12 @@ public class PermissionService {
     public List<PermissionResponseDTO> getUserPermissions(BigInteger id) {
 
         List<PermissionResponseDTO> permissions = new ArrayList<>();
-        userRepository.findById(id).get().getPermissions().forEach(permission -> {
+
+        Optional<User> optionalUser = userRepository.findById(id);
+        if(optionalUser.isEmpty()){
+            throw new UserNotFoundException("User with id " + id + " not found", HttpStatus.NOT_FOUND);
+        }
+        optionalUser.get().getPermissions().forEach(permission -> {
             permissions.add(new PermissionResponseDTO(permission));
         });
         return permissions;
@@ -41,6 +51,9 @@ public class PermissionService {
     }
 
     public List<UserResponseDTO> getAllUsersWithPermission(BigInteger permissionId) {
+        if(!permissionRepository.existsById(permissionId)){
+            throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
+        }
 
         List<UserResponseDTO> users = new ArrayList<>();
         permissionRepository.findById(permissionId).get().getUsers().forEach(user -> {
@@ -63,19 +76,37 @@ public class PermissionService {
     }
 
     public PermissionResponseDTO addUserPermission(BigInteger userId, BigInteger permissionId) {
+        if(!userRepository.existsById(userId)){
+            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+        if(!permissionRepository.existsById(permissionId)){
+            throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
+        }
         Permission permission = permissionRepository.findById(permissionId).get();
         permission.getUsers().add(userRepository.findById(userId).get());
         return new PermissionResponseDTO(permissionRepository.save(permission));
     }
 
     public void deleteUserPermission(BigInteger userId, BigInteger permissionId) {
+        Optional<User> optUser = userRepository.findById(userId);
+        Optional<Permission> optPermission = permissionRepository.findById(permissionId);
 
-        Permission permission = permissionRepository.findById(permissionId).get();
-        permission.getUsers().remove(userRepository.findById(userId).get());
+        if(optUser.isEmpty()){
+            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+        if(optPermission.isEmpty()){
+            throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        Permission permission = optPermission.get();
+        permission.getUsers().remove(optUser.get());
         permissionRepository.save(permission);
     }
 
     public void deletePermission(BigInteger permissionId) {
+        if(!permissionRepository.existsById(permissionId)){
+            throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
+        }
         permissionRepository.deleteById(permissionId);
     }
 }

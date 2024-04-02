@@ -42,12 +42,12 @@ public class Invitation {
     private String invitationCode;
 
 
-    public Invitation(InvitationRequestDTO invitationRequestDTO, String s) {
-        this.organisationId = invitationRequestDTO.getOrganisationId();
+    public Invitation(InvitationRequestDTO invitationRequestDTO, String invitationCode, BigInteger organisationId) {
         this.userFirstName = invitationRequestDTO.getUserFirstName();
         this.userSecondName = invitationRequestDTO.getUserSecondName();
         this.userSurname = invitationRequestDTO.getUserSurname();
-        this.invitationCode = s;
+        this.invitationCode = invitationCode;
+        this.organisationId = organisationId;
     }
 
     @Override

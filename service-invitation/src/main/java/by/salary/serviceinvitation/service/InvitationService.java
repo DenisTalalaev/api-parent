@@ -1,17 +1,23 @@
 package by.salary.serviceinvitation.service;
 
 import by.salary.serviceinvitation.entities.Invitation;
+import by.salary.serviceinvitation.exceptions.InvitationNotFoundException;
 import by.salary.serviceinvitation.model.InvitationRequestDTO;
 import by.salary.serviceinvitation.model.InvitationResponseDTO;
 import by.salary.serviceinvitation.repository.InvitationRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,25 +49,43 @@ public class InvitationService {
 
     private String generateInvitationCode(){
         while (true){
-            String code = String.valueOf((int) (Math.random() * 1000000));
+            String code = String.valueOf((int) (Math.random() * 1000000000));
             if (!invitationRepository.existsByInvitationCode(code)){
                 return code;
             }
         }
     }
 
-    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO) {
-        Invitation invitation = new Invitation(invitationRequestDTO, generateInvitationCode());
+    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO, String directorEmail) {
+        BigInteger organisationId = getOrganisationId(directorEmail);
+        Invitation invitation = new Invitation(invitationRequestDTO, generateInvitationCode(), organisationId);
         return new InvitationResponseDTO(invitationRepository.save(invitation));
     }
 
+    private BigInteger getOrganisationId(String directorEmail) {
+        return new BigInteger(Objects.requireNonNull(webClientBuilder
+                .build()
+                .post()
+                .uri("http://service-user:8080/users/getorganisationid/" + directorEmail)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block()));
+    }
+
     public InvitationResponseDTO deleteInvitation(String invitationCode) {
-        BigInteger id = invitationRepository.findByInvitationCode(invitationCode).get().getId();
-        invitationRepository.deleteById(id);
+        Optional<Invitation> invitation = invitationRepository.findByInvitationCode(invitationCode);
+        if(invitation.isEmpty()){
+            throw new InvitationNotFoundException("Invitation not found", HttpStatus.NOT_FOUND);
+        }
+        invitationRepository.deleteById(invitation.get().getId());
         return new InvitationResponseDTO();
     }
 
     public String getInvitation(String invitationCode) {
-        return invitationRepository.findByInvitationCode(invitationCode).get().toString();
+        Optional<Invitation> invitation = invitationRepository.findByInvitationCode(invitationCode);
+        if(invitation.isEmpty()){
+            throw new InvitationNotFoundException("Invitation not found", HttpStatus.NOT_FOUND);
+        }
+        return invitation.get().toString();
     }
 }
