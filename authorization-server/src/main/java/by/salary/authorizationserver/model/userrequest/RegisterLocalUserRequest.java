@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.model.dto;
+package by.salary.authorizationserver.model.userrequest;
 
 
 import lombok.Builder;

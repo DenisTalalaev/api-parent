@@ -1,6 +1,6 @@
-package by.salary.authorizationserver.filter;
+package by.salary.authorizationserver.authentication.filter;
 
-import by.salary.authorizationserver.model.JwtAuthenticationToken;
+import by.salary.authorizationserver.authentication.token.JwtAuthenticationToken;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;

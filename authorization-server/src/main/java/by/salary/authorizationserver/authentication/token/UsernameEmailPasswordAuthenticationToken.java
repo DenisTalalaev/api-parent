@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.model;
+package by.salary.authorizationserver.authentication.token;
 
 import lombok.Builder;
 import lombok.Getter;

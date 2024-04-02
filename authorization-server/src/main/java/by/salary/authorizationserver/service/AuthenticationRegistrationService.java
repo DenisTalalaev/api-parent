@@ -4,6 +4,8 @@ import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
+import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
+import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
 import lombok.AllArgsConstructor;

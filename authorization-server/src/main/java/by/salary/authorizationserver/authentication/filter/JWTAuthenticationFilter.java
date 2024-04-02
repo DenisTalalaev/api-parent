@@ -1,12 +1,10 @@
-package by.salary.authorizationserver.filter;
+package by.salary.authorizationserver.authentication.filter;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.UsernameEmailPasswordAuthenticationToken;
-import by.salary.authorizationserver.model.dto.AuthenticationLocalUserRequest;
-import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
+import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
+import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.entity.Authority;
-import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -70,24 +67,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authResult) throws IOException, ServletException {
         UsernameEmailPasswordAuthenticationToken authToken = (UsernameEmailPasswordAuthenticationToken) authResult;
 
-        List<Authority> authorities = authResult.getAuthorities().stream()
-                .map((a) -> new Authority(a.getAuthority())).collect(toList());
-
-
         String token = jwtService.generateToken(mapToUserDetails(authToken));
 
         //TODO: save token in database
 
         response.addHeader(SecurityConstants.HEADER, String.format("Bearer %s", token));
 
-        ConnValidationResponse respModel = ConnValidationResponse.builder()
-                .status(HttpStatus.OK.name())
-                .email(authToken.getUserEmail())
-                .authorities(authorities)
-                .token(String.format("Bearer %s", token))
-                .methodType(HttpMethod.GET.name())
-                .isAuthenticated(true)
-                .build();
+        ConnValidationResponse respModel = mapToConnValidationResponse(authToken, token);
+
         response.addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.getOutputStream().write(objectMapper.writeValueAsBytes(respModel));
     }
@@ -97,6 +84,21 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .name(authentication.getUsername())
                 .email(authentication.getUserEmail())
                 .authorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toList()))
+                .build();
+    }
+
+    private ConnValidationResponse mapToConnValidationResponse(UsernameEmailPasswordAuthenticationToken authentication,
+                                                               String jwt) {
+
+        List<Authority> authorities = authentication.getAuthorities().stream()
+                .map((a) -> new Authority(a.getAuthority())).toList();
+        return ConnValidationResponse.builder()
+                .status(HttpStatus.OK.name())
+                .email(authentication.getUserEmail())
+                .authorities(authorities)
+                .token(String.format("Bearer %s", jwt))
+                .methodType(HttpMethod.GET.name())
+                .isAuthenticated(true)
                 .build();
     }
 }

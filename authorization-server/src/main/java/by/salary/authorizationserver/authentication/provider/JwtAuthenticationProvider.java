@@ -1,6 +1,6 @@
-package by.salary.authorizationserver.filter;
+package by.salary.authorizationserver.authentication.provider;
 
-import by.salary.authorizationserver.model.JwtAuthenticationToken;
+import by.salary.authorizationserver.authentication.token.JwtAuthenticationToken;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
@@ -43,6 +43,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         if (responseDto.isEmpty()){
             throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
         }
+
         if (service.isTokenValid(jwt, responseDto.get())) {
             Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
                     new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());

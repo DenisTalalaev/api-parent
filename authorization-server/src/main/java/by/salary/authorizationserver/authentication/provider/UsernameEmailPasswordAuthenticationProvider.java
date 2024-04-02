@@ -1,7 +1,7 @@
-package by.salary.authorizationserver.filter;
+package by.salary.authorizationserver.authentication.provider;
 
 import by.salary.authorizationserver.exception.UserNotFoundException;
-import by.salary.authorizationserver.model.UsernameEmailPasswordAuthenticationToken;
+import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
@@ -27,11 +27,7 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         UsernameEmailPasswordAuthenticationToken token = (UsernameEmailPasswordAuthenticationToken) authentication;
 
-        AuthenticationRequestDto authenticationRequestDto = AuthenticationRequestDto.builder()
-                .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .userEmail(token.getUserEmail())
-                .username(token.getUsername())
-                .build();
+        AuthenticationRequestDto authenticationRequestDto = generateAuthenticationRequest(token);
         Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequestDto);
 
         if (responseDto.isEmpty()){
@@ -43,13 +39,27 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
             throw new UserNotFoundException("Authentication failed");
         }
 
-        return new UsernameEmailPasswordAuthenticationToken(
-                responseDto.get().getUserName(),
-                responseDto.get().getUserEmail(),
-                responseDto.get().getPassword(),
-                responseDto.get().getAuthorities().stream().map((a) -> new SimpleGrantedAuthority(a.getAuthority()))
-                        .collect(Collectors.toList()));
+        return mapToUserEmailPasswordAuthenticationToken(responseDto.get());
+    }
 
+    private UsernameEmailPasswordAuthenticationToken mapToUserEmailPasswordAuthenticationToken(AuthenticationResponseDto response) {
+
+        return new UsernameEmailPasswordAuthenticationToken(
+                response.getUserName(),
+                response.getUserEmail(),
+                response.getPassword(),
+                response.getAuthorities().stream().map((a) -> new SimpleGrantedAuthority(a.getAuthority()))
+                        .collect(Collectors.toList())
+        );
+    }
+
+    private AuthenticationRequestDto generateAuthenticationRequest(UsernameEmailPasswordAuthenticationToken token) {
+
+        return AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .userEmail(token.getUserEmail())
+                .username(token.getUsername())
+                .build();
     }
 
     @Override

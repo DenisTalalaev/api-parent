@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.filter;
+package by.salary.authorizationserver.authentication;
 
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
