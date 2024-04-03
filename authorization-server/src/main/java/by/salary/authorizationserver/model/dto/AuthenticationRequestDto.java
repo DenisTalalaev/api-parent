@@ -11,11 +11,8 @@ import lombok.Setter;
 public class AuthenticationRequestDto {
 
     private AuthenticationRegistrationId authenticationRegistrationId;
-
     private String authorizationRegistrationKey;
-
     private String username;
-
     private String userEmail;
 
 }

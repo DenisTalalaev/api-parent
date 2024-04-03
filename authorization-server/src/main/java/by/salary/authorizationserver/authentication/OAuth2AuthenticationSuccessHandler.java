@@ -9,9 +9,11 @@ import by.salary.authorizationserver.model.oauth2.AuthenticationUserInfo;
 import by.salary.authorizationserver.model.oauth2.FactoryAuthenticationRegistration;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
+import com.ctc.wstx.shaded.msv_core.util.Uri;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.UriBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,8 +24,10 @@ import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +45,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                                               JwtService jwtService) {
         this.authorizationRepository = authorizationRepository;
         this.jwtService = jwtService;
-        this.frontendUrl = "http://localhost:8080";
+        this.frontendUrl = "http://localhost:3000/auth/sign-in";
     }
 
     @Override
@@ -91,8 +95,10 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         }
         String jwt = jwtService.generateToken(responseDto.get());
 
+        URI uri = UriComponentsBuilder.fromHttpUrl(frontendUrl).queryParam("token", jwt).build().toUri();
+        String url = uri.toString();
         this.setAlwaysUseDefaultTargetUrl(true);
-        this.setDefaultTargetUrl(frontendUrl);
+        this.setDefaultTargetUrl(url);
         this.setRedirectStrategy(new DefaultRedirectStrategy(){
             @Override
             public void sendRedirect(HttpServletRequest request, HttpServletResponse response, String url) throws IOException {

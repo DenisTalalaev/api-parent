@@ -11,7 +11,7 @@ import lombok.Setter;
 public class RegisterLocalUserRequest {
 
     String username;
-    String email;
+    String userEmail;
     String password;
     String invitationCode;
 

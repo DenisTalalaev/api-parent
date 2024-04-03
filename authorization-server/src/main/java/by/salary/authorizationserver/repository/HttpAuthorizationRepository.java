@@ -28,19 +28,15 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
                 .uri("lb://service-user/account/auth")
                 .body(Mono.just(authenticationRequestDto), AuthenticationRequestDto.class)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        resp -> switch (resp.statusCode().value()) {
-                            case 400 ->
-                                    Mono.error(new AuthenticationException("The request was invalid."));
-                            case 404 ->
-                                    Mono.error(new AuthenticationException("The requested resource was not found."));
-                            case 500 ->
-                                    Mono.error(new AuthenticationException("The request was not completed due to an internal error on the server side."));
-                            default ->
-                                    Mono.error(new AuthenticationException("Authentication failed"));
-                        })
+                .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
                 .bodyToMono(AuthenticationResponseDto.class)
                 .blockOptional();
+
+        if (response.isPresent()){
+            if (response.get().getUserEmail() == null) {
+                return Optional.empty();
+            }
+        }
         return response;
     }
 
