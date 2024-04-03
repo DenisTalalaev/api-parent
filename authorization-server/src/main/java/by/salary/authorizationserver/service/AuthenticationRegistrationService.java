@@ -54,7 +54,7 @@ public class AuthenticationRegistrationService {
     private RegisterRequestDto mapToRegisterDto(RegisterLocalUserRequest registerLocalUserRequest){
         return RegisterRequestDto.builder()
                 .username(registerLocalUserRequest.getUsername())
-                .userEmail(registerLocalUserRequest.getEmail())
+                .userEmail(registerLocalUserRequest.getUserEmail())
                 .userPassword(registerLocalUserRequest.getPassword())
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
                 .invitationCode(registerLocalUserRequest.getInvitationCode())

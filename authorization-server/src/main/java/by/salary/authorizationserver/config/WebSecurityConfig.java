@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                 .authenticationProvider(new UsernameEmailPasswordAuthenticationProvider(authorizationRepository, passwordEncoder()))
                 .authenticationProvider(new JwtAuthenticationProvider(jwtService, authorizationRepository));
         return http
+                .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
@@ -59,11 +60,17 @@ public class WebSecurityConfig {
                 .addFilterAfter(
                         new JWTVerifierFilter(jwtService, authorizationRepository, authenticationManagerBuilder.getOrBuild()),
                         JWTAuthenticationFilter.class)
-                .formLogin(AbstractHttpConfigurer::disable)
+                .formLogin(login -> login.successHandler((request, response, authentication) -> {
+                    //nothing here :)
+                })
+                        .failureHandler((request, response, exception) -> {
+                            throw exception;
+                        }))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
                         .failureHandler((request, response, exception) -> { throw exception; })
                 )
+                .httpBasic(AbstractHttpConfigurer::disable)
                 .build();
     }
 

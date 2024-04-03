@@ -52,7 +52,7 @@ public class UserAuthenticationService {
             }
         }
         return new UserAuthenticationResponseDTO(
-                userRepository.findByUserAuthorisationAttributeKey(userAuthenticationRequestDTO.getAuthenticationRegistrationId())
+                userRepository.findByUserAuthorisationAttributeKey(userAuthenticationRequestDTO.getAuthorizationRegistrationKey())
         );
     }
 
@@ -76,6 +76,7 @@ public class UserAuthenticationService {
         user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
         user.setUsername(userRegistrationRequestDTO.getUserEmail());
         user.setImageURI(userRegistrationRequestDTO.getPictureUri());
+        user.setUserAuthorisationAttributeKey(userRegistrationRequestDTO.getAuthenticationRegistrationKey());
         userRepository.save(user);
         return new UserRegistrationResponseDTO(user);
     }
