@@ -1,12 +1,14 @@
 package by.salary.authorizationserver.authentication.provider;
 
-import by.salary.authorizationserver.exception.UserNotFoundException;
+
 import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
+import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AllArgsConstructor
+@Slf4j
 public class UsernameEmailPasswordAuthenticationProvider implements AuthenticationProvider {
 
     AuthorizationRepository authorizationRepository;
@@ -31,12 +34,13 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
         Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequestDto);
 
         if (responseDto.isEmpty()){
+            log.error("User not found in {}", this.getClass());
             throw new AuthenticationCredentialsNotFoundException("User not found");
         }
 
         if (!passwordEncoder.matches(token.getPassword(), responseDto.get().getPassword())){
-            //TODO: exception handling
-            throw new UserNotFoundException("Authentication failed");
+            log.error("Invalid password in {}", this.getClass());
+            throw new UserNotFoundException("Invalid password. Authentication failed");
         }
 
         return mapToUserEmailPasswordAuthenticationToken(responseDto.get());

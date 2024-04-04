@@ -49,10 +49,15 @@ public class JWTVerifierFilter extends OncePerRequestFilter {
         String authToken = bearerToken.replace(SecurityConstants.PREFIX, "");
 
         try {
-            Authentication auth = authenticationManager.authenticate(new JwtAuthenticationToken(authToken, service));
+            JwtAuthenticationToken token = new JwtAuthenticationToken(authToken, service);
+            Authentication auth = authenticationManager.authenticate(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
         }catch (AuthenticationException e){
             log.error("Jwt Authentication failed {}", e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }catch (Exception e){
+            log.error("Jwt claims extraction failed {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }

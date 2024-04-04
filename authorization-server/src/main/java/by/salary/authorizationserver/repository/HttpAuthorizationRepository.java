@@ -6,14 +6,16 @@ import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import javax.naming.AuthenticationException;
 import java.util.Optional;
 
 @Service
@@ -49,8 +51,8 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
                 .retrieve()
                 .onStatus(HttpStatusCode::isError,
                         resp -> switch (resp.statusCode().value()) {
-                    case 400 -> Mono.error(new AuthenticationException("The request was invalid."));
-                    case 404 -> Mono.error(new AuthenticationException("The requested resource was not found."));
+                    case 400 -> Mono.error(new BadRequestException("The request was invalid."));
+                    case 404 -> Mono.error(new NotFoundException("The requested resource was not found."));
                     case 409 -> Mono.error(new UserAlreadyExistsException("User already exists"));
                     default -> Mono.error(new InternalServerErrorException("Internal server error"));}
                 )

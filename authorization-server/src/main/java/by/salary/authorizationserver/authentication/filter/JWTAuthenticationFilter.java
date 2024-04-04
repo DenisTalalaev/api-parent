@@ -12,6 +12,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,13 +30,12 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 
 
+@Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    private final ObjectMapper objectMapper;
 
-
-    private ObjectMapper objectMapper;
-
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
     JwtService jwtService;
 
     public JWTAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager,
@@ -56,6 +56,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     authDto.getUserEmail(),
                     authDto.getPassword()));
         } catch (IOException e) {
+            log.error("Jwt Authentication failed in {}, {}", this.getClass(), e.getMessage());
             throw new AuthenticationCredentialsNotFoundException("Could not found user", e);
         }
     }
@@ -93,7 +94,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         List<Authority> authorities = authentication.getAuthorities().stream()
                 .map((a) -> new Authority(a.getAuthority())).toList();
         return ConnValidationResponse.builder()
-                .status(HttpStatus.OK.name())
+                .status(HttpStatus.OK)
                 .email(authentication.getUserEmail())
                 .authorities(authorities)
                 .token(String.format("Bearer %s", jwt))

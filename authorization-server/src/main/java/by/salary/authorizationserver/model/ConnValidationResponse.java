@@ -2,6 +2,7 @@ package by.salary.authorizationserver.model;
 
 import by.salary.authorizationserver.model.entity.Authority;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.util.Collection;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ConnValidationResponse {
-    private String status;
+    private HttpStatus status;
     private boolean isAuthenticated;
     private String methodType;
     private String email;
