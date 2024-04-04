@@ -13,6 +13,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -23,6 +25,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
@@ -32,12 +35,15 @@ import java.io.IOException;
 @AllArgsConstructor
 @EnableWebSecurity
 public class WebSecurityConfig {
-
-    CustomUserService userDetailsService;
     ObjectMapper objectMapper;
     JwtService jwtService;
     AuthenticationManagerBuilder authenticationManagerBuilder;
     AuthorizationRepository authorizationRepository;
+
+    @Autowired
+    @Qualifier("delegatedAuthenticationEntryPoint")
+    AuthenticationEntryPoint authEntryPoint;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -45,6 +51,9 @@ public class WebSecurityConfig {
                 .authenticationProvider(new UsernameEmailPasswordAuthenticationProvider(authorizationRepository, passwordEncoder()))
                 .authenticationProvider(new JwtAuthenticationProvider(jwtService, authorizationRepository));
         return http
+                .exceptionHandling(exceptionHandler -> exceptionHandler
+                        .authenticationEntryPoint(authEntryPoint)
+                )
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -60,17 +69,10 @@ public class WebSecurityConfig {
                 .addFilterAfter(
                         new JWTVerifierFilter(jwtService, authorizationRepository, authenticationManagerBuilder.getOrBuild()),
                         JWTAuthenticationFilter.class)
-                .formLogin(login -> login.successHandler((request, response, authentication) -> {
-                    //nothing here :)
-                })
-                        .failureHandler((request, response, exception) -> {
-                            throw exception;
-                        }))
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
                         .failureHandler((request, response, exception) -> { throw exception; })
                 )
-                .httpBasic(AbstractHttpConfigurer::disable)
                 .build();
     }
 

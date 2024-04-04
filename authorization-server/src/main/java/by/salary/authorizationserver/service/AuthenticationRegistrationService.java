@@ -9,6 +9,7 @@ import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.JwtService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +30,7 @@ public class AuthenticationRegistrationService {
         return authorizationRepository.save(mapToRegisterDto(registerLocalUserRequest));
     }
 
-    public ConnValidationResponse authenticate(AuthenticationLocalUserRequest authenticationRequestDto) {
+    public ConnValidationResponse authenticate(AuthenticationLocalUserRequest authenticationRequestDto) throws UserNotFoundException {
         AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
                 .username(authenticationRequestDto.getUsername())
@@ -69,7 +70,7 @@ public class AuthenticationRegistrationService {
 
     private ConnValidationResponse mapToConnValidationResponse(AuthenticationResponseDto authentication, String token) {
         return ConnValidationResponse.builder()
-                .status("OK")
+                .status(HttpStatus.OK)
                 .isAuthenticated(true)
                 .methodType("Bearer")
                 .email(authentication.getUserEmail())
