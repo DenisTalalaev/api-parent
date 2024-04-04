@@ -45,7 +45,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                                               JwtService jwtService) {
         this.authorizationRepository = authorizationRepository;
         this.jwtService = jwtService;
-        this.frontendUrl = "http://localhost:3000/auth/sign-in";
+        this.frontendUrl = "http://localhost:3000/account/connecting";
     }
 
     @Override
