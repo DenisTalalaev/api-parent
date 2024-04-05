@@ -20,7 +20,7 @@ public class TokenEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = false)
     private String username;
 
     @Column(nullable = false)
