@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.server.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+import javax.naming.AuthenticationException;
 import java.util.Map;
 
 @Component
@@ -58,6 +59,8 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
             return ((ResponseStatusException) throwable).getStatusCode();
         } else if (throwable instanceof AbstractStatusCodeAuthenticationException) {
             return HttpStatus.resolve(((AbstractStatusCodeAuthenticationException) throwable).getStatusCode());
+        } else if (throwable instanceof AuthenticationException) {
+            return HttpStatus.UNAUTHORIZED;
         } else {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }
