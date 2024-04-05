@@ -1,17 +1,23 @@
 package by.salary.authorizationserver.util;
 
+import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -24,8 +30,22 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class JwtService {
-    @Value("${token.signing.key}")
+    //@Value("${token.signing.key}")
     private String jwtSigningKey;
+
+    private TokenRepository tokenRepository;
+
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public JwtService(
+            @Value("${token.signing.key}") String jwtSigningKey,
+            TokenRepository tokenRepository,
+            PasswordEncoder passwordEncoder) {
+        this.jwtSigningKey = jwtSigningKey;
+        this.tokenRepository = tokenRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Извлечение имени пользователя из токена
@@ -105,7 +125,24 @@ public class JwtService {
      */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
-        return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+
+        boolean isCryptoValid = (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+
+        if (!isCryptoValid){
+            return false;
+        }
+
+        List<TokenEntity> tokenEntities = tokenRepository.findAllByUsername(userName);
+
+        boolean isSaved = false;
+        for (TokenEntity tokenEntity : tokenEntities){
+            if (passwordEncoder.matches(token, tokenEntity.getAuthenticationToken())) {
+                isSaved = true;
+                break;
+            }
+        }
+
+        return isSaved;
     }
 
     /**
@@ -128,10 +165,19 @@ public class JwtService {
      * @return токен
      */
     private String generateToken(Map<String, Object> extraClaims, String subject) {
-        return Jwts.builder().setClaims(extraClaims).setSubject(subject)
+        String token = Jwts.builder().setClaims(extraClaims).setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
+
+        TokenEntity tokenEntity = TokenEntity.builder()
+                .authenticationToken(passwordEncoder.encode(token))
+                .username(subject)
+                .build();
+
+        tokenRepository.save(tokenEntity);
+
+        return token;
     }
 
     /**
