@@ -1,11 +1,13 @@
 package by.salary.authorizationserver.config;
 
+import by.salary.authorizationserver.authentication.JwtLogoutHandler;
 import by.salary.authorizationserver.authentication.OAuth2AuthenticationSuccessHandler;
 import by.salary.authorizationserver.authentication.filter.JWTAuthenticationFilter;
 import by.salary.authorizationserver.authentication.filter.JWTVerifierFilter;
 import by.salary.authorizationserver.authentication.provider.JwtAuthenticationProvider;
 import by.salary.authorizationserver.authentication.provider.UsernameEmailPasswordAuthenticationProvider;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
+import by.salary.authorizationserver.repository.TokenRepository;
 import by.salary.authorizationserver.service.CustomUserService;
 import by.salary.authorizationserver.util.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +41,8 @@ public class WebSecurityConfig {
     JwtService jwtService;
     AuthenticationManagerBuilder authenticationManagerBuilder;
     AuthorizationRepository authorizationRepository;
+    JwtLogoutHandler jwtLogoutHandler;
+    PasswordEncoder passwordEncoder;
 
     @Autowired
     @Qualifier("delegatedAuthenticationEntryPoint")
@@ -48,7 +52,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         authenticationManagerBuilder
-                .authenticationProvider(new UsernameEmailPasswordAuthenticationProvider(authorizationRepository, passwordEncoder()))
+                .authenticationProvider(new UsernameEmailPasswordAuthenticationProvider(authorizationRepository, passwordEncoder))
                 .authenticationProvider(new JwtAuthenticationProvider(jwtService, authorizationRepository));
         return http
                 .exceptionHandling(exceptionHandler -> exceptionHandler
@@ -62,6 +66,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/auth/register", "/auth/token").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/login/**").permitAll()
+                                .requestMatchers("/auth/logout").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilter(new JWTAuthenticationFilter(
@@ -73,13 +78,8 @@ public class WebSecurityConfig {
                         .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
                         .failureHandler((request, response, exception) -> { throw exception; })
                 )
+                .logout(AbstractHttpConfigurer::disable)
                 .build();
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

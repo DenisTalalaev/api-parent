@@ -1,10 +1,12 @@
 package by.salary.authorizationserver.authentication.filter;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.repository.TokenRepository;
 import by.salary.authorizationserver.util.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +27,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -36,6 +40,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final ObjectMapper objectMapper;
 
     private final AuthenticationManager authenticationManager;
+
     JwtService jwtService;
 
     public JWTAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager,
@@ -68,9 +73,11 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             Authentication authResult) throws IOException, ServletException {
         UsernameEmailPasswordAuthenticationToken authToken = (UsernameEmailPasswordAuthenticationToken) authResult;
 
+        //If user already have token then regenerate it and modify
+
+
         String token = jwtService.generateToken(mapToUserDetails(authToken));
 
-        //TODO: save token in database
 
         response.addHeader(SecurityConstants.HEADER, String.format("Bearer %s", token));
 
