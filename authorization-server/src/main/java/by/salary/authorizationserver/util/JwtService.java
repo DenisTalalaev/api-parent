@@ -90,22 +90,24 @@ public class JwtService {
      * @return токен
      */
     public String generateToken(UserDetails userDetails) {
+        List<String> authorities = new ArrayList<>(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof UserInfoDTO customUserDetails) {
             claims.put("email", customUserDetails.getEmail());
-            claims.put("authorities", customUserDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority)
-                    .collect(toList()));
+            claims.put("authorities", authorities);
         }
         return generateToken(claims, userDetails.getUsername());
     }
 
     public String generateToken(String userName, String email, List<String> authorities) {
+
         Map<String, Object> claims = new HashMap<>();
         claims.put("email", email);
         claims.put("authorities", authorities);
         return generateToken(claims, email);
     }
     public boolean isTokenValid(String token, AuthenticationResponseDto authenticationResponseDto) {
+
         return isTokenValid(token, mapToUserInfoDto(authenticationResponseDto));
     }
     private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto authenticationResponseDto) {

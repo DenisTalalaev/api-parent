@@ -71,7 +71,7 @@ public class IdentityProviderController {
                 .methodType("Bearer")
                 .email(email)
                 .token(jwt)
-                .authorities(authorities.stream().map((ga) -> new Authority(ga.getAuthority())).toList())
+                .authorities(authorities.stream().map(GrantedAuthority::getAuthority).toList())
                 .build();
     }
 

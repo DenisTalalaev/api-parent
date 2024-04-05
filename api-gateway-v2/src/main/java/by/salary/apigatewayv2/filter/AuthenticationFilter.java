@@ -1,7 +1,9 @@
 package by.salary.apigatewayv2.filter;
 
 import by.salary.apigatewayv2.service.AuthenticationService;
+import by.salary.apigatewayv2.util.JwtService;
 import jakarta.ws.rs.core.SecurityContext;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -33,12 +35,17 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
 
     RouteValidator validator;
     AuthenticationService authenticationService;
+    JwtService jwtService;
 
-    AuthenticationFilter(RouteValidator validator, AuthenticationService authenticationService) {
+    AuthenticationFilter(RouteValidator validator,
+                         AuthenticationService authenticationService,
+                         JwtService jwtService) {
         super(Config.class);
         this.validator = validator;
         this.authenticationService = authenticationService;
+        this.jwtService = jwtService;
     }
+
     @Override
     public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
@@ -65,6 +72,11 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                                 return Mono.error(new AuthenticationException("Unauthorized access to application"));
                             }
 
+                            String token = response.getToken();
+                            if (!jwtService.hasAuthority(token, config.getAuthority())) {
+                                return Mono.error(new AuthenticationException("No authorities to preform this operation"));
+                            }
+
                             return chain.filter(exchange);
                         })
                         .onErrorResume(e -> {
@@ -76,8 +88,13 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         });
     }
 
+    @Data
     public static class Config {
+        String authority;
     }
 
-
+    @Override
+    public List<String> shortcutFieldOrder() {
+        return List.of("authority");
+    }
 }
