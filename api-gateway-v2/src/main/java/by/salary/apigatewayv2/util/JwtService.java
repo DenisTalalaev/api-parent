@@ -27,8 +27,9 @@ public class JwtService {
     }
 
     public boolean hasAuthority(String token, String authority){
+        //if route doesn't need authority return true
         if (authority == null){
-            return false;
+            return true;
         }
         List<String> authorities = extractAuthorities(token);
         for(String thisAuthority : authorities){
