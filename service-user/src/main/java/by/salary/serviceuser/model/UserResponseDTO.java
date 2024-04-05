@@ -42,6 +42,12 @@ public class UserResponseDTO {
 
     public UserResponseDTO(User user) {
 
+        Organisation organisation = user.getOrganisation();
+
+        if (organisation != null) {
+            this.organisationId = organisation.getId();
+        }
+
         this.id = user.getId();
         this.userFirstName = user.getUserFirstName();
         this.userSurname = user.getUserSurname();
@@ -53,7 +59,6 @@ public class UserResponseDTO {
         this.isAccountNonLocked = user.isAccountNonLocked();
         this.isCredentialsNonExpired = user.isCredentialsNonExpired();
         this.isEnabled = user.isEnabled();
-        this.organisationId = user.getOrganisation().getId();
         this.authorities = user.getAuthorities();
     }
 
