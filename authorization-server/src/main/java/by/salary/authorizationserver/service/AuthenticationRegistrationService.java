@@ -3,6 +3,7 @@ package by.salary.authorizationserver.service;
 import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.dto.*;
+import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
@@ -75,7 +76,7 @@ public class AuthenticationRegistrationService {
                 .methodType("Bearer")
                 .email(authentication.getUserEmail())
                 .token(token)
-                .authorities(authentication.getAuthorities())
+                .authorities(authentication.getAuthorities().stream().map(Authority::getAuthority).toList())
                 .build();
     }
 }

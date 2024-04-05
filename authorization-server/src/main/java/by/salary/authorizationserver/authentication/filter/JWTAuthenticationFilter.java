@@ -98,8 +98,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private ConnValidationResponse mapToConnValidationResponse(UsernameEmailPasswordAuthenticationToken authentication,
                                                                String jwt) {
 
-        List<Authority> authorities = authentication.getAuthorities().stream()
-                .map((a) -> new Authority(a.getAuthority())).toList();
+        List<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
         return ConnValidationResponse.builder()
                 .status(HttpStatus.OK)
                 .email(authentication.getUserEmail())
