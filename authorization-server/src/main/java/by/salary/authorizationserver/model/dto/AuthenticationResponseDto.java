@@ -21,4 +21,6 @@ public class AuthenticationResponseDto {
 
     Collection<Authority> authorities;
 
+    boolean enabled;
+
 }

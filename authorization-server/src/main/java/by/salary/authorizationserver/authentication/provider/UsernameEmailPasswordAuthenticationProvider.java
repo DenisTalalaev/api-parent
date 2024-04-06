@@ -38,6 +38,8 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
             throw new AuthenticationCredentialsNotFoundException("User not found");
         }
 
+        //TODO: if AuthenticationResponse has no verified email, then throw AuthenticationCredentialsNotFoundException
+
         if (!passwordEncoder.matches(token.getPassword(), responseDto.get().getPassword())){
             log.error("Invalid password in {}", this.getClass());
             throw new UserNotFoundException("Invalid password. Authentication failed");

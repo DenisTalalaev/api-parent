@@ -44,6 +44,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
         }
 
+        //TODO: if AuthenticationResponse has no verified email, then throw AuthenticationCredentialsNotFoundException
+
         if (service.isTokenValid(jwt, responseDto.get())) {
             Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
                     new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());
