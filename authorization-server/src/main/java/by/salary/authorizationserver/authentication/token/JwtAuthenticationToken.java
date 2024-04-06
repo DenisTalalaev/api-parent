@@ -1,16 +1,7 @@
 package by.salary.authorizationserver.authentication.token;
 
-import by.salary.authorizationserver.util.JwtService;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import by.salary.authorizationserver.service.JwtService;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Component;
-
-import java.util.Collection;
-import java.util.List;
 
 
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {

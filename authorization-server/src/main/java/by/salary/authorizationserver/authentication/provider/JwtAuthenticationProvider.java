@@ -5,7 +5,7 @@ import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
-import by.salary.authorizationserver.util.JwtService;
+import by.salary.authorizationserver.service.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;

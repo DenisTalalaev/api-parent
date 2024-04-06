@@ -1,4 +1,4 @@
-package by.salary.authorizationserver.util;
+package by.salary.authorizationserver.service;
 
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
@@ -14,6 +14,8 @@ import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,17 +35,17 @@ public class JwtService {
     //@Value("${token.signing.key}")
     private String jwtSigningKey;
 
-    private TokenRepository tokenRepository;
+    private TokenService tokenService;
 
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     public JwtService(
             @Value("${token.signing.key}") String jwtSigningKey,
-            TokenRepository tokenRepository,
+            TokenService tokenService,
             PasswordEncoder passwordEncoder) {
         this.jwtSigningKey = jwtSigningKey;
-        this.tokenRepository = tokenRepository;
+        this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -125,6 +127,8 @@ public class JwtService {
      * @param userDetails данные пользователя
      * @return true, если токен валиден
      */
+
+    @Cacheable(value = "token", key = "#userDetails.username")
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractUserName(token);
 
@@ -134,7 +138,7 @@ public class JwtService {
             return false;
         }
 
-        List<TokenEntity> tokenEntities = tokenRepository.findAllByUsername(userName);
+        List<TokenEntity> tokenEntities = tokenService.findAllByUsername(userName);
 
         boolean isSaved = false;
         for (TokenEntity tokenEntity : tokenEntities){
@@ -166,6 +170,7 @@ public class JwtService {
      * @param extraClaims дополнительные данные
      * @return токен
      */
+
     private String generateToken(Map<String, Object> extraClaims, String subject) {
         String token = Jwts.builder().setClaims(extraClaims).setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
@@ -177,7 +182,7 @@ public class JwtService {
                 .username(subject)
                 .build();
 
-        tokenRepository.save(tokenEntity);
+        tokenService.save(tokenEntity);
 
         return token;
     }

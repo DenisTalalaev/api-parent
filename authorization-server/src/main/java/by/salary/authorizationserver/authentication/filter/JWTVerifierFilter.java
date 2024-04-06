@@ -2,7 +2,7 @@ package by.salary.authorizationserver.authentication.filter;
 
 import by.salary.authorizationserver.authentication.token.JwtAuthenticationToken;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
-import by.salary.authorizationserver.util.JwtService;
+import by.salary.authorizationserver.service.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

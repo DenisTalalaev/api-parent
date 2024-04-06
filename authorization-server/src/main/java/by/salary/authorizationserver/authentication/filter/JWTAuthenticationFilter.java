@@ -1,13 +1,10 @@
 package by.salary.authorizationserver.authentication.filter;
 
 import by.salary.authorizationserver.model.ConnValidationResponse;
-import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
-import by.salary.authorizationserver.model.entity.Authority;
-import by.salary.authorizationserver.repository.TokenRepository;
-import by.salary.authorizationserver.util.JwtService;
+import by.salary.authorizationserver.service.JwtService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -27,9 +24,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 

@@ -7,13 +7,8 @@ import by.salary.authorizationserver.authentication.filter.JWTVerifierFilter;
 import by.salary.authorizationserver.authentication.provider.JwtAuthenticationProvider;
 import by.salary.authorizationserver.authentication.provider.UsernameEmailPasswordAuthenticationProvider;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
-import by.salary.authorizationserver.repository.TokenRepository;
-import by.salary.authorizationserver.service.CustomUserService;
-import by.salary.authorizationserver.util.JwtService;
+import by.salary.authorizationserver.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,14 +19,9 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-
-import java.io.IOException;
 
 @Configuration
 @AllArgsConstructor
