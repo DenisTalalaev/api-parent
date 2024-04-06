@@ -21,6 +21,7 @@
     <module>api-gateway-v2</module>
     <module>service-invitation</module>
     <module>service-agreement</module>
+      <module>service-mail</module>
   </modules>
 
   <version>1.0-SNAPSHOT</version>
