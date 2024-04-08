@@ -7,17 +7,11 @@ import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -86,5 +80,20 @@ public class UserService {
         }
         return optUser.get().getOrganisation().getAgreementId().toString();
 
+    }
+
+    public String getAllMails(String userEmail) {
+        Optional<User> optUser = userRepository.findByUserEmail(userEmail);
+        if (optUser.isEmpty()) {
+            return "nopermissions";
+        }
+        return String.join("\n",
+                userRepository.findAllByOrganisationId(
+                        optUser
+                                .get()
+                                .getOrganisation()
+                                .getId())
+                        .stream().map(User::getUserEmail)
+                        .toList());
     }
 }

@@ -69,6 +69,8 @@ public class UserAuthenticationService {
             user.setUsername(userRegistrationRequestDTO.getUsername());
             user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
+            user.setIs2FEnabled(false);
+            user.setIs2FVerified(false);
             userRepository.save(user);
             return new UserRegistrationResponseDTO(user);
         }
@@ -77,6 +79,8 @@ public class UserAuthenticationService {
         user.setUsername(userRegistrationRequestDTO.getUserEmail());
         user.setImageURI(userRegistrationRequestDTO.getPictureUri());
         user.setUserAuthorisationAttributeKey(userRegistrationRequestDTO.getAuthenticationRegistrationKey());
+        user.setIs2FEnabled(true);
+        user.setIs2FVerified(true);
         userRepository.save(user);
         return new UserRegistrationResponseDTO(user);
     }

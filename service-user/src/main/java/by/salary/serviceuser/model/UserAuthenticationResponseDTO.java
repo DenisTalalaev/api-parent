@@ -24,10 +24,16 @@ public class UserAuthenticationResponseDTO {
 
     Collection<Authority> authorities;
 
+
+    private Boolean is2FVerified;
+
+    private Boolean is2FEnabled;
     public UserAuthenticationResponseDTO(Optional<User> byAuthorisationAttributeKey) {
         this.userName = byAuthorisationAttributeKey.get().getUsername();
         this.userEmail = byAuthorisationAttributeKey.get().getUserEmail();
         this.password = byAuthorisationAttributeKey.get().getUserPassword();
         this.authorities = byAuthorisationAttributeKey.get().getAuthorities();
+        this.is2FVerified = byAuthorisationAttributeKey.get().getIs2FVerified();
+        this.is2FEnabled = byAuthorisationAttributeKey.get().getIs2FEnabled();
     }
 }

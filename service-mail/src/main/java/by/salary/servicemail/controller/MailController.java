@@ -1,21 +1,27 @@
 package by.salary.servicemail.controller;
 
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import by.salary.servicemail.model.MailRequestDTO;
+import by.salary.servicemail.model.MailResponseDTO;
+import by.salary.servicemail.service.MailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/mail")
 @RestController
 public class MailController {
 
+    private final MailService mailService;
 
-    /**
-     * endpoint to send mail to one user
-     */
+    @Autowired
+    public MailController(MailService mailService) {
+        this.mailService = mailService;
+    }
+
+
     @PostMapping
     @RequestMapping("/notification")
-    public void sendMail() {
-
+    public MailResponseDTO sendMail(@RequestBody MailRequestDTO mailRequestDTO, @RequestAttribute String email) {
+        return mailService.sendMail(mailRequestDTO, email);
     }
 
 
@@ -24,8 +30,8 @@ public class MailController {
      */
     @PostMapping
     @RequestMapping("/broadcast")
-    public void broadcastMail() {
-
+    public MailResponseDTO broadcastMail(@RequestBody  MailRequestDTO mailRequestDTO, @RequestAttribute String email) {
+        return mailService.broadcastMail(mailRequestDTO, email);
     }
 
 }
