@@ -10,7 +10,20 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    private static final String CLAIM_EMAIL = "email";
+    private static final String CLAIM_AUTHORITIES = "authorities";
+    private static final String CLAIM_IS_2F_ENABLED = "is2FEnabled";
+    private static final String CLAIM_IS_2F_VERIFIED = "is2FVerified";
 
+    public boolean is2FEnabled(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get(CLAIM_IS_2F_ENABLED, Boolean.class);
+    }
+
+    public boolean is2FVerified(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get(CLAIM_IS_2F_VERIFIED, Boolean.class);
+    }
     /**
      * Извлечение имени пользователя из токена
      *
@@ -23,7 +36,7 @@ public class JwtService {
 
     public String extractEmail(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("email", String.class);
+        return claims.get(CLAIM_EMAIL, String.class);
     }
 
     public boolean hasAuthority(String token, String authority){
@@ -42,7 +55,7 @@ public class JwtService {
 
 
     public List<String> extractAuthorities(String token) {
-        return (List<String>) extractClaim(token, claims -> claims.get("authorities", List.class));
+        return (List<String>) extractClaim(token, claims -> claims.get(CLAIM_AUTHORITIES, List.class));
     }
     /**
      * Извлечение данных из токена

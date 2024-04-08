@@ -23,6 +23,8 @@ public class TokenEntity {
     @Column(unique = false)
     private String username;
 
+    private String verificationCode;
+
     @Column(nullable = false)
     private String authenticationToken;
 

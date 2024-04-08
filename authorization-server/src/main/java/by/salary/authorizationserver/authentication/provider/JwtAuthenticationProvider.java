@@ -1,6 +1,7 @@
 package by.salary.authorizationserver.authentication.provider;
 
 import by.salary.authorizationserver.authentication.token.JwtAuthenticationToken;
+import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
@@ -44,13 +45,18 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
         }
 
-        //TODO: if AuthenticationResponse has no verified email, then throw AuthenticationCredentialsNotFoundException
+        AuthenticationResponseDto response = responseDto.get();
 
-        if (service.isTokenValid(jwt, responseDto.get())) {
+        if (service.is2FEnabled(jwt) != response.is2FEnabled()) {
+            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
+        }
+
+        if (service.isTokenValid(jwt, mapToUserInfoDto(responseDto.get()))) {
             Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
-                    new SimpleGrantedAuthority(a.getAuthority())).collect(Collectors.toList());
+                    new SimpleGrantedAuthority(a.getAuthority())).toList();
 
             if (grantedAuthorities.equals(jwtAuthenticationToken.getAuthorities())) {
+                //return new JwtAuthenticationToken(jwt, service);
                 return new UsernamePasswordAuthenticationToken(userName, null, grantedAuthorities);
             }
         }
@@ -60,5 +66,13 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?> authentication) {
         return JwtAuthenticationToken.class.isAssignableFrom(authentication);
+    }
+
+    private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto responseDto){
+
+        return UserInfoDTO.builder()
+                .name(responseDto.getUserName())
+                .email(responseDto.getUserEmail())
+                .build();
     }
 }

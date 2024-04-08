@@ -65,6 +65,8 @@ public class JWTVerifierFilter extends OncePerRequestFilter {
         request.setAttribute("email", service.extractEmail(authToken));
         request.setAttribute("authorities", service.extractAuthorities(authToken));
         request.setAttribute("jwt", authToken);
+        request.setAttribute("is2FEnabled", service.is2FEnabled(authToken));
+        request.setAttribute("is2FVerified", service.is2FVerified(authToken));
 
         filterChain.doFilter(request, response);
     }

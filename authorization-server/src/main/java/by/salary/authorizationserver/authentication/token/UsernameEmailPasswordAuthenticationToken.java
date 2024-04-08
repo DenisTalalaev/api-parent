@@ -14,6 +14,8 @@ public class UsernameEmailPasswordAuthenticationToken extends AbstractAuthentica
     private String username;
     private String userEmail;
     private String password;
+    private boolean is2FEnabled;
+    private boolean is2FVerified;
 
     public UsernameEmailPasswordAuthenticationToken(String username, String email, String password) {
         super(null);
@@ -23,11 +25,14 @@ public class UsernameEmailPasswordAuthenticationToken extends AbstractAuthentica
     }
 
     public UsernameEmailPasswordAuthenticationToken(String username, String email, String password,
+                                                    boolean is2FEnabled, boolean is2FVerified,
                                                     Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.username = username;
         this.userEmail = email;
         this.password = password;
+        this.is2FEnabled = is2FEnabled;
+        this.is2FVerified = is2FVerified;
     }
 
     @Override

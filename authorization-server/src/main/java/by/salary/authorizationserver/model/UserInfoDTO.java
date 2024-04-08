@@ -14,13 +14,13 @@ import java.util.Collection;
 @Setter
 public class UserInfoDTO implements UserDetails {
 
-    Long id;
     String name;
     String email;
     String password;
     Collection<String> authorities;
-    String pictureUri;
-    String registrationId;
+
+    boolean is2FEnabled;
+    boolean is2FVerified;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

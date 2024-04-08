@@ -1,5 +1,6 @@
 package by.salary.apigatewayv2.filter;
 
+import by.salary.apigatewayv2.exception.AuthenticationNotVerifiedException;
 import by.salary.apigatewayv2.service.AuthenticationService;
 import by.salary.apigatewayv2.util.JwtService;
 import jakarta.ws.rs.core.SecurityContext;
@@ -73,9 +74,17 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                             }
 
                             String token = response.getToken();
+                            if (jwtService.is2FEnabled(token)){
+
+                                if (!jwtService.is2FVerified(token)) {
+                                    return Mono.error(new AuthenticationNotVerifiedException("2FA is not verified"));
+                                }
+                            }
+
                             if (!jwtService.hasAuthority(token, config.getAuthority())) {
                                 return Mono.error(new AuthenticationException("No authorities to preform this operation"));
                             }
+
 
                             return chain.filter(exchange);
                         })

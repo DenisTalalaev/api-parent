@@ -1,11 +1,17 @@
 package by.salary.authorizationserver.controller;
 
 import by.salary.authorizationserver.authentication.JwtLogoutHandler;
+import by.salary.authorizationserver.authentication.VerificationCodeHandler;
+import by.salary.authorizationserver.authentication.token.JwtAuthenticationToken;
 import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.RestError;
+import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
+import by.salary.authorizationserver.model.userrequest.VerificationCodeRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.AuthenticationRegistrationService;
 import by.salary.authorizationserver.service.JwtService;
@@ -32,6 +38,7 @@ public class IdentityProviderController {
 
     JwtService jwtService;
     JwtLogoutHandler logoutHandler;
+    VerificationCodeHandler verificationCodeHandler;
 
 
     @PostMapping("/register")
@@ -57,6 +64,8 @@ public class IdentityProviderController {
         String email = (String) request.getAttribute("email");
         String jwt = (String) request.getAttribute("jwt");
         List<GrantedAuthority> authorities = (List<GrantedAuthority>) request.getAttribute("authorities");
+        boolean is2FEnabled = (boolean) request.getAttribute("is2FEnabled");
+        boolean is2FVerified = (boolean) request.getAttribute("is2FVerified");
 
         return ConnValidationResponse.builder()
                 .status(HttpStatus.OK)
@@ -65,6 +74,8 @@ public class IdentityProviderController {
                 .email(email)
                 .token(jwt)
                 .authorities(authorities.stream().map(GrantedAuthority::getAuthority).toList())
+                .is2FEnabled(is2FEnabled)
+                .is2FVerified(is2FVerified)
                 .build();
     }
 
@@ -77,4 +88,38 @@ public class IdentityProviderController {
 
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @PostMapping(value = "/verify/code")
+    public ResponseEntity<?> verifyCode(@RequestBody VerificationCodeRequest code, HttpServletRequest request) {
+
+        String email = (String) request.getAttribute("email");
+        String jwt = (String) request.getAttribute("jwt");
+        List<GrantedAuthority> authorities = (List<GrantedAuthority>) request.getAttribute("authorities");
+        boolean is2FEnabled = (boolean) request.getAttribute("is2FEnabled");
+        boolean is2FVerified = (boolean) request.getAttribute("is2FVerified");
+        //verify code
+        boolean isVerified = verificationCodeHandler.verify(jwt, code);
+
+        UserInfoDTO userInfoDTO = UserInfoDTO.builder()
+                .name(jwtService.extractUserName(jwt))
+                .email(email)
+                .authorities(authorities.stream().map(GrantedAuthority::getAuthority).toList())
+                .is2FEnabled(is2FEnabled)
+                .is2FVerified(isVerified)
+                .build();
+
+        //generate new token with isVerified = true
+        if (isVerified) {
+            ConnValidationResponse connValidationResponse = verificationCodeHandler.generateNewToken(userInfoDTO);
+            return ResponseEntity.status(HttpStatus.OK).body(connValidationResponse);
+        }
+
+        RestError errorMessage = RestError.builder()
+                .httpStatus(HttpStatus.UNAUTHORIZED)
+                .message("Incorrect validation code")
+                .build();
+        return ResponseEntity.status(errorMessage.getHttpStatus()).body(errorMessage);
+    }
+
+
 }

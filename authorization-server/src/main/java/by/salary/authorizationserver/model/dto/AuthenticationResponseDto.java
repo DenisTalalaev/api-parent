@@ -21,6 +21,6 @@ public class AuthenticationResponseDto {
 
     Collection<Authority> authorities;
 
-    boolean enabled;
+    boolean is2FEnabled;
 
 }
