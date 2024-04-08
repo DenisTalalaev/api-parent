@@ -27,6 +27,7 @@ public class AuthenticationRegistrationService {
 
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
         registerLocalUserRequest.setPassword(passwordEncoder.encode(registerLocalUserRequest.getPassword()));
+        //TODO: send email registration code
         return authorizationRepository.save(mapToRegisterDto(registerLocalUserRequest));
     }
 
