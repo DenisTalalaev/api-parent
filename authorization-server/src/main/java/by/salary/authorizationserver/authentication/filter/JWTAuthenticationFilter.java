@@ -1,10 +1,14 @@
 package by.salary.authorizationserver.authentication.filter;
 
+import by.salary.authorizationserver.authentication.VerificationCodeHandler;
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.service.JwtService;
+import by.salary.authorizationserver.service.TokenRegistrationService;
+import by.salary.authorizationserver.service.TokenService;
 import by.salary.authorizationserver.util.SecurityConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -21,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -36,14 +41,15 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
 
-    JwtService jwtService;
+    TokenRegistrationService tokenRegistrationService;
 
-    public JWTAuthenticationFilter(ObjectMapper objectMapper, AuthenticationManager authenticationManager,
-                                   JwtService jwtService) {
+    public JWTAuthenticationFilter(ObjectMapper objectMapper,
+                                   AuthenticationManager authenticationManager,
+                                   TokenRegistrationService tokenRegistrationService){
         setFilterProcessesUrl("/auth/token");
         this.objectMapper = objectMapper;
         this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
+        this.tokenRegistrationService = tokenRegistrationService;
     }
 
     @Override
@@ -69,12 +75,17 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UsernameEmailPasswordAuthenticationToken authToken = (UsernameEmailPasswordAuthenticationToken) authResult;
 
         //If user already have token then regenerate it and modify
+        UserInfoDTO userInfo = mapToUserDetails(authToken);
 
 
-        String token = jwtService.generateToken(mapToUserDetails(authToken));
+
+        //send verification code to email
+        String token = tokenRegistrationService.generateToken(userInfo);
 
 
+        //preparing response
         response.addHeader(SecurityConstants.HEADER, String.format("Bearer %s", token));
+
 
         ConnValidationResponse respModel = mapToConnValidationResponse(authToken, token);
 
@@ -86,6 +97,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return UserInfoDTO.builder()
                 .name(authentication.getUsername())
                 .email(authentication.getUserEmail())
+                .is2FEnabled(authentication.is2FEnabled())
+                .is2FVerified(false)
                 .authorities(authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(toList()))
                 .build();
     }
@@ -102,6 +115,8 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .token(String.format("Bearer %s", jwt))
                 .methodType(HttpMethod.GET.name())
                 .isAuthenticated(true)
+                .is2FEnabled(authentication.is2FEnabled())
+                .is2FVerified(authentication.is2FVerified())
                 .build();
     }
 }

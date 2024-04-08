@@ -20,7 +20,6 @@ public class AgreementController {
         this.agreementService = agreementService;
     }
 
-
     @GetMapping("/admin")
     public List<AgreementResponseDTO> getAgreements() {
         return agreementService.getAllAgreements();

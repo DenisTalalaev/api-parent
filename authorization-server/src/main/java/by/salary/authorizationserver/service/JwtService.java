@@ -1,5 +1,6 @@
 package by.salary.authorizationserver.service;
 
+import by.salary.authorizationserver.authentication.VerificationCodeHandler;
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
@@ -32,12 +33,16 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class JwtService {
-    //@Value("${token.signing.key}")
     private String jwtSigningKey;
 
     private TokenService tokenService;
 
     private PasswordEncoder passwordEncoder;
+
+    private static final String CLAIM_EMAIL = "email";
+    private static final String CLAIM_AUTHORITIES = "authorities";
+    private static final String CLAIM_IS_2F_ENABLED = "is2FEnabled";
+    private static final String CLAIM_IS_2F_VERIFIED = "is2FVerified";
 
     @Autowired
     public JwtService(
@@ -61,7 +66,17 @@ public class JwtService {
 
     public String extractEmail(String token) {
         Claims claims = extractAllClaims(token);
-        return claims.get("email", String.class);
+        return claims.get(CLAIM_EMAIL, String.class);
+    }
+
+    public boolean is2FEnabled(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get(CLAIM_IS_2F_ENABLED, Boolean.class);
+    }
+
+    public boolean is2FVerified(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get(CLAIM_IS_2F_VERIFIED, Boolean.class);
     }
 
     /**
@@ -71,7 +86,7 @@ public class JwtService {
      * @return список authorities
      */
     public List<GrantedAuthority> extractAuthorities(String token) {
-        List<String> authoritiesStrings = extractClaim(token, claims -> claims.get("authorities", List.class));
+        List<String> authoritiesStrings = extractClaim(token, claims -> claims.get(CLAIM_AUTHORITIES, List.class));
         List<GrantedAuthority> authorities = new ArrayList<>();
         if (authoritiesStrings != null && !authoritiesStrings.isEmpty()) {
             for (String authority : authoritiesStrings) {
@@ -79,10 +94,6 @@ public class JwtService {
             }
         }
         return authorities;
-    }
-
-    public String generateToken(AuthenticationResponseDto authenticationResponseDto) {
-        return generateToken(mapToUserInfoDto(authenticationResponseDto));
     }
 
     /**
@@ -95,30 +106,14 @@ public class JwtService {
         List<String> authorities = new ArrayList<>(userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList());
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof UserInfoDTO customUserDetails) {
-            claims.put("email", customUserDetails.getEmail());
-            claims.put("authorities", authorities);
+            claims.put(CLAIM_EMAIL, customUserDetails.getEmail());
+            claims.put(CLAIM_AUTHORITIES, authorities);
+            claims.put(CLAIM_IS_2F_ENABLED, customUserDetails.is2FEnabled());
+            claims.put(CLAIM_IS_2F_VERIFIED, customUserDetails.is2FVerified());
         }
         return generateToken(claims, userDetails.getUsername());
     }
 
-    public String generateToken(String userName, String email, List<String> authorities) {
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("email", email);
-        claims.put("authorities", authorities);
-        return generateToken(claims, email);
-    }
-    public boolean isTokenValid(String token, AuthenticationResponseDto authenticationResponseDto) {
-
-        return isTokenValid(token, mapToUserInfoDto(authenticationResponseDto));
-    }
-    private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto authenticationResponseDto) {
-        return UserInfoDTO.builder()
-                .name(authenticationResponseDto.getUserName())
-                .email(authenticationResponseDto.getUserEmail())
-                .authorities(authenticationResponseDto.getAuthorities().stream().map(Authority::getAuthority).collect(Collectors.toList()))
-                .build();
-    }
 
     /**
      * Проверка токена на валидность
@@ -176,13 +171,6 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
-
-        TokenEntity tokenEntity = TokenEntity.builder()
-                .authenticationToken(passwordEncoder.encode(token))
-                .username(subject)
-                .build();
-
-        tokenService.save(tokenEntity);
 
         return token;
     }

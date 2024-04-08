@@ -38,9 +38,10 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
             throw new AuthenticationCredentialsNotFoundException("User not found");
         }
 
-        //TODO: if AuthenticationResponse has no verified email, then throw AuthenticationCredentialsNotFoundException
+        AuthenticationResponseDto response = responseDto.get();
 
-        if (!passwordEncoder.matches(token.getPassword(), responseDto.get().getPassword())){
+
+        if (!passwordEncoder.matches(token.getPassword(), response.getPassword())){
             log.error("Invalid password in {}", this.getClass());
             throw new UserNotFoundException("Invalid password. Authentication failed");
         }
@@ -48,12 +49,15 @@ public class UsernameEmailPasswordAuthenticationProvider implements Authenticati
         return mapToUserEmailPasswordAuthenticationToken(responseDto.get());
     }
 
-    private UsernameEmailPasswordAuthenticationToken mapToUserEmailPasswordAuthenticationToken(AuthenticationResponseDto response) {
+    private UsernameEmailPasswordAuthenticationToken
+    mapToUserEmailPasswordAuthenticationToken(AuthenticationResponseDto response) {
 
         return new UsernameEmailPasswordAuthenticationToken(
                 response.getUserName(),
                 response.getUserEmail(),
                 response.getPassword(),
+                response.is2FEnabled(),
+                false,
                 response.getAuthorities().stream().map((a) -> new SimpleGrantedAuthority(a.getAuthority()))
                         .collect(Collectors.toList())
         );
