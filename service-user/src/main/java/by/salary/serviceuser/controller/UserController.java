@@ -29,6 +29,12 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    @GetMapping("/getallmails/{userEmail}")
+    @ResponseStatus(HttpStatus.OK)
+    public String getAllMails(@PathVariable String userEmail) {
+        return userService.getAllMails(userEmail);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDTO getOneUser(@PathVariable BigInteger id) {

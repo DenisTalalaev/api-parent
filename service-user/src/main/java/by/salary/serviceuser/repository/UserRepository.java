@@ -5,6 +5,7 @@ import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import org.springframework.data.repository.CrudRepository;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<User, BigInteger> {
@@ -14,5 +15,7 @@ public interface UserRepository extends CrudRepository<User, BigInteger> {
     Optional<User> findByUserAuthorisationAttributeKey(String authenticationRegistrationKey);
 
     Optional<User> findByUsername(String username);
+
+    List<User> findAllByOrganisationId(BigInteger organisationId);
 
 }

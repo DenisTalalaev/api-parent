@@ -42,6 +42,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
+
+
     @Size(min = 2, max = 50)
     private String userFirstName;
 
@@ -51,15 +53,23 @@ public class User {
     @Size(min = 2, max = 50)
     private String userSecondName;
 
+
+
     @Size(min = 8, max = 50)
     @Column(unique = true)
     private String username;
 
     private String userPassword;
 
+
+
+
     @Email
     @Column(unique = true)
     private String userEmail;
+
+
+
 
     @Value("true")
     private Boolean isAccountNonExpired;
@@ -73,6 +83,13 @@ public class User {
     @Value("true")
     private Boolean isEnabled;
 
+    private Boolean is2FVerified;
+
+    private Boolean is2FEnabled;
+
+
+
+
     private String imageURI;
 
     @Column(unique = true)
@@ -80,6 +97,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private AuthenticationRegistrationId authenticationRegistrationId;
+
+
+
+
 
 
     @ManyToOne
@@ -99,6 +120,8 @@ public class User {
 
     @OneToMany(fetch = FetchType.EAGER)
     private List<Authority> authorities;
+
+
 
     public Boolean isAccountNonExpired() {
         return isAccountNonExpired;
