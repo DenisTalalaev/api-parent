@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Getter
@@ -41,8 +42,24 @@ public class Permission {
         this.description = permissionResponseDTO.getDescription();
     }
 
-    public Permission(String s) {
+    public Permission(String s, String description) {
         this.name = s;
-        this.description = "All permissions";
+        this.description = description;
+    }
+
+    public Permission(PermissionsEnum permissionsEnum) {
+        this.name = permissionsEnum.name();
+        this.description = permissionsEnum.name() + "  permission";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return this.name.equals(((Permission) o).name) ||
+                ((Permission) o).name.equals(new Permission(PermissionsEnum.ALL_PERMISSIONS));
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

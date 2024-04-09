@@ -1,6 +1,8 @@
 package by.salary.serviceuser.controller;
 
 
+import by.salary.serviceuser.entities.Permission;
+import by.salary.serviceuser.model.UserPromoteRequestDTO;
 import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.service.UserService;
@@ -66,5 +68,23 @@ public class UserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable BigInteger id) {
         userService.deleteUser(id);
+    }
+
+    @PutMapping("/promote")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO promoteUser(@RequestBody UserPromoteRequestDTO userPromoteRequestDTO,
+                                       @RequestAttribute String email,
+                                       @RequestAttribute List<Permission> permissions
+    ) {
+        return userService.promoteUser(userPromoteRequestDTO, email, permissions);
+    }
+
+    @PutMapping("/demote")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO demoteUser(@RequestBody UserPromoteRequestDTO userPromoteRequestDTO,
+                                       @RequestAttribute String email,
+                                       @RequestAttribute List<Permission> permissions
+    ) {
+        return userService.demoteUser(userPromoteRequestDTO, email, permissions);
     }
 }

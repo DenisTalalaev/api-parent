@@ -1,14 +1,14 @@
 package by.salary.serviceuser.service;
 
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
+import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
+import by.salary.serviceuser.model.UserPromoteRequestDTO;
 import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -54,7 +54,9 @@ public class UserService {
         if (optionalOrganisation.isEmpty()) {
             throw new UserNotFoundException("Organisation with id " + userRequestDTO.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
         }
-        return new UserResponseDTO(userRepository.save(new User(userRequestDTO, optionalOrganisation.get())));
+        User user = new User(userRequestDTO, optionalOrganisation.get());
+        user.getAuthorities().add(new Authority("USER"));
+        return new UserResponseDTO(userRepository.save(user));
     }
 
     public void deleteUser(BigInteger id) {
@@ -95,5 +97,96 @@ public class UserService {
                                 .getId())
                         .stream().map(User::getUserEmail)
                         .toList());
+    }
+
+    public UserResponseDTO promoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> promoterOpt = userRepository.findByUserEmail(email);
+        if (promoterOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        user.getAuthorities().add(userPromoteRequestDTO.getAuthority());
+        userRepository.save(user);
+        return new UserResponseDTO(user);
+    }
+
+    public UserResponseDTO demoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> promoterOpt = userRepository.findByUserEmail(email);
+        if (promoterOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if(user.getAuthorities().contains(userPromoteRequestDTO.getAuthority())){
+            user.getAuthorities().remove(userPromoteRequestDTO.getAuthority());
+        } else {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " has not this authority", HttpStatus.NOT_FOUND);
+        }
+
+        clearPermissions(user);
+
+        switch (userPromoteRequestDTO.getAuthority().getAuthority()) {
+            case "ADMINISTRATOR" -> addAdministratorPermissions(user);
+            case "MODERATOR" -> addModeratorPermissions(user);
+            case "USER" -> addUserPermissions(user);
+            default -> clearPermissions(user);
+        }
+
+        userRepository.save(user);
+        return new UserResponseDTO(user);
+    }
+
+    private boolean addUserPermissions (User user) {
+        user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
+        user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean addModeratorPermissions (User user) {
+        addUserPermissions(user);
+        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_STATE));
+        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_STATE));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_STATE));
+
+        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_LIST));
+        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_LIST));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_LIST));
+
+        user.addPermission(new Permission(PermissionsEnum.READ_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.ADD_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.CHANGE_USER_AGREEMENT));
+
+        user.addPermission(new Permission(PermissionsEnum.INVITE_USER));
+        user.addPermission(new Permission(PermissionsEnum.EXPIRE_USER));
+
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean addAdministratorPermissions (User user) {
+        user.addPermission(new Permission(PermissionsEnum.ALL_PERMISSIONS));
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean clearPermissions(User user) {
+        user.getPermissions().clear();
+        userRepository.save(user);
+        return true;
     }
 }

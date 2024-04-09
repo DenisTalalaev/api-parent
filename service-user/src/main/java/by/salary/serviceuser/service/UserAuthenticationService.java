@@ -1,8 +1,6 @@
 package by.salary.serviceuser.service;
 
-import by.salary.serviceuser.entities.Invitation;
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
 import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
@@ -115,6 +113,10 @@ public class UserAuthenticationService {
         user.setUserSurname(invitation.getUserSurname());
         user.setUserSecondName(invitation.getUserSecondName());
 
+        user.getAuthorities().add(new Authority("USER"));
+
+        user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
+        user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
 
         userRepository.save(user);
         deleteInvitation(userJoinOrganisationRequestDTO.getInvitationCode());

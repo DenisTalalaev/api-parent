@@ -1,5 +1,6 @@
 package by.salary.serviceinvitation.controller;
 
+import by.salary.serviceinvitation.filters.Permission;
 import by.salary.serviceinvitation.model.InvitationRequestDTO;
 import by.salary.serviceinvitation.model.InvitationResponseDTO;
 import by.salary.serviceinvitation.service.InvitationService;
@@ -39,8 +40,8 @@ public class InvitationController {
     @ResponseStatus(HttpStatus.CREATED)
     public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO,
                                                   @RequestAttribute String email,
-                                                  @RequestAttribute List<String> authorities) {
-        return invitationService.createInvitation(invitationRequestDTO, email);
+                                                  @RequestAttribute List<Permission> permissions) {
+        return invitationService.createInvitation(invitationRequestDTO, email, permissions);
     }
 
     @DeleteMapping("/{invitationCode}")

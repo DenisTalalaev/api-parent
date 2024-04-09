@@ -1,5 +1,6 @@
 package by.salary.serviceagreement.entities;
 
+import by.salary.serviceagreement.model.AgreementListRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,5 +33,10 @@ public class AgreementList {
     public AgreementList(String stateListName, Agreement agreement) {
         this.listName = stateListName;
         this.agreement = agreement;
+    }
+
+    public AgreementList update(AgreementListRequestDTO agreementListResponseDTO) {
+        this.listName = agreementListResponseDTO.getStateListName();
+        return this;
     }
 }

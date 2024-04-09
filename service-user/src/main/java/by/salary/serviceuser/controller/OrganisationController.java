@@ -53,11 +53,4 @@ public class OrganisationController {
     }
 
 
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteOrganisation(@PathVariable BigInteger id) {
-        organisationService.deleteOrganisation(id);
-    }
-
 }

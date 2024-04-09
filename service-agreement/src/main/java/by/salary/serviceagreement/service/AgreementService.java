@@ -4,12 +4,16 @@ import by.salary.serviceagreement.entities.Agreement;
 import by.salary.serviceagreement.entities.AgreementList;
 import by.salary.serviceagreement.entities.AgreementState;
 import by.salary.serviceagreement.exceptions.AgreementNotFoundException;
+import by.salary.serviceagreement.exceptions.NotEnoughtPermissionsException;
+import by.salary.serviceagreement.filters.Permission;
+import by.salary.serviceagreement.filters.PermissionsEnum;
 import by.salary.serviceagreement.model.*;
 import by.salary.serviceagreement.repository.AgreementRepository;
 import by.salary.serviceagreement.repository.AgreementListRepository;
 import by.salary.serviceagreement.repository.AgreementStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -95,8 +99,10 @@ public class AgreementService {
         return agreement.getId();
     }
 
-    public AgreementList createAgreementList(AgreementListRequestDTO agreementListResponseDTO, String email) {
-
+    public AgreementList createAgreementList(AgreementListRequestDTO agreementListResponseDTO, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.CREATE_AGREEMENT_LIST))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
         BigInteger agreementId = getAgreementId(email);
         Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
         if (optAgreement.isEmpty()) {
@@ -108,7 +114,10 @@ public class AgreementService {
         return agreementList;
     }
 
-    public AgreementState createAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, String email) {
+    public AgreementState createAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.CREATE_AGREEMENT_STATE))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
         BigInteger agreementId = getAgreementId(email);
         Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
         if (optAgreement.isEmpty()) {
@@ -126,5 +135,107 @@ public class AgreementService {
         AgreementState agreementState = new AgreementState(agreementStateListRequestDTO, agreementList);
         agreementStateRepository.save(agreementState);
         return agreementState;
+    }
+
+    public void deleteAgreementList(BigInteger listId, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_AGREEMENT_LIST))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        BigInteger agreementId = getAgreementId(email);
+        Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
+        if (optAgreement.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement not found", HttpStatus.NOT_FOUND);
+        }
+        Agreement agreement = optAgreement.get();
+        Optional<AgreementList> optAgreementList = agreementListRepository.findById(listId);
+        if (optAgreementList.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement list not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementList agreementList = optAgreementList.get();
+        if (!agreementId.equals(agreementList.getAgreement().getId())) {
+            throw new AgreementNotFoundException("Agreement list not found in this organisation", HttpStatus.NOT_FOUND);
+        }
+        agreementListRepository.delete(agreementList);
+    }
+
+    public void deleteAgreementState(BigInteger listId, BigInteger stateId, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_AGREEMENT_STATE))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+
+        BigInteger agreementId = getAgreementId(email);
+        Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
+        if (optAgreement.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement not found", HttpStatus.NOT_FOUND);
+        }
+        Agreement agreement = optAgreement.get();
+        Optional<AgreementList> optAgreementList = agreementListRepository.findById(listId);
+        if (optAgreementList.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement list not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementList agreementList = optAgreementList.get();
+        if (!agreementId.equals(agreementList.getAgreement().getId())) {
+            throw new AgreementNotFoundException("Agreement list not found in this organisation", HttpStatus.NOT_FOUND);
+        }
+        Optional<AgreementState> optAgreementState = agreementStateRepository.findById(stateId);
+        if (optAgreementState.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement state not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementState agreementState = optAgreementState.get();
+        if (!listId.equals(agreementState.getAgreementLists().getId())) {
+            throw new AgreementNotFoundException("Agreement state not found in this list", HttpStatus.NOT_FOUND);
+        }
+        agreementStateRepository.delete(agreementState);
+    }
+
+    public void updateAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, BigInteger stateId, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.UPDATE_AGREEMENT_STATE))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+
+        BigInteger agreementId = getAgreementId(email);
+        Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
+        if (optAgreement.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement not found", HttpStatus.NOT_FOUND);
+        }
+        Agreement agreement = optAgreement.get();
+        Optional<AgreementList> optAgreementList = agreementListRepository.findById(listId);
+        if (optAgreementList.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement list not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementList agreementList = optAgreementList.get();
+        if (!agreementId.equals(agreementList.getAgreement().getId())) {
+            throw new AgreementNotFoundException("Agreement list not found in this organisation", HttpStatus.NOT_FOUND);
+        }
+        Optional<AgreementState> optAgreementState = agreementStateRepository.findById(stateId);
+        if (optAgreementState.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement state not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementState agreementState = optAgreementState.get();
+        if (!listId.equals(agreementState.getAgreementLists().getId())) {
+            throw new AgreementNotFoundException("Agreement state not found in this list", HttpStatus.NOT_FOUND);
+        }
+        agreementStateRepository.save(agreementState.update(agreementStateListRequestDTO));
+    }
+
+    public void updateAgreementList(AgreementListRequestDTO agreementListResponseDTO, BigInteger listId, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.UPDATE_AGREEMENT_LIST))) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        BigInteger agreementId = getAgreementId(email);
+        Optional<Agreement> optAgreement = agreementRepository.findById(agreementId);
+        if (optAgreement.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement not found", HttpStatus.NOT_FOUND);
+        }
+        Agreement agreement = optAgreement.get();
+        Optional<AgreementList> optAgreementList = agreementListRepository.findById(listId);
+        if (optAgreementList.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement list not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementList agreementList = optAgreementList.get();
+        if (!agreementId.equals(agreementList.getAgreement().getId())) {
+            throw new AgreementNotFoundException("Agreement list not found in this organisation", HttpStatus.NOT_FOUND);
+        }
+        agreementListRepository.save(agreementList.update(agreementListResponseDTO));
     }
 }
