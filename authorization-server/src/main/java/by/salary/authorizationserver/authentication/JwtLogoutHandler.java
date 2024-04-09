@@ -5,6 +5,7 @@ import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordA
 import by.salary.authorizationserver.repository.TokenRepository;
 import by.salary.authorizationserver.service.JwtService;
 import by.salary.authorizationserver.service.TokenService;
+import by.salary.authorizationserver.util.AuthenticationUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -21,21 +22,12 @@ import org.springframework.stereotype.Component;
 @Transactional
 public class JwtLogoutHandler implements LogoutHandler {
     TokenService tokenService;
-    JwtService jwtService;
+    AuthenticationUtils authenticationUtils;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        String username;
-        if (authentication instanceof UsernameEmailPasswordAuthenticationToken){
-            username = ((UsernameEmailPasswordAuthenticationToken) authentication).getUsername();
-        }else if (authentication instanceof UsernamePasswordAuthenticationToken){
-            username = authentication.getName();
-        }else if (authentication instanceof JwtAuthenticationToken){
-            String token = (String) authentication.getPrincipal();
-            username = jwtService.extractUserName(token);
-        }else {
-            throw new UnsupportedOperationException("Unsupported authentication mechanism. Cannot logout");
-        }
+        String username = authenticationUtils.extractUsername(authentication);
+
         tokenService.deleteAllByUsername(username);
     }
 }

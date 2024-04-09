@@ -2,12 +2,15 @@ package by.salary.authorizationserver.config;
 
 import by.salary.authorizationserver.authentication.JwtLogoutHandler;
 import by.salary.authorizationserver.authentication.OAuth2AuthenticationSuccessHandler;
+import by.salary.authorizationserver.authentication.VerificationCodeHandler;
 import by.salary.authorizationserver.authentication.filter.JWTAuthenticationFilter;
 import by.salary.authorizationserver.authentication.filter.JWTVerifierFilter;
 import by.salary.authorizationserver.authentication.provider.JwtAuthenticationProvider;
 import by.salary.authorizationserver.authentication.provider.UsernameEmailPasswordAuthenticationProvider;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.JwtService;
+import by.salary.authorizationserver.service.TokenRegistrationService;
+import by.salary.authorizationserver.service.TokenService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,11 @@ public class WebSecurityConfig {
     JwtLogoutHandler jwtLogoutHandler;
     PasswordEncoder passwordEncoder;
 
+    TokenService tokenService;
+    TokenRegistrationService tokenRegistrationService;
+
+    OAuth2AuthenticationSuccessHandler successHandler;
+
     @Autowired
     @Qualifier("delegatedAuthenticationEntryPoint")
     AuthenticationEntryPoint authEntryPoint;
@@ -57,15 +65,16 @@ public class WebSecurityConfig {
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/login/**").permitAll()
                                 .requestMatchers("/auth/logout").authenticated()
+                                .requestMatchers("/auth/verify/code").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .addFilter(new JWTAuthenticationFilter(
-                        objectMapper, authenticationManagerBuilder.getOrBuild(), jwtService))
+                        objectMapper, authenticationManagerBuilder.getOrBuild(), tokenRegistrationService))
                 .addFilterAfter(
                         new JWTVerifierFilter(jwtService, authorizationRepository, authenticationManagerBuilder.getOrBuild()),
                         JWTAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(new OAuth2AuthenticationSuccessHandler(authorizationRepository, jwtService))
+                        .successHandler(successHandler)
                         .failureHandler((request, response, exception) -> { throw exception; })
                 )
                 .logout(AbstractHttpConfigurer::disable)

@@ -47,6 +47,9 @@ spring:
         uri: lb://service-agreement
         predicates:
           - Path=/agreements/**
+        filters:
+          - AuthenticationFilter
+          - LoggingFilter
         ### User Service route
       - id: service-user-organisation
         uri: lb://service-user

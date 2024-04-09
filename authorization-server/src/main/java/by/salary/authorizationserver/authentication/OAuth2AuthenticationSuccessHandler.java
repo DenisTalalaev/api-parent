@@ -1,21 +1,27 @@
 package by.salary.authorizationserver.authentication;
 
+import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
 import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
+import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.oauth2.AuthenticationUserInfo;
 import by.salary.authorizationserver.model.oauth2.FactoryAuthenticationRegistration;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.JwtService;
+import by.salary.authorizationserver.service.TokenRegistrationService;
+import by.salary.authorizationserver.service.TokenService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.DefaultRedirectStrategy;
@@ -36,19 +42,21 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     private final String frontendUrl;
     private final AuthorizationRepository authorizationRepository;
-    private final JwtService jwtService;
+
+    TokenRegistrationService tokenRegistrationService;
     @Autowired
-    public OAuth2AuthenticationSuccessHandler(AuthorizationRepository authorizationRepository,
-                                              JwtService jwtService) {
+    public OAuth2AuthenticationSuccessHandler(@Value("${frontend.url}") String frontendUrl,
+                                              AuthorizationRepository authorizationRepository,
+                                              TokenRegistrationService tokenRegistrationService) {
         this.authorizationRepository = authorizationRepository;
-        this.jwtService = jwtService;
-        this.frontendUrl = "http://localhost:3000/auth/sign-in";
+        this.frontendUrl = frontendUrl;
+        this.tokenRegistrationService = tokenRegistrationService;
     }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws ServletException, IOException {
-
+        //token from oauth2 resource
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
 
         Map<String, Object> attributes = token.getPrincipal().getAttributes();
@@ -65,9 +73,10 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 .build();
 
         Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequestDto);
+        String jwt;
         //if user already exists
         if (responseDto.isPresent()) {
-            authenticatedUser(response, token, authUserInfo, attributes).accept(responseDto.get());
+            jwt = authenticatedUser(responseDto.get(), token, authUserInfo, attributes);
         //registration
         }else {
             //creating request for registration
@@ -81,8 +90,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 Optional<AuthenticationResponseDto> afterSaveResponseDto = authorizationRepository.find(authenticationRequestDto);
                 //if user found
                 if (afterSaveResponseDto.isPresent()){
-                    authenticatedUser(response, token, authUserInfo, attributes).accept(afterSaveResponseDto.get());
-                    responseDto = afterSaveResponseDto;
+                    jwt = authenticatedUser(afterSaveResponseDto.get(), token, authUserInfo, attributes);
                 } else {
                     throw new RuntimeException("Internal server error. User registered successfully but not found.");
                 }
@@ -90,8 +98,8 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 throw new RuntimeException(registerResponseDto.getMessage());
             }
         }
-        String jwt = jwtService.generateToken(responseDto.get());
 
+        //sending token to frontend
         URI uri = UriComponentsBuilder.fromHttpUrl(frontendUrl).queryParam("token", jwt).build().toUri();
         String url = uri.toString();
         this.setAlwaysUseDefaultTargetUrl(true);
@@ -106,10 +114,10 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
         super.onAuthenticationSuccess(request, response, authentication);
     }
 
-    Consumer<AuthenticationResponseDto> authenticatedUser(HttpServletResponse response, OAuth2AuthenticationToken token,
-                                            AuthenticationUserInfo authUserInfo,
-                                            Map<String, Object> attributes) {
-        return user -> {
+    String authenticatedUser(AuthenticationResponseDto user,
+                           OAuth2AuthenticationToken token,
+                           AuthenticationUserInfo authUserInfo,
+                           Map<String, Object> attributes) {
             Collection<? extends GrantedAuthority> roles = user.getAuthorities().stream().map(
                     (a) -> new SimpleGrantedAuthority(a.getAuthority())
             ).collect(Collectors.toList());
@@ -122,9 +130,8 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                     defaultOAuth2User, roles, token.getAuthorizedClientRegistrationId()
             );
             SecurityContextHolder.getContext().setAuthentication(securityAuthentication);
-            String jwt = jwtService.generateToken(user);
-            response.setHeader("Authorization", "Bearer " + jwt);
-        };
+
+            return tokenRegistrationService.generateToken(mapToUserInfoDto(user));
     }
 
     RegisterRequestDto mapToRegisterDto(AuthenticationUserInfo authUserInfo){
@@ -134,6 +141,20 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 .userEmail(authUserInfo.getEmail())
                 .pictureUri(authUserInfo.getUri())
                 .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
+                .build();
+    }
+
+    private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto authenticationResponseDto) {
+        return UserInfoDTO.builder()
+                .name(authenticationResponseDto.getUserName())
+                .email(authenticationResponseDto.getUserEmail())
+                .authorities(
+                        authenticationResponseDto.getAuthorities()
+                                .stream().map(Authority::getAuthority)
+                        .collect(Collectors.toList())
+                )
+                .is2FEnabled(true)
+                .is2FVerified(true)
                 .build();
     }
 }

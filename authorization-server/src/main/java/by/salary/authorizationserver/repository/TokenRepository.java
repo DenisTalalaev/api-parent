@@ -11,4 +11,6 @@ public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
     List<TokenEntity> findAllByUsername(String username);
 
     void deleteAllByUsername(String username);
+
+    Optional<TokenEntity> findByAuthenticationToken(String token);
 }

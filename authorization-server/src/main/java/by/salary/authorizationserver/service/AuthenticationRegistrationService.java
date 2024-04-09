@@ -2,6 +2,7 @@ package by.salary.authorizationserver.service;
 
 import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -24,6 +26,8 @@ public class AuthenticationRegistrationService {
     AuthorizationRepository authorizationRepository;
 
     PasswordEncoder passwordEncoder;
+
+    TokenRegistrationService tokenRegistrationService;
 
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
         registerLocalUserRequest.setPassword(passwordEncoder.encode(registerLocalUserRequest.getPassword()));
@@ -43,13 +47,16 @@ public class AuthenticationRegistrationService {
         if (authentication.isEmpty()){
             throw new UserNotFoundException("Authentication failed");
         }
+        //TODO: verify email
 
         if (!passwordEncoder.matches(authenticationRequestDto.getPassword(), authentication.get().getPassword())){
             //TODO: exception handling
             throw new UserNotFoundException("Authentication failed");
         }
 
-        return mapToConnValidationResponse(authentication.get());
+        String token = tokenRegistrationService.generateToken(mapToUserInfoDto(authentication.get()));
+
+        return mapToConnValidationResponse(authentication.get(), token);
     }
 
 
@@ -64,11 +71,6 @@ public class AuthenticationRegistrationService {
     }
 
 
-    private ConnValidationResponse mapToConnValidationResponse(AuthenticationResponseDto authentication) {
-        return mapToConnValidationResponse(authentication, jwtService.generateToken(authentication));
-    }
-
-
     private ConnValidationResponse mapToConnValidationResponse(AuthenticationResponseDto authentication, String token) {
         return ConnValidationResponse.builder()
                 .status(HttpStatus.OK)
@@ -78,5 +80,16 @@ public class AuthenticationRegistrationService {
                 .token(token)
                 .authorities(authentication.getAuthorities().stream().map(Authority::getAuthority).toList())
                 .build();
+    }
+
+    private UserInfoDTO mapToUserInfoDto(AuthenticationResponseDto authenticationResponseDto){
+        return UserInfoDTO.builder()
+                .name(authenticationResponseDto.getUserName())
+                .email(authenticationResponseDto.getUserEmail())
+                .authorities(authenticationResponseDto.getAuthorities().stream().map(Authority::getAuthority).collect(Collectors.toList()))
+                .is2FEnabled(authenticationResponseDto.is2FEnabled())
+                .is2FVerified(false)
+                .build();
+
     }
 }

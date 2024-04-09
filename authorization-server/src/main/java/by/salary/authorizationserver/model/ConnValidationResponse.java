@@ -19,4 +19,7 @@ public class ConnValidationResponse {
     private String email;
     private Collection<String> authorities;
     private String token;
+
+    private boolean is2FEnabled;
+    private boolean is2FVerified;
 }
