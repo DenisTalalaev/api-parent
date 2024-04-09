@@ -1,9 +1,6 @@
 package by.salary.serviceuser.service;
 
-import by.salary.serviceuser.entities.Authority;
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.Permission;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
 import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.OrganisationRequestDTO;
@@ -94,13 +91,11 @@ public class OrganisationService {
         director.setUserSecondName(organisationRequestDTO.getDirectorSecondName());
 
         director.getAuthorities().add(new Authority("ADMINISTRATOR"));
-        if(!permissionRepository.existsByName("*")) {
-            permissionRepository.save(new Permission("*", "All permissions"));
+        if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
+            permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         }
-        director.addPermission(permissionRepository.findByName("*").get());
-
+        director.addPermission(permissionRepository.findByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName()).get());
         userRepository.save(director);
-
         return new OrganisationResponseDTO(organisation);
     }
 

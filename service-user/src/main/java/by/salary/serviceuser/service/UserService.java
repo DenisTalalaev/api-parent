@@ -1,15 +1,14 @@
 package by.salary.serviceuser.service;
 
-import by.salary.serviceuser.entities.Authority;
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
+import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
+import by.salary.serviceuser.model.UserPromoteRequestDTO;
 import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -99,4 +98,45 @@ public class UserService {
                         .stream().map(User::getUserEmail)
                         .toList());
     }
+
+    public UserResponseDTO promoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> promoterOpt = userRepository.findByUserEmail(email);
+        if (promoterOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        user.getAuthorities().add(userPromoteRequestDTO.getAuthority());
+        userRepository.save(user);
+        return new UserResponseDTO(user);
+    }
+
+    public UserResponseDTO demoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> promoterOpt = userRepository.findByUserEmail(email);
+        if (promoterOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if(user.getAuthorities().contains(userPromoteRequestDTO.getAuthority())){
+            user.getAuthorities().remove(userPromoteRequestDTO.getAuthority());
+        } else {
+            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " has not this authority", HttpStatus.NOT_FOUND);
+        }
+        userRepository.save(user);
+        return new UserResponseDTO(user);
+    }
+
 }
