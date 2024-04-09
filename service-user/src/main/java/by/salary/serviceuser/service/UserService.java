@@ -135,8 +135,58 @@ public class UserService {
         } else {
             throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " has not this authority", HttpStatus.NOT_FOUND);
         }
+
+        clearPermissions(user);
+
+        switch (userPromoteRequestDTO.getAuthority().getAuthority()) {
+            case "ADMINISTRATOR" -> addAdministratorPermissions(user);
+            case "MODERATOR" -> addModeratorPermissions(user);
+            case "USER" -> addUserPermissions(user);
+            default -> clearPermissions(user);
+        }
+
         userRepository.save(user);
         return new UserResponseDTO(user);
     }
 
+    private boolean addUserPermissions (User user) {
+        user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
+        user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean addModeratorPermissions (User user) {
+        addUserPermissions(user);
+        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_STATE));
+        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_STATE));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_STATE));
+
+        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_LIST));
+        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_LIST));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_LIST));
+
+        user.addPermission(new Permission(PermissionsEnum.READ_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.ADD_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.DELETE_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.CHANGE_USER_AGREEMENT));
+
+        user.addPermission(new Permission(PermissionsEnum.INVITE_USER));
+        user.addPermission(new Permission(PermissionsEnum.EXPIRE_USER));
+
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean addAdministratorPermissions (User user) {
+        user.addPermission(new Permission(PermissionsEnum.ALL_PERMISSIONS));
+        userRepository.save(user);
+        return true;
+    }
+
+    private boolean clearPermissions(User user) {
+        user.getPermissions().clear();
+        userRepository.save(user);
+        return true;
+    }
 }
