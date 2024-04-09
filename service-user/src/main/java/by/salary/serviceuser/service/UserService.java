@@ -189,4 +189,8 @@ public class UserService {
         userRepository.save(user);
         return true;
     }
+
+    public UserResponseDTO getUser(String email) {
+        return new UserResponseDTO(userRepository.findByUserEmail(email).get());
+    }
 }
