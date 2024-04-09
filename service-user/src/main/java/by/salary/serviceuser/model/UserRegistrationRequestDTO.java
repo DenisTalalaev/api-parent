@@ -30,6 +30,7 @@ public class UserRegistrationRequestDTO {
 
     //oauth2
     String pictureUri;
-    
+
+    Boolean is2FEnabled;
 
 }
