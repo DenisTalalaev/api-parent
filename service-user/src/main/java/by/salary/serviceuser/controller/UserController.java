@@ -44,6 +44,13 @@ public class UserController {
     }
 
 
+    @GetMapping("/self")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO getUser(@RequestAttribute String email) {
+        return userService.getUser(email);
+    }
+
+
     @PostMapping("/createUser")
     @ResponseStatus(HttpStatus.CREATED)
     public String createUserByInvitation(@RequestBody UserRequestDTO userRequestDTO) {
