@@ -7,7 +7,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -126,7 +125,11 @@ public class MailService {
         }
         return mails;
     }
-    
 
 
+    public void checkMail(MailRequestDTO mailRequestDTO) {
+        if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
+            throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
+        }
+    }
 }
