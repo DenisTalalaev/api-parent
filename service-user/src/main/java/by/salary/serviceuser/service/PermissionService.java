@@ -1,7 +1,9 @@
 package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.Permission;
+import by.salary.serviceuser.entities.PermissionsEnum;
 import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.PermissionNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.PermissionResponseDTO;
@@ -29,8 +31,8 @@ public class PermissionService {
         this.userRepository = userRepository;
 
         //default permission for all permissions
-        if(!permissionRepository.existsByName("*")){
-            permissionRepository.save(new Permission("*"));
+        if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
+            permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         }
 
     }
@@ -75,19 +77,31 @@ public class PermissionService {
         return new PermissionResponseDTO(permissionRepository.save(new Permission(permissionResponseDTO) ));
     }
 
-    public PermissionResponseDTO addUserPermission(BigInteger userId, BigInteger permissionId) {
+    public PermissionResponseDTO addUserPermission(BigInteger userId, BigInteger permissionId, String email, List<Permission> permissions) {
+
         if(!userRepository.existsById(userId)){
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
+        if(!userRepository.existsByUserEmail(email)){
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
         if(!permissionRepository.existsById(permissionId)){
             throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
+        }
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
+                userRepository.findById(userId).get().getOrganisation().getId()
+        )){
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Permission permission = permissionRepository.findById(permissionId).get();
         permission.getUsers().add(userRepository.findById(userId).get());
         return new PermissionResponseDTO(permissionRepository.save(permission));
     }
 
-    public void deleteUserPermission(BigInteger userId, BigInteger permissionId) {
+    public void deleteUserPermission(BigInteger userId, BigInteger permissionId, String email, List<Permission> permissions) {
         Optional<User> optUser = userRepository.findById(userId);
         Optional<Permission> optPermission = permissionRepository.findById(permissionId);
 
@@ -98,15 +112,19 @@ public class PermissionService {
             throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
         }
 
+
+        if(!permissions.contains(new Permission(PermissionsEnum.DEMOTE_USER))){
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
+                userRepository.findById(userId).get().getOrganisation().getId()
+        )){
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+
         Permission permission = optPermission.get();
         permission.getUsers().remove(optUser.get());
         permissionRepository.save(permission);
     }
 
-    public void deletePermission(BigInteger permissionId) {
-        if(!permissionRepository.existsById(permissionId)){
-            throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
-        }
-        permissionRepository.deleteById(permissionId);
-    }
 }

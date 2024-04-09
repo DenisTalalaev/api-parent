@@ -1,5 +1,6 @@
 package by.salary.serviceuser.service;
 
+import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
@@ -54,7 +55,9 @@ public class UserService {
         if (optionalOrganisation.isEmpty()) {
             throw new UserNotFoundException("Organisation with id " + userRequestDTO.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
         }
-        return new UserResponseDTO(userRepository.save(new User(userRequestDTO, optionalOrganisation.get())));
+        User user = new User(userRequestDTO, optionalOrganisation.get());
+        user.getAuthorities().add(new Authority("USER"));
+        return new UserResponseDTO(userRepository.save(user));
     }
 
     public void deleteUser(BigInteger id) {

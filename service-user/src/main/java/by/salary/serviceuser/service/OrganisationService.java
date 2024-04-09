@@ -1,5 +1,6 @@
 package by.salary.serviceuser.service;
 
+import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Organisation;
 import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.entities.User;
@@ -92,8 +93,11 @@ public class OrganisationService {
         director.setUserSurname(organisationRequestDTO.getDirectorSurname());
         director.setUserSecondName(organisationRequestDTO.getDirectorSecondName());
 
-        //TODO: add permissions
-        //director.addPermission(permissionRepository.findByName("*").get());
+        director.getAuthorities().add(new Authority("ADMINISTRATOR"));
+        if(!permissionRepository.existsByName("*")) {
+            permissionRepository.save(new Permission("*", "All permissions"));
+        }
+        director.addPermission(permissionRepository.findByName("*").get());
 
         userRepository.save(director);
 
