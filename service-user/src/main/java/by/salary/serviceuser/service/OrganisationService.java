@@ -6,6 +6,7 @@ import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.OrganisationRequestDTO;
 import by.salary.serviceuser.model.OrganisationResponseDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.repository.AuthorityRepository;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.PermissionRepository;
 import by.salary.serviceuser.repository.UserRepository;
@@ -30,15 +31,29 @@ public class OrganisationService {
 
     private PermissionRepository permissionRepository;
 
+    private AuthorityRepository authorityRepository;
+
     private UserRepository userRepository;
     private WebClient.Builder webClientBuilder;
 
     @Autowired
-    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository, WebClient.Builder webClientBuilder, PermissionRepository permissionRepository) {
+    public OrganisationService(OrganisationRepository organisationRepository, UserRepository userRepository, WebClient.Builder webClientBuilder, PermissionRepository permissionRepository, AuthorityRepository authorityRepository) {
         this.permissionRepository = permissionRepository;
         this.webClientBuilder = webClientBuilder;
         this.organisationRepository = organisationRepository;
         this.userRepository = userRepository;
+        this.authorityRepository = authorityRepository;
+
+        if(!authorityRepository.existsByAuthority(new Authority("USER").getAuthority())){
+            authorityRepository.save(new Authority("USER"));
+        }
+        if(!authorityRepository.existsByAuthority(new Authority("MODERATOR").getAuthority())){
+            authorityRepository.save(new Authority("MODERATOR"));
+        }
+        if(!authorityRepository.existsByAuthority(new Authority("ADMINISTRATOR").getAuthority())){
+            authorityRepository.save(new Authority("ADMINISTRATOR"));
+        }
+
     }
 
 
@@ -90,7 +105,8 @@ public class OrganisationService {
         director.setUserSurname(organisationRequestDTO.getDirectorSurname());
         director.setUserSecondName(organisationRequestDTO.getDirectorSecondName());
 
-        director.getAuthorities().add(new Authority("ADMINISTRATOR"));
+        director.getAuthorities().add(authorityRepository.findByAuthority(new Authority("ADMINISTRATOR").getAuthority()).get());
+
         if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
             permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         }

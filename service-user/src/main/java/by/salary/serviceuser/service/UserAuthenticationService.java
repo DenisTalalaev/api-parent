@@ -5,6 +5,7 @@ import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import by.salary.serviceuser.model.*;
+import by.salary.serviceuser.repository.AuthorityRepository;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -30,14 +31,16 @@ public class UserAuthenticationService {
 
     private UserRepository userRepository;
     private OrganisationRepository organisationRepository;
+    private AuthorityRepository authorityRepository;
 
     WebClient.Builder webClientBuilder;
 
     @Autowired
-    public UserAuthenticationService(UserRepository userRepository, WebClient.Builder webClientBuilder, OrganisationRepository organisationRepository) {
+    public UserAuthenticationService(UserRepository userRepository, WebClient.Builder webClientBuilder, OrganisationRepository organisationRepository, AuthorityRepository authorityRepository) {
         this.organisationRepository = organisationRepository;
         this.userRepository = userRepository;
         this.webClientBuilder = webClientBuilder;
+        this.authorityRepository = authorityRepository;
     }
 
 
@@ -113,7 +116,7 @@ public class UserAuthenticationService {
         user.setUserSurname(invitation.getUserSurname());
         user.setUserSecondName(invitation.getUserSecondName());
 
-        user.getAuthorities().add(new Authority("USER"));
+        user.getAuthorities().add(authorityRepository.findByAuthority(new Authority("USER").getAuthority()).get());
 
         user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
         user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
