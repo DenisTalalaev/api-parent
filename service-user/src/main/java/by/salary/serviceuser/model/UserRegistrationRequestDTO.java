@@ -32,6 +32,6 @@ public class UserRegistrationRequestDTO {
     String pictureUri;
 
     boolean is2FEnabled;
-    
+
 
 }

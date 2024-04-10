@@ -1,8 +1,6 @@
 package by.salary.serviceuser.service;
 
-import by.salary.serviceuser.entities.Invitation;
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
 import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
@@ -71,6 +69,9 @@ public class UserAuthenticationService {
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
             user.setIs2FEnabled(userRegistrationRequestDTO.is2FEnabled());
             user.setIs2FVerified(false);
+            if(userRegistrationRequestDTO.getIs2FEnabled() != null) {
+                user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());
+            }
             userRepository.save(user);
             return new UserRegistrationResponseDTO(user);
         }
@@ -81,6 +82,9 @@ public class UserAuthenticationService {
         user.setUserAuthorisationAttributeKey(userRegistrationRequestDTO.getAuthenticationRegistrationKey());
         user.setIs2FEnabled(true);
         user.setIs2FVerified(true);
+        if(userRegistrationRequestDTO.getIs2FEnabled() != null) {
+            user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());
+        }
         userRepository.save(user);
         return new UserRegistrationResponseDTO(user);
     }
@@ -109,6 +113,10 @@ public class UserAuthenticationService {
         user.setUserSurname(invitation.getUserSurname());
         user.setUserSecondName(invitation.getUserSecondName());
 
+        user.getAuthorities().add(new Authority("USER"));
+
+        user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
+        user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
 
         userRepository.save(user);
         deleteInvitation(userJoinOrganisationRequestDTO.getInvitationCode());

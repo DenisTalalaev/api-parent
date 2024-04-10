@@ -2,13 +2,14 @@ package by.salary.serviceinvitation.service;
 
 import by.salary.serviceinvitation.entities.Invitation;
 import by.salary.serviceinvitation.exceptions.InvitationNotFoundException;
+import by.salary.serviceinvitation.exceptions.NotEnoughtPermissionsException;
+import by.salary.serviceinvitation.filters.Permission;
+import by.salary.serviceinvitation.filters.PermissionsEnum;
 import by.salary.serviceinvitation.model.InvitationRequestDTO;
 import by.salary.serviceinvitation.model.InvitationResponseDTO;
 import by.salary.serviceinvitation.repository.InvitationRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -56,7 +57,10 @@ public class InvitationService {
         }
     }
 
-    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO, String directorEmail) {
+    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO, String directorEmail, List<Permission> permissions) {
+        if(!permissions.contains(new Permission(PermissionsEnum.INVITE_USER))){
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
         BigInteger organisationId = getOrganisationId(directorEmail);
         Invitation invitation = new Invitation(invitationRequestDTO, generateInvitationCode(), organisationId);
         return new InvitationResponseDTO(invitationRepository.save(invitation));

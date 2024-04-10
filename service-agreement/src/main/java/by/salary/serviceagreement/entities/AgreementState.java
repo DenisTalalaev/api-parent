@@ -36,4 +36,11 @@ public class AgreementState {
         this.stateInfo = agreementStateListRequestDTO.getStateInfo();
         this.agreementLists = agreementList;
     }
+
+
+    public AgreementState update(AgreementStateRequestDTO agreementStateListRequestDTO) {
+        this.stateName = agreementStateListRequestDTO.getStateName();
+        this.stateInfo = agreementStateListRequestDTO.getStateInfo();
+        return this;
+    }
 }

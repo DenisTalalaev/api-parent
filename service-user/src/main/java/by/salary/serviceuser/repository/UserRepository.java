@@ -18,4 +18,5 @@ public interface UserRepository extends CrudRepository<User, BigInteger> {
 
     List<User> findAllByOrganisationId(BigInteger organisationId);
 
+    boolean existsByUserEmail(String email);
 }

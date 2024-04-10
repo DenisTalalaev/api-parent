@@ -18,4 +18,8 @@ public class Authority {
     private BigInteger id;
 
     private String authority;
+
+    public Authority(String authority) {
+        this.authority = authority;
+    }
 }

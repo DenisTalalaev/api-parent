@@ -1,5 +1,6 @@
 package by.salary.serviceuser.controller;
 
+import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.model.PermissionResponseDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.service.PermissionService;
@@ -55,19 +56,20 @@ public class PermissionController {
 
     @PostMapping("/{user_id}/{permission_id}")
     @ResponseStatus(HttpStatus.OK)
-    public PermissionResponseDTO addUserPermission(@PathVariable BigInteger user_id, @PathVariable BigInteger permission_id) {
-        return permissionService.addUserPermission(user_id, permission_id);
+    public PermissionResponseDTO addUserPermission(@PathVariable BigInteger user_id,
+                                                   @PathVariable BigInteger permission_id,
+                                                   @RequestAttribute String email,
+                                                   @RequestAttribute List<Permission> permissions) {
+        return permissionService.addUserPermission(user_id, permission_id, email, permissions);
     }
 
     @DeleteMapping("/{user_id}/{permission_id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteUserPermission(@PathVariable BigInteger user_id, @PathVariable BigInteger permission_id) {
-        permissionService.deleteUserPermission(user_id, permission_id);
-    }
-    @DeleteMapping("/{permission_id}")
-    @ResponseStatus(HttpStatus.OK)
-    public void deleteUserPermission(@PathVariable BigInteger permission_id) {
-        permissionService.deletePermission(permission_id);
+    public void deleteUserPermission(@PathVariable BigInteger user_id,
+                                     @PathVariable BigInteger permission_id,
+                                     @RequestAttribute String email,
+                                     @RequestAttribute List<Permission> permissions) {
+        permissionService.deleteUserPermission(user_id, permission_id, email, permissions);
     }
 
 
