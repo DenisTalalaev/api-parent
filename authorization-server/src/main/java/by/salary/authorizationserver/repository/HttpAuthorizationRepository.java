@@ -39,8 +39,7 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
                 return Optional.empty();
             }
         }
-        //TODO: remove after testing
-        response.get().set2FEnabled(true);
+
         return response;
     }
 
