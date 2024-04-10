@@ -141,6 +141,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 .userEmail(authUserInfo.getEmail())
                 .pictureUri(authUserInfo.getUri())
                 .authenticationRegistrationId(authUserInfo.getAuthenticationAttributeKey())
+                .is2FEnabled(true)
                 .build();
     }
 
