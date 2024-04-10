@@ -1,5 +1,6 @@
 package by.salary.authorizationserver.service;
 
+import by.salary.authorizationserver.exception.EmailNotFoundException;
 import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.UserInfoDTO;
@@ -29,9 +30,18 @@ public class AuthenticationRegistrationService {
 
     TokenRegistrationService tokenRegistrationService;
 
+    MailService mailService;
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
+
+        MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
+                .mailTo(registerLocalUserRequest.getUserEmail())
+                .build();
+
+        if (!mailService.checkEmail(mailRequestDTO)){
+            throw new EmailNotFoundException("Email " + registerLocalUserRequest.getUserEmail() + " not found");
+        }
+
         registerLocalUserRequest.setPassword(passwordEncoder.encode(registerLocalUserRequest.getPassword()));
-        //TODO: send email registration code
         return authorizationRepository.save(mapToRegisterDto(registerLocalUserRequest));
     }
 
@@ -66,7 +76,7 @@ public class AuthenticationRegistrationService {
                 .userEmail(registerLocalUserRequest.getUserEmail())
                 .userPassword(registerLocalUserRequest.getPassword())
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .invitationCode(registerLocalUserRequest.getInvitationCode())
+                .is2FEnabled(registerLocalUserRequest.is2FEnabled())
                 .build();
     }
 

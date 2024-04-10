@@ -67,7 +67,7 @@ public class UserAuthenticationService {
             user.setUsername(userRegistrationRequestDTO.getUsername());
             user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
-            user.setIs2FEnabled(false);
+            user.setIs2FEnabled(userRegistrationRequestDTO.is2FEnabled());
             user.setIs2FVerified(false);
             if(userRegistrationRequestDTO.getIs2FEnabled() != null) {
                 user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());

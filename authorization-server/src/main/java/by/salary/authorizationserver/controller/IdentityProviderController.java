@@ -121,5 +121,11 @@ public class IdentityProviderController {
         return ResponseEntity.status(errorMessage.getHttpStatus()).body(errorMessage);
     }
 
+    @PostMapping(value = "/change/password")
+    public ResponseEntity<?> changePassword() {
+
+
+        return null;
+    }
 
 }

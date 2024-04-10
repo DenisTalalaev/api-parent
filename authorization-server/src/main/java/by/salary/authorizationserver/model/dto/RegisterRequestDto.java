@@ -21,13 +21,12 @@ public class RegisterRequestDto {
     //local
     String userPassword;
 
-    //always
-    String invitationCode;
-
     //oatuth2
     String authenticationRegistrationKey;
 
     //oauth2
     String pictureUri;
+
+    boolean is2FEnabled;
 
 }

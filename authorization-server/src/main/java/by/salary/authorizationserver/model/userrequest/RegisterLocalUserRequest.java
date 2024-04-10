@@ -13,6 +13,6 @@ public class RegisterLocalUserRequest {
     String username;
     String userEmail;
     String password;
-    String invitationCode;
+    boolean is2FEnabled;
 
 }

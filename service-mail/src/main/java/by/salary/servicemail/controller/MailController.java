@@ -38,7 +38,7 @@ public class MailController {
     @PostMapping
     @RequestMapping("/check")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void checkMail(@RequestBody  MailRequestDTO mailRequestDTO, @RequestAttribute String email) {
+    public void checkMail(@RequestBody  MailRequestDTO mailRequestDTO) {
         mailService.checkMail(mailRequestDTO);
     }
 

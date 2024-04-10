@@ -78,8 +78,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserInfoDTO userInfo = mapToUserDetails(authToken);
 
 
-
-        //send verification code to email
         String token = tokenRegistrationService.generateToken(userInfo);
 
 

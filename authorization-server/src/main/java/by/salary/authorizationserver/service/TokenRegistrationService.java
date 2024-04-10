@@ -3,6 +3,7 @@ package by.salary.authorizationserver.service;
 import by.salary.authorizationserver.authentication.VerificationCodeHandler;
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.dto.MailRequestDTO;
 import com.netflix.discovery.converters.Auto;
 import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.Formatter;
 @Slf4j
 public class TokenRegistrationService {
 
+    MailService mailService;
     JwtService jwtService;
     TokenService tokenService;
     private static BigInteger BILLION;
@@ -26,9 +28,11 @@ public class TokenRegistrationService {
     @Autowired
     TokenRegistrationService(
             JwtService service,
-            TokenService tokenService){
+            TokenService tokenService,
+            MailService mailService) {
         this.tokenService = tokenService;
         this.jwtService = service;
+        this.mailService = mailService;
         BILLION = BigInteger.valueOf(999_999_999L);
     }
 
@@ -71,10 +75,17 @@ public class TokenRegistrationService {
                 .verificationCode(verificationCode)
                 .build();
 
+        //TODO: send verification code to email
+        MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
+                .mailTo(userInfo.getEmail())
+                .message(verificationCode)
+                .build();
+
+        mailService.sendMessage(mailRequestDTO, token);
+
         //save token in db
         tokenService.save(tokenEntity);
 
-        //TODO: send verification code to email
 
         return token;
     }
