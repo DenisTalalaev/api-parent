@@ -110,7 +110,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .status(HttpStatus.OK)
                 .email(authentication.getUserEmail())
                 .authorities(authorities)
-                .token(String.format("Bearer %s", jwt))
+                .token(jwt)
                 .methodType(HttpMethod.GET.name())
                 .isAuthenticated(true)
                 .is2FEnabled(authentication.is2FEnabled())
