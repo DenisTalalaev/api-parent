@@ -70,11 +70,11 @@ public class UserAuthenticationService {
             user.setUsername(userRegistrationRequestDTO.getUsername());
             user.setUserEmail(userRegistrationRequestDTO.getUserEmail());
             user.setUserPassword(userRegistrationRequestDTO.getUserPassword());
-            user.setIs2FEnabled(userRegistrationRequestDTO.is2FEnabled());
-            user.setIs2FVerified(false);
-            if(userRegistrationRequestDTO.getIs2FEnabled() != null) {
-                user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());
+            user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());
+            if(user.getIs2FEnabled() == null){
+                user.setIs2FEnabled(false);
             }
+            user.setIs2FVerified(false);
             userRepository.save(user);
             return new UserRegistrationResponseDTO(user);
         }
@@ -85,9 +85,6 @@ public class UserAuthenticationService {
         user.setUserAuthorisationAttributeKey(userRegistrationRequestDTO.getAuthenticationRegistrationKey());
         user.setIs2FEnabled(true);
         user.setIs2FVerified(true);
-        if(userRegistrationRequestDTO.getIs2FEnabled() != null) {
-            user.setIs2FEnabled(userRegistrationRequestDTO.getIs2FEnabled());
-        }
         userRepository.save(user);
         return new UserRegistrationResponseDTO(user);
     }

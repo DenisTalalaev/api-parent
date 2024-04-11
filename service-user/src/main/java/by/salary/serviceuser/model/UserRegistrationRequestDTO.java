@@ -13,6 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserRegistrationRequestDTO {
 
+    Boolean is2FEnabled = null;
+
     AuthenticationRegistrationId authenticationRegistrationId;
 
     //local/oauth2
@@ -31,7 +33,7 @@ public class UserRegistrationRequestDTO {
     //oauth2
     String pictureUri;
 
-    boolean is2FEnabled;
+    public Boolean getIs2FEnabled() { return is2FEnabled; }
 
 
 }
