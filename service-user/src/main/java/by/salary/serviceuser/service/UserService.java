@@ -68,7 +68,7 @@ public class UserService {
             throw new UserNotFoundException("Organisation with id " + userRequestDTO.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
         }
         User user = new User(userRequestDTO, optionalOrganisation.get());
-        user.getAuthorities().add(new Authority("USER"));
+        user.getAuthorities().add(new Authority(AuthorityEnum.USER));
         return new UserResponseDTO(userRepository.save(user));
     }
 
