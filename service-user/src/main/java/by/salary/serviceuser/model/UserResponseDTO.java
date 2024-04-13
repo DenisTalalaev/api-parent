@@ -1,14 +1,13 @@
 package by.salary.serviceuser.model;
 
-import by.salary.serviceuser.entities.Authority;
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.entities.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -40,6 +39,10 @@ public class UserResponseDTO {
 
     private List<Authority> authorities;
 
+    private List<PermissionResponseDTO> permissions;
+
+    private List<UserAgreementResponseDTO> userAgreementList;
+
     public UserResponseDTO(User user) {
 
         Organisation organisation = user.getOrganisation();
@@ -60,6 +63,10 @@ public class UserResponseDTO {
         this.isCredentialsNonExpired = user.isCredentialsNonExpired();
         this.isEnabled = user.isEnabled();
         this.authorities = user.getAuthorities();
+        this.permissions =  new ArrayList<>();
+        user.getPermissions().forEach(permission -> this.permissions.add(new PermissionResponseDTO(permission)));
+        this.userAgreementList = new ArrayList<>();
+        user.getUserAgreementList().forEach(userAgreement -> this.userAgreementList.add(new UserAgreementResponseDTO(userAgreement)));
     }
 
     @Override
@@ -77,7 +84,9 @@ public class UserResponseDTO {
                 ", isCredentialsNonExpired=" + isCredentialsNonExpired +
                 ", isEnabled=" + isEnabled +
                 ", organisationId=" + organisationId +
-                ", authorities=" + authorities +
+                ", authorities=" + authorities.toString() +
+                ", permissions=" + permissions.toString() +
+                ", userAgreementList=" + userAgreementList.toString() +
                 '}';
     }
 }

@@ -30,11 +30,11 @@ public class PermissionService {
         this.permissionRepository = permissionRepository;
         this.userRepository = userRepository;
 
-        //default permission for all permissions
-        if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
-            permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
+        for(PermissionsEnum permission : PermissionsEnum.values()){
+            if(!permissionRepository.existsByName(permission.name())){
+                permissionRepository.save(new Permission(permission));
+            }
         }
-
     }
 
     public List<PermissionResponseDTO> getUserPermissions(BigInteger id) {

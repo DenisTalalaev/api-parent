@@ -44,15 +44,12 @@ public class OrganisationService {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
 
-        if(!authorityRepository.existsByAuthority(new Authority("USER").getAuthority())){
-            authorityRepository.save(new Authority("USER"));
+        for(AuthorityEnum authority : AuthorityEnum.values()){
+            if(!authorityRepository.existsByAuthority(authority.name())){
+                authorityRepository.save(new Authority(authority));
+            }
         }
-        if(!authorityRepository.existsByAuthority(new Authority("MODERATOR").getAuthority())){
-            authorityRepository.save(new Authority("MODERATOR"));
-        }
-        if(!authorityRepository.existsByAuthority(new Authority("ADMINISTRATOR").getAuthority())){
-            authorityRepository.save(new Authority("ADMINISTRATOR"));
-        }
+
 
     }
 
@@ -105,7 +102,7 @@ public class OrganisationService {
         director.setUserSurname(organisationRequestDTO.getDirectorSurname());
         director.setUserSecondName(organisationRequestDTO.getDirectorSecondName());
 
-        director.getAuthorities().add(authorityRepository.findByAuthority(new Authority("ADMINISTRATOR").getAuthority()).get());
+        director.getAuthorities().add(authorityRepository.findByAuthority(new Authority(AuthorityEnum.ADMINISTRATOR).getAuthority()).get());
 
         if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
             permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
