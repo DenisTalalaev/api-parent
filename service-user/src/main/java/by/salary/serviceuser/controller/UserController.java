@@ -27,8 +27,8 @@ public class UserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserResponseDTO> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserResponseDTO> getAllUsers(@RequestAttribute String email) {
+        return userService.getAllUsers(email);
     }
 
     @GetMapping("/getallmails/{userEmail}")

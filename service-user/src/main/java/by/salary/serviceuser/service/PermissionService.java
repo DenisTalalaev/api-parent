@@ -35,6 +35,8 @@ public class PermissionService {
             permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         }
 
+        //TODO: initialize all permissions, if not initialized
+
     }
 
     public List<PermissionResponseDTO> getUserPermissions(BigInteger id) {

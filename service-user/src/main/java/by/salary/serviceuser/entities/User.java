@@ -100,9 +100,6 @@ public class User {
 
 
 
-
-
-
     @ManyToOne
     @JoinColumn(name = "organisation_id")
     private Organisation organisation;
