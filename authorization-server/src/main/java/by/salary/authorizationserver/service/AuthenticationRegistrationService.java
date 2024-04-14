@@ -11,6 +11,7 @@ import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRe
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class AuthenticationRegistrationService {
         registerLocalUserRequest.setPassword(passwordEncoder.encode(registerLocalUserRequest.getPassword()));
         return authorizationRepository.save(mapToRegisterDto(registerLocalUserRequest));
     }
+
 
     public ConnValidationResponse authenticate(AuthenticationLocalUserRequest authenticationRequestDto) throws UserNotFoundException {
         AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()

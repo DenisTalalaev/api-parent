@@ -30,4 +30,5 @@ public class ProfilerFilter extends OncePerRequestFilter {
         Date end = new Date();
         log.info("Request {} took {} ms", request.getRequestURI(), end.getTime() - start.getTime());
     }
+
 }
