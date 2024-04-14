@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserRegistrationRequestDTO {
 
-    Boolean is2FEnabled = null;
+    Boolean is2FEnabled;
 
     AuthenticationRegistrationId authenticationRegistrationId;
 

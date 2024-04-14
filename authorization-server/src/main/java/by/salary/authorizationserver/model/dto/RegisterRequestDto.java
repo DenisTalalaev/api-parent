@@ -27,6 +27,6 @@ public class RegisterRequestDto {
     //oauth2
     String pictureUri;
 
-    boolean is2FEnabled;
+    Boolean is2FEnabled;
 
 }
