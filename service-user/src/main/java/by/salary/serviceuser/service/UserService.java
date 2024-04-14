@@ -31,10 +31,23 @@ public class UserService {
         this.organisationRepository = organisationRepository;
     }
 
-    public List<UserResponseDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers(String email) {
+
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if (optUser.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        if (!Permission.isPermitted(optUser.get(), PermissionsEnum.READ_ALL_USERS)) {
+            throw new NotEnoughtPermissionsException("User with email " + email + " has not enough permissions", HttpStatus.FORBIDDEN);
+        }
+        BigInteger organisationId = optUser.get().getOrganisation().getId();
+
+        if (!organisationRepository.existsById(organisationId)) {
+            throw new UserNotFoundException("Organisation with id " + organisationId + " not found", HttpStatus.NOT_FOUND);
+        }
 
         List<UserResponseDTO> users = new ArrayList<>();
-        userRepository.findAll().forEach(user -> {
+        userRepository.findAllByOrganisationId(organisationId).forEach(user -> {
             users.add(new UserResponseDTO(user));
         });
         return users;
@@ -55,7 +68,7 @@ public class UserService {
             throw new UserNotFoundException("Organisation with id " + userRequestDTO.getOrganisationId() + " not found", HttpStatus.NOT_FOUND);
         }
         User user = new User(userRequestDTO, optionalOrganisation.get());
-        user.getAuthorities().add(new Authority("USER"));
+        user.getAuthorities().add(new Authority(AuthorityEnum.USER));
         return new UserResponseDTO(userRepository.save(user));
     }
 

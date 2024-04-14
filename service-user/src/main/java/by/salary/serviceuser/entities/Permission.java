@@ -52,6 +52,15 @@ public class Permission {
         this.description = permissionsEnum.name() + "  permission";
     }
 
+    public static boolean isPermitted(User user, PermissionsEnum permissionsEnum) {
+        for (Permission permission : user.getPermissions()) {
+            if (permission.getName().equals(permissionsEnum.name()) || permission.getName().equals(PermissionsEnum.ALL_PERMISSIONS.name())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         return this.name.equals(((Permission) o).name) ||

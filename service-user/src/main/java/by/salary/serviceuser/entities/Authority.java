@@ -22,4 +22,8 @@ public class Authority {
     public Authority(String authority) {
         this.authority = authority;
     }
+
+    public Authority(AuthorityEnum authority) {
+        this.authority = authority.name();
+    }
 }
