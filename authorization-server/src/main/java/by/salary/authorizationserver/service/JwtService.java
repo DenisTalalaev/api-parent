@@ -114,7 +114,6 @@ public class JwtService {
         return generateToken(claims, userDetails.getUsername());
     }
 
-
     /**
      * Проверка токена на валидность
      *

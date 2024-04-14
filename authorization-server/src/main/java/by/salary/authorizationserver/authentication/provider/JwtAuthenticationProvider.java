@@ -48,7 +48,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
         AuthenticationResponseDto response = responseDto.get();
 
         if (service.is2FEnabled(jwt) != response.is2FEnabled()) {
-            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
+            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid: 2FA is not matched");
         }
 
         if (service.isTokenValid(jwt, mapToUserInfoDto(responseDto.get()))) {
@@ -59,6 +59,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
                 //return new JwtAuthenticationToken(jwt, service);
                 return new UsernamePasswordAuthenticationToken(userName, null, grantedAuthorities);
             }
+            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid: roles are not matched");
         }
         throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
     }

@@ -46,7 +46,8 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
         HttpStatusCode httpStatus = determineHttpStatus(throwable);
 
         errorPropertiesMap.put("status", httpStatus.value());
-        errorPropertiesMap.remove("error");
+        //errorPropertiesMap.remove("error");
+
 
         log.error("Error occurred: {}", errorPropertiesMap);
         return ServerResponse.status(httpStatus)

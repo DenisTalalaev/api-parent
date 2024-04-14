@@ -29,7 +29,8 @@ public class ServiceCacheConfig {
 
     @Bean
     public CacheManager cacheManager(Caffeine caffeine) {
-        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager("tokens");
+        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager(
+                "tokens", "tokenEntities");
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }
