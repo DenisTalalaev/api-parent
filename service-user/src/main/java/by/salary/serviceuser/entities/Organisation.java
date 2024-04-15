@@ -67,12 +67,11 @@ public class Organisation {
         this.director = null;
     }
 
-    public void update(OrganisationRequestDTO organisationRequestDTO, User director) {
 
+    public void update(OrganisationRequestDTO organisationRequestDTO) {
         this.organisationName = organisationRequestDTO.getOrganisationName() == null? this.organisationName : organisationRequestDTO.getOrganisationName();
         this.organisationAddress = organisationRequestDTO.getOrganisationAddress() ==null? this.organisationAddress : organisationRequestDTO.getOrganisationAddress();
         this.organisationContactNumber = organisationRequestDTO.getOrganisationContactNumber() == null? this.organisationContactNumber : organisationRequestDTO.getOrganisationContactNumber();
-        this.director = director == null? this.director : director;
         this.baseReward = organisationRequestDTO.getBaseReward() == null? this.baseReward : organisationRequestDTO.getBaseReward();
     }
 }

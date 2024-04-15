@@ -6,6 +6,7 @@ import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.UserPromoteRequestDTO;
 import by.salary.serviceuser.model.UserRequestDTO;
 import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.repository.AuthorityRepository;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,13 @@ import java.util.Optional;
 public class UserService {
 
     UserRepository userRepository;
+
+    AuthorityRepository authorityRepository;
     private OrganisationRepository organisationRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository) {
+    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository, AuthorityRepository authorityRepository) {
+        this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
         this.organisationRepository = organisationRepository;
     }
@@ -205,5 +209,31 @@ public class UserService {
 
     public UserResponseDTO getUser(String email) {
         return new UserResponseDTO(userRepository.findByUserEmail(email).get());
+    }
+
+    public UserResponseDTO setUserAuthority(BigInteger userId, BigInteger authorityId, String email) {
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if(!Permission.isPermitted(user, PermissionsEnum.AUTHORITY_REDACTION)){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<Authority> authorityOpt = authorityRepository.findById(authorityId);
+        if (authorityOpt.isEmpty()) {
+            throw new UserNotFoundException("Authority with id " + authorityId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        Optional<User> userOpt2 = userRepository.findById(userId);
+        if (userOpt2.isEmpty()) {
+            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user2 = userOpt2.get();
+        Authority authority = authorityOpt.get();
+        user2.getAuthorities().clear();
+        user2.getAuthorities().add(authority);
+        userRepository.save(user2);
+        return new UserResponseDTO(user2);
     }
 }

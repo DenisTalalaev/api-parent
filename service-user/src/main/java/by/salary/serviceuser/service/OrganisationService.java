@@ -1,6 +1,7 @@
 package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.*;
+import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.OrganisationNotFoundException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.OrganisationRequestDTO;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import javax.swing.plaf.OptionPaneUI;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,8 +46,8 @@ public class OrganisationService {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
 
-        for(AuthorityEnum authority : AuthorityEnum.values()){
-            if(!authorityRepository.existsByAuthority(authority.name())){
+        for (AuthorityEnum authority : AuthorityEnum.values()) {
+            if (!authorityRepository.existsByAuthority(authority.name())) {
                 authorityRepository.save(new Authority(authority));
             }
         }
@@ -85,7 +87,7 @@ public class OrganisationService {
     public OrganisationResponseDTO createOrganisation(OrganisationRequestDTO organisationRequestDTO,
                                                       String email) {
         Optional<User> directorOpt = userRepository.findByUserEmail(email);
-        if(directorOpt.isEmpty()){
+        if (directorOpt.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User director = directorOpt.get();
@@ -104,7 +106,7 @@ public class OrganisationService {
 
         director.getAuthorities().add(authorityRepository.findByAuthority(new Authority(AuthorityEnum.ADMINISTRATOR).getAuthority()).get());
 
-        if(!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())){
+        if (!permissionRepository.existsByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName())) {
             permissionRepository.save(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         }
         director.addPermission(permissionRepository.findByName(new Permission(PermissionsEnum.ALL_PERMISSIONS).getName()).get());
@@ -113,9 +115,8 @@ public class OrganisationService {
     }
 
 
-
     public void deleteOrganisation(BigInteger id) {
-        if(!organisationRepository.existsById(id)){
+        if (!organisationRepository.existsById(id)) {
             throw new OrganisationNotFoundException("Organisation with id " + id + " not found", HttpStatus.NOT_FOUND);
         }
         organisationRepository.deleteById(id);
@@ -132,5 +133,21 @@ public class OrganisationService {
             users.add(new UserResponseDTO(user));
         });
         return users;
+    }
+
+    public OrganisationResponseDTO updateOrganisation(OrganisationRequestDTO organisationRequestDTO, String email) {
+        Optional<User> directorOpt = userRepository.findByUserEmail(email);
+        if (directorOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User director = directorOpt.get();
+        if (!Permission.isPermitted(director, PermissionsEnum.REDACT_ORGANISATION_INFO)) {
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<Organisation> optionalOrganisation = organisationRepository.findById(director.getOrganisation().getId());
+        Organisation organisation = optionalOrganisation.get();
+        organisation.update(organisationRequestDTO);
+        organisationRepository.save(organisation);
+        return new OrganisationResponseDTO(organisation);
     }
 }
