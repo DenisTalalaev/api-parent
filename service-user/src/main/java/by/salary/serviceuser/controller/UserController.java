@@ -8,7 +8,6 @@ import by.salary.serviceuser.model.UserResponseDTO;
 import by.salary.serviceuser.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.query.JSqlParserUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -94,4 +93,14 @@ public class UserController {
     ) {
         return userService.demoteUser(userPromoteRequestDTO, email, permissions);
     }
+
+    @PutMapping("/authority/{user_id}/{authority_id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO updateUser(@PathVariable BigInteger user_id,
+                                      @PathVariable BigInteger authority_id,
+                                      @RequestAttribute String email
+    ) {
+        return userService.setUserAuthority(user_id, authority_id, email);
+    }
+
 }

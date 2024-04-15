@@ -52,5 +52,12 @@ public class OrganisationController {
         return organisationService.createOrganisation(organisationRequestDTO, email);
     }
 
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public OrganisationResponseDTO updateOrganisation(@RequestBody OrganisationRequestDTO organisationRequestDTO,
+                                                      @RequestAttribute String email) {
+        return organisationService.updateOrganisation(organisationRequestDTO, email);
+    }
+
 
 }
