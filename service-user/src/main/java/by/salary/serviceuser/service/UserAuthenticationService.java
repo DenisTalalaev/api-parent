@@ -47,10 +47,19 @@ public class UserAuthenticationService {
     public UserAuthenticationResponseDTO auth(UserAuthenticationRequestDTO userAuthenticationRequestDTO) {
         if (userAuthenticationRequestDTO.getAuthenticationRegistrationId().equals(AuthenticationRegistrationId.local)) {
             if (userAuthenticationRequestDTO.getUserEmail() != null) {
-                return new UserAuthenticationResponseDTO(userRepository.findByUserEmail(userAuthenticationRequestDTO.getUserEmail()));
+                Optional<User> optUser = userRepository.findByUserEmail(userAuthenticationRequestDTO.getUserEmail());
+                if (optUser.isEmpty()) {
+                    throw new UserNotFoundException("User with email " + userAuthenticationRequestDTO.getUserEmail() + " not found", HttpStatus.NOT_FOUND);
+                }
+                return new UserAuthenticationResponseDTO(optUser);
             } else if (userAuthenticationRequestDTO.getUsername() != null) {
-                return new UserAuthenticationResponseDTO(userRepository.findByUsername(userAuthenticationRequestDTO.getUsername()));
+                Optional<User> optUser = userRepository.findByUsername(userAuthenticationRequestDTO.getUsername());
+                if (optUser.isEmpty()) {
+                    throw new UserNotFoundException("User with username " + userAuthenticationRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+                }
+                return new UserAuthenticationResponseDTO(optUser);
             }
+            throw new UserNotFoundException("User not found", HttpStatus.NOT_FOUND);
         }
         return new UserAuthenticationResponseDTO(
                 userRepository.findByUserAuthorisationAttributeKey(userAuthenticationRequestDTO.getAuthorizationRegistrationKey())
