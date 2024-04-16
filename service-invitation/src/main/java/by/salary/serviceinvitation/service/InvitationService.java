@@ -90,7 +90,7 @@ public class InvitationService {
     public InvitationResponseDTO deleteInvitation(String invitationCode) {
         Optional<Invitation> invitation = invitationRepository.findByInvitationCode(invitationCode);
         if(invitation.isEmpty()){
-            throw new InvitationNotFoundException("Invitation not found", HttpStatus.NOT_FOUND);
+            throw new InvitationNotFoundException("Invitation not found", HttpStatus.NOT_FOUND) ;
         }
         invitationRepository.deleteById(invitation.get().getId());
         return new InvitationResponseDTO();

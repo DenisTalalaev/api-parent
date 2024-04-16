@@ -240,4 +240,23 @@ public class UserService {
     public String isPermitted(String email) {
         return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.INVITE_USER));
     }
+
+    public UserResponseDTO updateUser(BigInteger user_id, String email) {
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if(!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)){
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> userOpt2 = userRepository.findById(user_id);
+        if (userOpt2.isEmpty()) {
+            throw new UserNotFoundException("User with id " + user_id + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user2 = userOpt2.get();
+        user2.setIsAccountNonExpired(false);
+        userRepository.save(user2);
+        return new UserResponseDTO(user2);
+    }
 }

@@ -38,7 +38,6 @@ public class Organisation {
     private BigInteger id;
 
     @Size(min = 2, max = 100)
-    @Column(unique = true)
     private String organisationName;
 
     @Size(min = 2, max = 200)
