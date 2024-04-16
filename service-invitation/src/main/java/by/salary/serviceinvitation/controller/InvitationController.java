@@ -39,9 +39,8 @@ public class InvitationController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public InvitationResponseDTO createInvitation(@RequestBody InvitationRequestDTO invitationRequestDTO,
-                                                  @RequestAttribute String email,
-                                                  @RequestAttribute List<Permission> permissions) {
-        return invitationService.createInvitation(invitationRequestDTO, email, permissions);
+                                                  @RequestAttribute String email) {
+        return invitationService.createInvitation(invitationRequestDTO, email);
     }
 
     @DeleteMapping("/{invitationCode}")
