@@ -236,4 +236,16 @@ public class UserService {
         userRepository.save(user2);
         return new UserResponseDTO(user2);
     }
+
+    public String isPermitted(String email) {
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if(!Permission.isPermitted(user, PermissionsEnum.INVITE_USER)){
+            return String.valueOf(false);
+        }
+        return String.valueOf(true);
+    }
 }

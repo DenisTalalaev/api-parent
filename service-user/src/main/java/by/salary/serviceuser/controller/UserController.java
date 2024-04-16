@@ -103,4 +103,10 @@ public class UserController {
         return userService.setUserAuthority(user_id, authority_id, email);
     }
 
+    @GetMapping("/ispermitted/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    public String isPermitted(@PathVariable String email) {
+        return userService.isPermitted(email);
+    }
+
 }

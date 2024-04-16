@@ -57,9 +57,9 @@ public class InvitationService {
         }
     }
 
-    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO, String directorEmail, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.INVITE_USER))){
-            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+    public InvitationResponseDTO createInvitation(InvitationRequestDTO invitationRequestDTO, String directorEmail) {
+        if(!isPermitted(directorEmail)){
+            throw new NotEnoughtPermissionsException("User with email " + directorEmail + " has not enough permissions", HttpStatus.FORBIDDEN);
         }
         BigInteger organisationId = getOrganisationId(directorEmail);
         Invitation invitation = new Invitation(invitationRequestDTO, generateInvitationCode(), organisationId);
@@ -74,6 +74,17 @@ public class InvitationService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block()));
+    }
+
+
+    private Boolean isPermitted(String directorEmail) {
+        return Objects.requireNonNull(webClientBuilder
+                .build()
+                .get()
+                .uri("http://service-user:8080/users/ispermitted/" + directorEmail)
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block());
     }
 
     public InvitationResponseDTO deleteInvitation(String invitationCode) {
