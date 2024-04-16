@@ -55,6 +55,11 @@ spring:
         uri: lb://service-user
         predicates:
           - Path=/organisations/**
+        ### User permissions route
+      - id: service-user-permissions
+        uri: lb://service-user
+        predicates:
+          - Path=/permissions/**
         ### User agreement Service route
       - id: service-user-user-agreement
         uri: lb://service-user
