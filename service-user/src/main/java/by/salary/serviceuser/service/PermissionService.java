@@ -122,9 +122,9 @@ public class PermissionService {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
 
-        Permission permission = optPermission.get();
-        permission.getUsers().remove(optUser.get());
-        permissionRepository.save(permission);
+        User user = optUser.get();
+        user.getPermissions().remove(optPermission.get());
+        userRepository.save(user);
     }
 
 }
