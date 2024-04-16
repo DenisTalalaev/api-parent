@@ -114,7 +114,7 @@ public class UserController {
     public UserResponseDTO expireUser(@PathVariable BigInteger user_id,
                                       @RequestAttribute String email
     ) {
-        return userService.updateUser(user_id, email);
+        return userService.expireUser(user_id, email);
     }
 
 }

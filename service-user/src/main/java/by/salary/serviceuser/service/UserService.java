@@ -52,7 +52,13 @@ public class UserService {
 
         List<UserResponseDTO> users = new ArrayList<>();
         userRepository.findAllByOrganisationId(organisationId).forEach(user -> {
-            users.add(new UserResponseDTO(user));
+            if (user.getIsAccountNonExpired() != null) {
+                if (user.getIsAccountNonExpired()) {
+                    users.add(new UserResponseDTO(user));
+                }
+            } else {
+                users.add(new UserResponseDTO(user));
+            }
         });
         return users;
     }
@@ -108,16 +114,16 @@ public class UserService {
         }
         return String.join("\n",
                 userRepository.findAllByOrganisationId(
-                        optUser
-                                .get()
-                                .getOrganisation()
-                                .getId())
+                                optUser
+                                        .get()
+                                        .getOrganisation()
+                                        .getId())
                         .stream().map(User::getUserEmail)
                         .toList());
     }
 
     public UserResponseDTO promoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+        if (!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> promoterOpt = userRepository.findByUserEmail(email);
@@ -126,7 +132,7 @@ public class UserService {
         }
         Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
         if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException("User  " + userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
         user.getAuthorities().add(userPromoteRequestDTO.getAuthority());
@@ -135,7 +141,7 @@ public class UserService {
     }
 
     public UserResponseDTO demoteUser(UserPromoteRequestDTO userPromoteRequestDTO, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+        if (!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> promoterOpt = userRepository.findByUserEmail(email);
@@ -144,13 +150,13 @@ public class UserService {
         }
         Optional<User> userOpt = userRepository.findByUsername(userPromoteRequestDTO.getUsername());
         if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException("User  " + userPromoteRequestDTO.getUsername() + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
-        if(user.getAuthorities().contains(userPromoteRequestDTO.getAuthority())){
+        if (user.getAuthorities().contains(userPromoteRequestDTO.getAuthority())) {
             user.getAuthorities().remove(userPromoteRequestDTO.getAuthority());
         } else {
-            throw new UserNotFoundException("User  " +userPromoteRequestDTO.getUsername() + " has not this authority", HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException("User  " + userPromoteRequestDTO.getUsername() + " has not this authority", HttpStatus.NOT_FOUND);
         }
 
         clearPermissions(user);
@@ -166,12 +172,12 @@ public class UserService {
         return new UserResponseDTO(user);
     }
 
-    private boolean addUserPermissions (User user) {
+    private boolean addUserPermissions(User user) {
         userRepository.save(user);
         return true;
     }
 
-    private boolean addModeratorPermissions (User user) {
+    private boolean addModeratorPermissions(User user) {
         addUserPermissions(user);
         user.addPermission(new Permission(PermissionsEnum.CRUD_AGREEMENT_STATE));
 
@@ -186,7 +192,7 @@ public class UserService {
         return true;
     }
 
-    private boolean addAdministratorPermissions (User user) {
+    private boolean addAdministratorPermissions(User user) {
         user.addPermission(new Permission(PermissionsEnum.ALL_PERMISSIONS));
         userRepository.save(user);
         return true;
@@ -208,7 +214,7 @@ public class UserService {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
-        if(!Permission.isPermitted(user, PermissionsEnum.AUTHORITY_REDACTION)){
+        if (!Permission.isPermitted(user, PermissionsEnum.AUTHORITY_REDACTION)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<Authority> authorityOpt = authorityRepository.findById(authorityId);
@@ -238,7 +244,7 @@ public class UserService {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
-        if(!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)){
+        if (!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> userOpt2 = userRepository.findById(user_id);
@@ -247,6 +253,29 @@ public class UserService {
         }
         User user2 = userOpt2.get();
         user2.setIsAccountNonExpired(false);
+        userRepository.save(user2);
+        return new UserResponseDTO(user2);
+    }
+
+    public UserResponseDTO expireUser(BigInteger user_id, String email) {
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = userOpt.get();
+        if (!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)) {
+            throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        Optional<User> userOpt2 = userRepository.findById(user_id);
+        if (userOpt2.isEmpty()) {
+            throw new UserNotFoundException("User with id " + user_id + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user2 = userOpt2.get();
+        user2.setIsAccountNonExpired(false);
+        user2.setUserEmail(null);
+        user2.setIsAccountNonLocked(false);
+        user2.setIsEnabled(false);
+        user2.setUsername(null);
         userRepository.save(user2);
         return new UserResponseDTO(user2);
     }
