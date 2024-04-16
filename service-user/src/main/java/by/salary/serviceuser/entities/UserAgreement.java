@@ -64,4 +64,15 @@ public class UserAgreement {
         this.currentBaseReward = user.getOrganisation().getBaseReward();
         this.user = user;
     }
+
+    public UserAgreement(UserAgreementRequestDTO userAgreement, User user, User moderator) {
+        this.agreementId = userAgreement.getAgreementId();
+        this.moderatorName = moderator.getUserSurname() + " " + moderator.getUserFirstName() + " " + moderator.getUserSecondName();
+        this.moderatorComment = userAgreement.getModeratorComment();
+        this.count = userAgreement.getCount();
+        this.time = new Time(System.currentTimeMillis());
+        this.currentBaseReward = user.getOrganisation().getBaseReward();
+        this.user = user;
+
+    }
 }

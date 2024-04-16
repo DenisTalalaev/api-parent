@@ -2,6 +2,7 @@ package by.salary.serviceuser.service;
 
 import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.entities.PermissionsEnum;
+import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.entities.UserAgreement;
 import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserAgreementsService {
@@ -30,13 +32,13 @@ public class UserAgreementsService {
     }
 
 
-    public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email, List<Permission> permissions) {
-        if(!userRepository.existsById(userId)){
+    public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email) {
+        if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
 
-        if(!userId.equals(userRepository.findByUserEmail(email).get().getId())
-            & ! permissions.contains(new Permission(PermissionsEnum.READ_USER_AGREEMENT))
+        if (!userId.equals(userRepository.findByUserEmail(email).get().getId())
+                & !Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.CRUD_USER_AGREEMENT)
         ){
             throw new NotEnoughtPermissionsException("User with id " + userId + " not found", HttpStatus.FORBIDDEN);
         }
@@ -52,50 +54,38 @@ public class UserAgreementsService {
         return userAgreements;
     }
 
-    public void deleteUserAgreement(BigInteger agreementId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_USER_AGREEMENT))){
-            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
-        }
-        if(!userRepository.existsByUserEmail(email)){
+    public void deleteUserAgreement(BigInteger agreementId, String email) {
+
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if (optUser.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
-        if(!userAgreementsRepository.existsById(agreementId)){
+
+        if (!Permission.isPermitted(optUser.get(), PermissionsEnum.CRUD_USER_AGREEMENT)) {
+            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        if (!userRepository.existsByUserEmail(email)) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        if (!userAgreementsRepository.existsById(agreementId)) {
             throw new UserNotFoundException("User agreement with id " + agreementId + " not found", HttpStatus.NOT_FOUND);
         }
         userAgreementsRepository.deleteById(agreementId);
     }
 
-    public void deleteUserAgreements(BigInteger userId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_USER_AGREEMENT))){
-            throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
-        }
-        if(!userRepository.existsByUserEmail(email)){
+
+    public UserAgreementResponseDTO createUserAgreement(UserAgreementRequestDTO userAgreementRequestDTO, BigInteger userId, String email) {
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if (optUser.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
-        if(!userRepository.existsById(userId)){
-            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
-        }
-        userAgreementsRepository.findAll().forEach(
-                userAgreement -> {
-                    if (userAgreement.getUser().getId().equals(userId)) {
-                        userAgreementsRepository.deleteById(userAgreement.getId());
-                    }
-                }
-        );
-    }
-
-    public UserAgreementResponseDTO createUserAgreement(UserAgreementRequestDTO userAgreementRequestDTO, BigInteger userId, String email, List<Permission> permissions) {
-        if(!userRepository.existsByUserEmail(email)){
-            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
-        }
-        if(!permissions.contains(new Permission(PermissionsEnum.ADD_USER_AGREEMENT))){
+        if (!Permission.isPermitted(optUser.get(), PermissionsEnum.CRUD_USER_AGREEMENT)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
-        if(!userRepository.existsById(userId)){
+        if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
-
-        UserAgreement userAgreement = new UserAgreement(userAgreementRequestDTO, userRepository.findById(userId).get());
+        UserAgreement userAgreement = new UserAgreement(userAgreementRequestDTO, userRepository.findById(userId).get(), optUser.get());
         return new UserAgreementResponseDTO(userAgreementsRepository.save(userAgreement));
     }
 }

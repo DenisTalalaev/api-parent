@@ -124,9 +124,6 @@ public class UserAuthenticationService {
 
         user.getAuthorities().add(authorityRepository.findByAuthority(new Authority("USER").getAuthority()).get());
 
-        user.addPermission(new Permission(PermissionsEnum.READ_OWN_AGREEMENT_STATES));
-        user.addPermission(new Permission(PermissionsEnum.READ_AGREEMENT));
-
         userRepository.save(user);
         deleteInvitation(userJoinOrganisationRequestDTO.getInvitationCode());
         return new UserJoinOrganisationResponseDTO(user);
