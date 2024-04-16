@@ -109,4 +109,12 @@ public class UserController {
         return userService.isPermitted(email);
     }
 
+    @PutMapping("/expire/{user_id}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO expireUser(@PathVariable BigInteger user_id,
+                                      @RequestAttribute String email
+    ) {
+        return userService.updateUser(user_id, email);
+    }
+
 }

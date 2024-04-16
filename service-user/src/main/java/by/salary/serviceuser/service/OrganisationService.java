@@ -12,13 +12,12 @@ import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.PermissionRepository;
 import by.salary.serviceuser.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.swing.plaf.OptionPaneUI;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +83,7 @@ public class OrganisationService {
         );
     }
 
+    @Transactional
     public OrganisationResponseDTO createOrganisation(OrganisationRequestDTO organisationRequestDTO,
                                                       String email) {
         Optional<User> directorOpt = userRepository.findByUserEmail(email);
