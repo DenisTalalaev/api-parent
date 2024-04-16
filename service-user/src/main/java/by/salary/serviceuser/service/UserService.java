@@ -175,18 +175,11 @@ public class UserService {
 
     private boolean addModeratorPermissions (User user) {
         addUserPermissions(user);
-        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_STATE));
-        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_STATE));
-        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_STATE));
+        user.addPermission(new Permission(PermissionsEnum.CRUD_AGREEMENT_STATE));
 
-        user.addPermission(new Permission(PermissionsEnum.CREATE_AGREEMENT_LIST));
-        user.addPermission(new Permission(PermissionsEnum.UPDATE_AGREEMENT_LIST));
-        user.addPermission(new Permission(PermissionsEnum.DELETE_AGREEMENT_LIST));
+        user.addPermission(new Permission(PermissionsEnum.CRUD_AGREEMENT_LIST));
 
-        user.addPermission(new Permission(PermissionsEnum.READ_USER_AGREEMENT));
-        user.addPermission(new Permission(PermissionsEnum.ADD_USER_AGREEMENT));
-        user.addPermission(new Permission(PermissionsEnum.DELETE_USER_AGREEMENT));
-        user.addPermission(new Permission(PermissionsEnum.CHANGE_USER_AGREEMENT));
+        user.addPermission(new Permission(PermissionsEnum.CRUD_USER_AGREEMENT));
 
         user.addPermission(new Permission(PermissionsEnum.INVITE_USER));
         user.addPermission(new Permission(PermissionsEnum.EXPIRE_USER));
