@@ -25,37 +25,26 @@ public class UserAgreementsController {
         this.userAgreementsService = userAgreementsService;
     }
 
-    @GetMapping("{user_id}")
+    @GetMapping("/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public List<UserAgreementResponseDTO> getAllUserAgreements(@PathVariable BigInteger user_id,
-                                                               @RequestAttribute String email,
-                                                               @RequestAttribute List<Permission> permissions) {
-        return userAgreementsService.getAllUserAgreements(user_id, email, permissions);
+                                                               @RequestAttribute String email) {
+        return userAgreementsService.getAllUserAgreements(user_id, email);
     }
 
     @PostMapping("/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public UserAgreementResponseDTO createUserAgreement(@RequestBody UserAgreementRequestDTO userAgreementRequestDTO,
                                                         @PathVariable BigInteger user_id,
-                                                        @RequestAttribute String email,
-                                                        @RequestAttribute List<Permission> permissions) {
-        return userAgreementsService.createUserAgreement(userAgreementRequestDTO, user_id, email, permissions);
+                                                        @RequestAttribute String email) {
+        return userAgreementsService.createUserAgreement(userAgreementRequestDTO, user_id, email);
     }
 
     @DeleteMapping("/{agreement_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUserAgreement( @PathVariable BigInteger agreement_id,
-                                     @RequestAttribute String email,
-                                     @RequestAttribute List<Permission> permissions) {
-        userAgreementsService.deleteUserAgreement(agreement_id, email, permissions);
-    }
-
-    @DeleteMapping("/{user_id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteAllUserAgreements(@PathVariable BigInteger user_id,
-                                        @RequestAttribute String email,
-                                        @RequestAttribute List<Permission> permissions) {
-        userAgreementsService.deleteUserAgreements(user_id, email, permissions);
+                                     @RequestAttribute String email) {
+        userAgreementsService.deleteUserAgreement(agreement_id, email);
     }
 
 }

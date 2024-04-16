@@ -88,7 +88,7 @@ public class PermissionService {
         if(!permissionRepository.existsById(permissionId)){
             throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
         }
-        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER))){
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
@@ -113,7 +113,7 @@ public class PermissionService {
         }
 
 
-        if(!permissions.contains(new Permission(PermissionsEnum.DEMOTE_USER))){
+        if(!permissions.contains(new Permission(PermissionsEnum.DEMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
