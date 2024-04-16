@@ -238,14 +238,6 @@ public class UserService {
     }
 
     public String isPermitted(String email) {
-        Optional<User> userOpt = userRepository.findByUserEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
-        }
-        User user = userOpt.get();
-        if(!Permission.isPermitted(user, PermissionsEnum.INVITE_USER)){
-            return String.valueOf(false);
-        }
-        return String.valueOf(true);
+        return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.INVITE_USER));
     }
 }

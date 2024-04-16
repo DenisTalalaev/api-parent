@@ -78,13 +78,13 @@ public class InvitationService {
 
 
     private Boolean isPermitted(String directorEmail) {
-        return Objects.requireNonNull(webClientBuilder
+        return Boolean.valueOf(Objects.requireNonNull(webClientBuilder
                 .build()
                 .get()
                 .uri("http://service-user:8080/users/ispermitted/" + directorEmail)
                 .retrieve()
-                .bodyToMono(Boolean.class)
-                .block());
+                .bodyToMono(String.class)
+                .block()));
     }
 
     public InvitationResponseDTO deleteInvitation(String invitationCode) {
