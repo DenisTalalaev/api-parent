@@ -3,9 +3,7 @@ package by.salary.serviceuser.service;
 import by.salary.serviceuser.entities.*;
 import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
-import by.salary.serviceuser.model.UserPromoteRequestDTO;
-import by.salary.serviceuser.model.UserRequestDTO;
-import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.model.*;
 import by.salary.serviceuser.repository.AuthorityRepository;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
@@ -238,7 +236,7 @@ public class UserService {
         return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.INVITE_USER));
     }
 
-    public UserResponseDTO updateUser(BigInteger user_id, String email) {
+    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, String email) {
         Optional<User> userOpt = userRepository.findByUserEmail(email);
         if (userOpt.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
@@ -247,12 +245,12 @@ public class UserService {
         if (!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
-        Optional<User> userOpt2 = userRepository.findById(user_id);
+        Optional<User> userOpt2 = userRepository.findById(userRequestDTO.getId());
         if (userOpt2.isEmpty()) {
-            throw new UserNotFoundException("User with id " + user_id + " not found", HttpStatus.NOT_FOUND);
+            throw new UserNotFoundException("User with id " + userRequestDTO.getId() + " not found", HttpStatus.NOT_FOUND);
         }
         User user2 = userOpt2.get();
-        user2.setIsAccountNonExpired(false);
+        user2.update(userRequestDTO);
         userRepository.save(user2);
         return new UserResponseDTO(user2);
     }
@@ -278,5 +276,16 @@ public class UserService {
         user2.setUsername(null);
         userRepository.save(user2);
         return new UserResponseDTO(user2);
+    }
+
+    public AuthenticationChangePasswordResponseDto changePassword(AuthenticationChangePasswordRequestDto authenticationChangePasswordRequestDto) {
+        Optional<User> optionalUser = userRepository.findByUserEmail(authenticationChangePasswordRequestDto.getEmail());
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User with email " + authenticationChangePasswordRequestDto.getEmail() + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = optionalUser.get();
+        user.setUserPassword(authenticationChangePasswordRequestDto.getPassword());
+        userRepository.save(user);
+        return new AuthenticationChangePasswordResponseDto(HttpStatus.OK, "Password changed successfully");
     }
 }

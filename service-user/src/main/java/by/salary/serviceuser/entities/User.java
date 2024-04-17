@@ -168,6 +168,10 @@ public class User {
         this.isCredentialsNonExpired = userRequestDTO.isCredentialsNonExpired() == null ? this.isCredentialsNonExpired : userRequestDTO.isCredentialsNonExpired();
     }
 
+    public void update(UserRequestDTO userRequestDTO) {
+        this.update(userRequestDTO, this.organisation);
+    }
+
     public void addPermission(Permission permission) {
         permissions.add(permission);
     }
