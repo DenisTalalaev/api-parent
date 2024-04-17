@@ -38,7 +38,7 @@ public class VerificationCodeHandler {
 
     TokenRegistrationService tokenRegistrationService;
 
-    public boolean verify(String jwt, VerificationCodeRequest verificationCode) {
+    public boolean verify(String jwt, String verificationCode) {
         String username = jwtService.extractUserName(jwt);
 
         List<TokenEntity> tokens = tokenService.findAllByUsername(username);
@@ -47,7 +47,7 @@ public class VerificationCodeHandler {
         }
         for (TokenEntity token : tokens){
             if (passwordEncoder.matches(jwt, token.getAuthenticationToken())){
-                if (verificationCode.getCode().equals(token.getVerificationCode())) {
+                if (verificationCode.equals(token.getVerificationCode())) {
                     tokenService.deleteById(token.getId(), token.getUsername());
                     return true;
                 }

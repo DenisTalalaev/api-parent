@@ -3,6 +3,7 @@ package by.salary.apigatewayv2.filter;
 import by.salary.apigatewayv2.exception.AuthenticationNotVerifiedException;
 import by.salary.apigatewayv2.service.AuthenticationService;
 import by.salary.apigatewayv2.util.JwtService;
+import by.salary.apigatewayv2.util.SecurityConstants;
 import jakarta.ws.rs.core.SecurityContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -85,6 +86,9 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
                                 return Mono.error(new AuthenticationException("No authorities to preform this operation"));
                             }
 
+                            if (jwtService.hasAuthority(token, SecurityConstants.CHANGE_PASSWORD)) {
+                                return Mono.error(new AuthenticationNotVerifiedException("Password change is not verified"));
+                            }
 
                             return chain.filter(exchange);
                         })

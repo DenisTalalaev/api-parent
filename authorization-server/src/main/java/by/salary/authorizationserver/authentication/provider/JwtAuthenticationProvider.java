@@ -55,11 +55,8 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
             Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
                     new SimpleGrantedAuthority(a.getAuthority())).toList();
 
-            if (grantedAuthorities.equals(jwtAuthenticationToken.getAuthorities())) {
-                //return new JwtAuthenticationToken(jwt, service);
-                return new UsernamePasswordAuthenticationToken(userName, null, grantedAuthorities);
-            }
-            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid: roles are not matched");
+            //return new JwtAuthenticationToken(jwt, service);
+            return new UsernamePasswordAuthenticationToken(userName, null, grantedAuthorities);
         }
         throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid");
     }

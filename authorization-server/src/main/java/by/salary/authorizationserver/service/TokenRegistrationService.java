@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Collections;
 import java.util.Formatter;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -37,23 +39,21 @@ public class TokenRegistrationService {
     }
 
     public String generateToken(UserInfoDTO userInfo){
-
-        //generate jwt
-        String token = jwtService.generateToken(userInfo);
-
         //generate verification code
         if(!userInfo.is2FEnabled()){
-            return is2FDisabled(userInfo, token);
+            return is2FDisabled(userInfo);
         }
 
         if (!userInfo.is2FVerified()){
-            return is2FEnabledNotVerified(userInfo, token);
+            return is2FEnabledNotVerified(userInfo);
         }
 
-        return is2FVerified(userInfo, token);
+        return is2FVerified(userInfo);
     }
 
-    private String is2FDisabled(UserInfoDTO userInfoDTO, String token){
+    private String is2FDisabled(UserInfoDTO userInfoDTO){
+        //generate jwt
+        String token = jwtService.generateToken(userInfoDTO);
         TokenEntity tokenEntity = TokenEntity.builder()
                 .username(userInfoDTO.getUsername())
                 .authenticationToken(token)
@@ -65,7 +65,10 @@ public class TokenRegistrationService {
         return token;
     }
 
-    private String is2FEnabledNotVerified(UserInfoDTO userInfo, String token){
+    private String is2FEnabledNotVerified(UserInfoDTO userInfo){
+        userInfo.setAuthorities(Collections.emptyList());
+        //generate jwt
+        String token = jwtService.generateToken(userInfo);
         String verificationCode = generateVerificationCode();
         log.info("Verification code for email {} is {}", userInfo.getEmail(), verificationCode);
 
@@ -90,7 +93,9 @@ public class TokenRegistrationService {
         return token;
     }
 
-    private String is2FVerified(UserInfoDTO userInfoDTO, String token){
+    private String is2FVerified(UserInfoDTO userInfoDTO){
+        //generate jwt
+        String token = jwtService.generateToken(userInfoDTO);
         TokenEntity tokenEntity = TokenEntity.builder()
                 .username(userInfoDTO.getUsername())
                 .authenticationToken(token)
@@ -104,7 +109,7 @@ public class TokenRegistrationService {
         return token;
     }
 
-    public String generateVerificationCode() {
+    private String generateVerificationCode() {
         SecureRandom random = new SecureRandom();
         BigInteger code;
         do {
