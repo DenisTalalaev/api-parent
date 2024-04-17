@@ -9,6 +9,7 @@ import by.salary.authorizationserver.model.RestError;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.AuthenticationChangePasswordResponseDto;
 import by.salary.authorizationserver.model.dto.ChangePasswordRequestDto;
+import by.salary.authorizationserver.model.dto.ForgetPasswordRequestDto;
 import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
@@ -100,7 +101,7 @@ public class IdentityProviderController {
         boolean is2FEnabled = (boolean) request.getAttribute("is2FEnabled");
         boolean is2FVerified = (boolean) request.getAttribute("is2FVerified");
         //verify code
-        boolean isVerified = verificationCodeHandler.verify(jwt, code);
+        boolean isVerified = verificationCodeHandler.verify(jwt, code.getCode());
 
         UserInfoDTO userInfoDTO = UserInfoDTO.builder()
                 .name(jwtService.extractUserName(jwt))
@@ -123,13 +124,26 @@ public class IdentityProviderController {
         return ResponseEntity.status(errorMessage.getHttpStatus()).body(errorMessage);
     }
 
+    @PostMapping(value = "/forgot/password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequestDto requestDto) {
+        return authenticationRegistrationService.forgotPassword(requestDto);
+    }
+
     @PutMapping(value = "/change/password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDto changePasswordRequestDto, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        String jwt = (String) request.getAttribute("jwt");
         String email = (String) request.getAttribute("email");
 
-        AuthenticationChangePasswordResponseDto responseDto =  authenticationRegistrationService.changePassword(email, changePasswordRequestDto);
+        if (!verificationCodeHandler.verify(jwt, changePasswordRequestDto.getVerificationCode())){
+            RestError error = RestError.builder().httpStatus(HttpStatus.UNAUTHORIZED).message("Incorrect validation code")
+                    .build();
+            return ResponseEntity.status(error.getHttpStatus()).body(error);
+        }
+
+        AuthenticationChangePasswordResponseDto responseDto =  authenticationRegistrationService.changePassword(email,
+                changePasswordRequestDto);
 
         if (responseDto.getStatus().is2xxSuccessful()){
             logoutHandler.logout(request, response, authentication);

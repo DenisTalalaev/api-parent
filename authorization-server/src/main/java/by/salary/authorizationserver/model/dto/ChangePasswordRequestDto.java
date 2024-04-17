@@ -11,5 +11,8 @@ import org.checkerframework.checker.units.qual.N;
 @Getter
 @Setter
 public class ChangePasswordRequestDto {
+
+    String verificationCode;
     String password;
+
 }
