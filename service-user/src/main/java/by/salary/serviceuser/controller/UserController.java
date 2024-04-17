@@ -2,9 +2,7 @@ package by.salary.serviceuser.controller;
 
 
 import by.salary.serviceuser.entities.Permission;
-import by.salary.serviceuser.model.UserPromoteRequestDTO;
-import by.salary.serviceuser.model.UserRequestDTO;
-import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.model.*;
 import by.salary.serviceuser.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,5 +114,23 @@ public class UserController {
     ) {
         return userService.expireUser(user_id, email);
     }
+
+    @PutMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDTO renewUser(@RequestBody UserRequestDTO userRequestDTO,
+                                     @RequestAttribute String email
+    ) {
+        return userService.updateUser(userRequestDTO, email);
+    }
+
+
+    @PutMapping("/changepassword")
+    @ResponseStatus(HttpStatus.OK)
+    public AuthenticationChangePasswordResponseDto renewUser(@RequestBody AuthenticationChangePasswordRequestDto authenticationChangePasswordRequestDto
+    ) {
+        return userService.changePassword(authenticationChangePasswordRequestDto);
+    }
+
+
 
 }
