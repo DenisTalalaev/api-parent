@@ -126,7 +126,6 @@ public class IdentityProviderController {
 
     @PostMapping(value = "/forgot/password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgetPasswordRequestDto requestDto) {
-
         return authenticationRegistrationService.forgotPassword(requestDto);
     }
 
