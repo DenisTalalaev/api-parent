@@ -1,21 +1,21 @@
 package by.salary.authorizationserver.repository;
 
 import by.salary.authorizationserver.exception.UserAlreadyExistsException;
-import by.salary.authorizationserver.model.dto.AuthenticationRequestDto;
-import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
-import by.salary.authorizationserver.model.dto.RegisterRequestDto;
-import by.salary.authorizationserver.model.dto.RegisterResponseDto;
+import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Optional;
 
 @Service
@@ -59,6 +59,20 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
                 )
                 .bodyToMono(RegisterResponseDto.class)
                 .blockOptional();
+        if (response.isEmpty()) {
+            throw new UserAlreadyExistsException("User not found");
+        }
+        return response.get();
+    }
+
+    public AuthenticationChangePasswordResponseDto changePassword(AuthenticationChangePasswordRequestDto changePasswordRequestDto) {
+        Optional<AuthenticationChangePasswordResponseDto> response = webClientBuilder.build()
+                .put()
+                .uri("lb://service-user/users/changepassword")
+                .body(Mono.just(changePasswordRequestDto), AuthenticationChangePasswordRequestDto.class)
+                .retrieve()
+                .bodyToMono(AuthenticationChangePasswordResponseDto.class)
+                .blockOptional(Duration.ofSeconds(10));
         if (response.isEmpty()) {
             throw new UserAlreadyExistsException("User not found");
         }

@@ -7,6 +7,8 @@ import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.RestError;
 import by.salary.authorizationserver.model.UserInfoDTO;
+import by.salary.authorizationserver.model.dto.AuthenticationChangePasswordResponseDto;
+import by.salary.authorizationserver.model.dto.ChangePasswordRequestDto;
 import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
@@ -121,11 +123,19 @@ public class IdentityProviderController {
         return ResponseEntity.status(errorMessage.getHttpStatus()).body(errorMessage);
     }
 
-    @PostMapping(value = "/change/password")
-    public ResponseEntity<?> changePassword() {
+    @PutMapping(value = "/change/password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequestDto changePasswordRequestDto, HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        String email = (String) request.getAttribute("email");
 
-        return null;
+        AuthenticationChangePasswordResponseDto responseDto =  authenticationRegistrationService.changePassword(email, changePasswordRequestDto);
+
+        if (responseDto.getStatus().is2xxSuccessful()){
+            logoutHandler.logout(request, response, authentication);
+        }
+
+        return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
     }
 
 }

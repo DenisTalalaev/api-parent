@@ -10,10 +10,13 @@ import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
+import by.salary.authorizationserver.util.AuthenticationUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -32,6 +35,10 @@ public class AuthenticationRegistrationService {
     TokenRegistrationService tokenRegistrationService;
 
     MailService mailService;
+
+    AuthenticationUtils authenticationUtils;
+
+    LogoutHandler logoutHandler;
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
 
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
@@ -69,6 +76,15 @@ public class AuthenticationRegistrationService {
         String token = tokenRegistrationService.generateToken(mapToUserInfoDto(authentication.get()));
 
         return mapToConnValidationResponse(authentication.get(), token);
+    }
+
+    public AuthenticationChangePasswordResponseDto changePassword(String email, ChangePasswordRequestDto changePasswordRequestDto) {
+        AuthenticationChangePasswordRequestDto requestDto = AuthenticationChangePasswordRequestDto.builder()
+                .email(email)
+                .password(passwordEncoder.encode(changePasswordRequestDto.getPassword()))
+                .build();
+
+        return authorizationRepository.changePassword(requestDto);
     }
 
 
