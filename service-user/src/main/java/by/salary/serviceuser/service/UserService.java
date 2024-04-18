@@ -288,4 +288,10 @@ public class UserService {
         userRepository.save(user);
         return new AuthenticationChangePasswordResponseDto(HttpStatus.OK, "Password changed successfully");
     }
+
+    public List<Authority> getAllAuthorities() {
+        ArrayList<Authority> authorities = new ArrayList<>();
+        authorityRepository.findAll().forEach(authority -> authorities.add(authority));
+        return authorities;
+    }
 }
