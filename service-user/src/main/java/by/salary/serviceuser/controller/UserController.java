@@ -1,6 +1,7 @@
 package by.salary.serviceuser.controller;
 
 
+import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.model.*;
 import by.salary.serviceuser.service.UserService;
@@ -99,6 +100,12 @@ public class UserController {
                                       @RequestAttribute String email
     ) {
         return userService.setUserAuthority(user_id, authority_id, email);
+    }
+
+    @GetMapping("/authority")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Authority> gelAllAuthorities() {
+        return userService.getAllAuthorities();
     }
 
     @GetMapping("/ispermitted/{email}")
