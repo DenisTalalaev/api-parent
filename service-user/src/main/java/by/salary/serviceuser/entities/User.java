@@ -169,7 +169,9 @@ public class User {
     }
 
     public void update(UserRequestDTO userRequestDTO) {
-        this.update(userRequestDTO, this.organisation);
+        this.userFirstName = userRequestDTO.getUserFirstName() == null? this.userFirstName : userRequestDTO.getUserFirstName();
+        this.userSurname = userRequestDTO.getUserSurname() == null? this.userSurname : userRequestDTO.getUserSurname();
+        this.userSecondName = userRequestDTO.getUserSecondName() == null? this.userSecondName : userRequestDTO.getUserSecondName();
     }
 
     public void addPermission(Permission permission) {

@@ -22,5 +22,6 @@ public enum PermissionsEnum {
     //USER
 
     READ_ALL_USERS,
+    REDACT_USER_INFO,
     AUTHORITY_REDACTION
 }
