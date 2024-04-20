@@ -242,7 +242,7 @@ public class UserService {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User user = userOpt.get();
-        if (!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)) {
+        if (!Permission.isPermitted(user, PermissionsEnum.REDACT_USER_INFO)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> userOpt2 = userRepository.findById(userRequestDTO.getId());
