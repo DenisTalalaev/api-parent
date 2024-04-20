@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.sql.Time;
 
 /**
@@ -38,7 +39,7 @@ public class UserAgreement {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
     @NotNull
-    private BigInteger agreementId;
+    private String agreementId;
 
     @Size(min = 1, max = 50)
     private String moderatorName;
@@ -47,7 +48,7 @@ public class UserAgreement {
     @NotNull
     private BigDecimal count;
     @NotNull
-    private Time time;
+    private Date time;
     @NotNull
     private BigDecimal currentBaseReward;
 
@@ -55,24 +56,25 @@ public class UserAgreement {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public UserAgreement(UserAgreementRequestDTO userAgreement, User user) {
-        this.agreementId = userAgreement.getAgreementId();
+    public UserAgreement(UserAgreementRequestDTO userAgreement, User user, String agreement) {
+        this.agreementId = agreement;
         this.moderatorName = userAgreement.getModeratorName();
         this.moderatorComment = userAgreement.getModeratorComment();
         this.count = userAgreement.getCount();
-        this.time = new Time(System.currentTimeMillis());
+        this.time = new Date(System.currentTimeMillis());
         this.currentBaseReward = user.getOrganisation().getBaseReward();
         this.user = user;
     }
 
-    public UserAgreement(UserAgreementRequestDTO userAgreement, User user, User moderator) {
-        this.agreementId = userAgreement.getAgreementId();
-        this.moderatorName = moderator.getUserSurname() + " " + moderator.getUserFirstName() + " " + moderator.getUserSecondName();
+    public UserAgreement(UserAgreementRequestDTO userAgreement, User user, User moderator, String agreement) {
+        this.agreementId = agreement;
+        this.moderatorName = moderator.getUserSurname() + " " + moderator.getUserFirstName().charAt(0) + "." + moderator.getUserSecondName().charAt(0) + ".";
         this.moderatorComment = userAgreement.getModeratorComment();
         this.count = userAgreement.getCount();
-        this.time = new Time(System.currentTimeMillis());
+        this.time = new Date(System.currentTimeMillis());
         this.currentBaseReward = user.getOrganisation().getBaseReward();
         this.user = user;
 
     }
+
 }

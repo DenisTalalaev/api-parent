@@ -22,6 +22,13 @@ public class AgreementController {
         this.agreementService = agreementService;
     }
 
+
+    @GetMapping("/getagreementstate/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public String getAgreementState(@PathVariable BigInteger id) {
+        return agreementService.getAgreementState(id);
+    }
+
     @GetMapping("/admin")
     public List<AgreementResponseDTO> getAgreements() {
         return agreementService.getAllAgreements();
@@ -105,6 +112,8 @@ public class AgreementController {
                                      @RequestAttribute List<Permission> permissions) {
         agreementService.updateAgreementList(agreementListResponseDTO, list_id, email, permissions);
     }
+
+
 
 
 
