@@ -232,8 +232,8 @@ public class UserService {
         return new UserResponseDTO(user2);
     }
 
-    public String isPermitted(String email) {
-        return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.INVITE_USER));
+    public String isPermitted(String email, String permission) {
+        return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.valueOf(permission)));
     }
 
     public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, String email) {

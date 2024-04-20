@@ -61,6 +61,16 @@ public class Permission {
         return false;
     }
 
+    public static List<Permission> parse(String s) {
+        List<Permission> permissions = new ArrayList<>();
+        for (PermissionsEnum permissionsEnum : PermissionsEnum.values()) {
+            if (s.contains(permissionsEnum.name())) {
+                permissions.add(new Permission(permissionsEnum));
+            }
+        }
+        return permissions;
+    }
+
     @Override
     public boolean equals(Object o) {
         return this.name.equals(((Permission) o).name) ||

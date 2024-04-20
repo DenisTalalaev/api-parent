@@ -36,6 +36,12 @@ public class PermissionController {
         return permissionService.getUserPermissions(user_id);
     }
 
+    @GetMapping("/user/{email}")
+    @ResponseStatus(HttpStatus.OK)
+    public String getUserPermissions(@PathVariable String email) {
+        return permissionService.getUserPermissions(email).stream().map(PermissionResponseDTO::getName).reduce((a, b) -> a + ", " + b).get();
+    }
+
     @GetMapping("/users/{permission_id}")
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDTO> getAllUsersWithPermission(@PathVariable BigInteger permission_id) {
