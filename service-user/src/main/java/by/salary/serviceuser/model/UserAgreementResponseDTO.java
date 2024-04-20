@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.sql.Time;
 
 @Data
@@ -17,11 +18,11 @@ public class UserAgreementResponseDTO {
 
     private BigInteger id;
     private BigInteger userId;
-    private BigInteger agreementId;
+    private String agreementId;
     private String moderatorName;
     private String moderatorComment;
     private BigDecimal count;
-    private Time time;
+    private Date time;
     private BigDecimal currentBaseReward;
 
     public UserAgreementResponseDTO(UserAgreement userAgreement) {

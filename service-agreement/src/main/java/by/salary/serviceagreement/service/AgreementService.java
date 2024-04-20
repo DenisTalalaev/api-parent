@@ -238,4 +238,13 @@ public class AgreementService {
         }
         agreementListRepository.save(agreementList.update(agreementListResponseDTO));
     }
+
+    public String getAgreementState(BigInteger id) {
+        Optional<AgreementState> optAgreementState = agreementStateRepository.findById(id);
+        if (optAgreementState.isEmpty()) {
+            throw new AgreementNotFoundException("Agreement state not found", HttpStatus.NOT_FOUND);
+        }
+        AgreementState agreementState = optAgreementState.get();
+        return agreementState.getStateName() + ": " + agreementState.getStateInfo();
+    }
 }

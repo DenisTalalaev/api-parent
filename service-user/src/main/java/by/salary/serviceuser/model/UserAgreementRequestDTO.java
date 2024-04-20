@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.sql.Time;
 
 @NoArgsConstructor
@@ -19,6 +20,6 @@ public class UserAgreementRequestDTO {
     private String moderatorName;
     private String moderatorComment;
     private BigDecimal count;
-    private Time time;
+    private Date time;
     private BigDecimal currentBaseReward;
 }

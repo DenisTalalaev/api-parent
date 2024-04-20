@@ -13,10 +13,12 @@ import by.salary.serviceuser.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -25,8 +27,11 @@ public class UserAgreementsService {
     private final UserAgreementsRepository userAgreementsRepository;
     private final UserRepository userRepository;
 
+    private WebClient.Builder webClientBuilder;
+
     @Autowired
-    public UserAgreementsService(UserAgreementsRepository userAgreementsRepository, UserRepository userRepository) {
+    public UserAgreementsService(UserAgreementsRepository userAgreementsRepository, UserRepository userRepository, WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
         this.userAgreementsRepository = userAgreementsRepository;
         this.userRepository = userRepository;
     }
@@ -39,7 +44,7 @@ public class UserAgreementsService {
 
         if (!userId.equals(userRepository.findByUserEmail(email).get().getId())
                 & !Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.CRUD_USER_AGREEMENT)
-        ){
+        ) {
             throw new NotEnoughtPermissionsException("User with id " + userId + " not found", HttpStatus.FORBIDDEN);
         }
 
@@ -85,7 +90,23 @@ public class UserAgreementsService {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
-        UserAgreement userAgreement = new UserAgreement(userAgreementRequestDTO, userRepository.findById(userId).get(), optUser.get());
+        UserAgreement userAgreement = new UserAgreement(
+                userAgreementRequestDTO,
+                userRepository.findById(userId).get(),
+                optUser.get(),
+                getAgreementState(userAgreementRequestDTO.getAgreementId()));
         return new UserAgreementResponseDTO(userAgreementsRepository.save(userAgreement));
     }
+
+    private String getAgreementState(BigInteger id) {
+        return Objects.requireNonNull(webClientBuilder
+                .build()
+                .get()
+                .uri("http://service-agreement:8080/agreements/getagreementstate/" + id)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block());
+
+    }
+
 }
