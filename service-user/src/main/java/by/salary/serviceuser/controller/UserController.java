@@ -8,6 +8,7 @@ import by.salary.serviceuser.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -108,10 +109,10 @@ public class UserController {
         return userService.getAllAuthorities();
     }
 
-    @GetMapping("/ispermitted/{email}")
+    @GetMapping("/ispermitted/{email}/{permissionName}")
     @ResponseStatus(HttpStatus.OK)
-    public String isPermitted(@PathVariable String email) {
-        return userService.isPermitted(email);
+    public String isPermitted(@PathVariable String email, @PathVariable String permissionName) {
+        return userService.isPermitted(email, permissionName);
     }
 
     @PutMapping("/expire/{user_id}")

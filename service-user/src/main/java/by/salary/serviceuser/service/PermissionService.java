@@ -127,4 +127,15 @@ public class PermissionService {
         userRepository.save(user);
     }
 
+    public List<PermissionResponseDTO> getUserPermissions(String email) {
+        Optional<User> optUser = userRepository.findByUserEmail(email);
+        if(optUser.isEmpty()){
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        List<PermissionResponseDTO> permissions = new ArrayList<>();
+        optUser.get().getPermissions().forEach(permission -> {
+            permissions.add(new PermissionResponseDTO(permission));
+        });
+        return permissions;
+    }
 }

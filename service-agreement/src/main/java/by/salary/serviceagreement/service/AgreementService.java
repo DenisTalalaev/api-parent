@@ -13,7 +13,6 @@ import by.salary.serviceagreement.repository.AgreementListRepository;
 import by.salary.serviceagreement.repository.AgreementStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -69,20 +68,6 @@ public class AgreementService {
         return new AgreementResponseDTO(agreement);
     }
 
-    public AgreementListResponseDTO createAgreementList(AgreementListRequestDTO agreementStateListRequestDTO, BigInteger agreementId) {
-
-        Agreement agreement = agreementRepository.findById(agreementId).get();
-        AgreementList agreementList = new AgreementList(agreementStateListRequestDTO.getStateListName(), agreement);
-        agreementListRepository.save(agreementList);
-        return new AgreementListResponseDTO(agreementList);
-    }
-
-    public AgreementStateResponseDTO createAgreementState(AgreementStateRequestDTO agreementStateRequestDTO, BigInteger agreementId, BigInteger listId) {
-        AgreementList agreementList = agreementListRepository.findById(listId).get();
-        AgreementState agreementState = new AgreementState(agreementStateRequestDTO.getStateName(), agreementStateRequestDTO.getStateInfo(), agreementList);
-        agreementStateRepository.save(agreementState);
-        return new AgreementStateResponseDTO(agreementState);
-    }
 
     public Agreement getAgreement(String email) {
         BigInteger agreementId = getAgreementId(email);
@@ -99,8 +84,8 @@ public class AgreementService {
         return agreement.getId();
     }
 
-    public AgreementList createAgreementList(AgreementListRequestDTO agreementListResponseDTO, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.CREATE_AGREEMENT_LIST))) {
+    public AgreementList createAgreementList(AgreementListRequestDTO agreementListResponseDTO, String email) {
+        if(!isPermitted(email,PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         BigInteger agreementId = getAgreementId(email);
@@ -114,8 +99,8 @@ public class AgreementService {
         return agreementList;
     }
 
-    public AgreementState createAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.CREATE_AGREEMENT_STATE))) {
+    public AgreementState createAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, String email) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         BigInteger agreementId = getAgreementId(email);
@@ -137,8 +122,8 @@ public class AgreementService {
         return agreementState;
     }
 
-    public void deleteAgreementList(BigInteger listId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_AGREEMENT_LIST))) {
+    public void deleteAgreementList(BigInteger listId, String email) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         BigInteger agreementId = getAgreementId(email);
@@ -158,8 +143,8 @@ public class AgreementService {
         agreementListRepository.delete(agreementList);
     }
 
-    public void deleteAgreementState(BigInteger listId, BigInteger stateId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.DELETE_AGREEMENT_STATE))) {
+    public void deleteAgreementState(BigInteger listId, BigInteger stateId, String email) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
 
@@ -188,8 +173,8 @@ public class AgreementService {
         agreementStateRepository.delete(agreementState);
     }
 
-    public void updateAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, BigInteger stateId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.UPDATE_AGREEMENT_STATE))) {
+    public void updateAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, BigInteger stateId, String email) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
 
@@ -218,8 +203,8 @@ public class AgreementService {
         agreementStateRepository.save(agreementState.update(agreementStateListRequestDTO));
     }
 
-    public void updateAgreementList(AgreementListRequestDTO agreementListResponseDTO, BigInteger listId, String email, List<Permission> permissions) {
-        if(!permissions.contains(new Permission(PermissionsEnum.UPDATE_AGREEMENT_LIST))) {
+    public void updateAgreementList(AgreementListRequestDTO agreementListResponseDTO, BigInteger listId, String email) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         BigInteger agreementId = getAgreementId(email);
@@ -246,5 +231,18 @@ public class AgreementService {
         }
         AgreementState agreementState = optAgreementState.get();
         return agreementState.getStateName() + ": " + agreementState.getStateInfo();
+    }
+
+    private Boolean isPermitted(String email, PermissionsEnum permission) {
+        return Boolean.valueOf(
+                Objects.requireNonNull(webClientBuilder
+                        .build()
+                        .get()
+                        .uri("http://service-user:8080/users/ispermitted/" + email + "/" + permission)
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block())
+        );
+
     }
 }
