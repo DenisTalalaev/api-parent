@@ -1,12 +1,9 @@
 package by.salary.serviceuser.controller;
 
 import by.salary.serviceuser.entities.Permission;
-import by.salary.serviceuser.model.PermissionResponseDTO;
-import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.model.premission.PermissionResponseDTO;
+import by.salary.serviceuser.model.user.UserResponseDTO;
 import by.salary.serviceuser.service.PermissionService;
-import com.netflix.eureka.registry.PeerAwareInstanceRegistry;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.ListResourceBundle;
 
 @Controller
 @RestController
