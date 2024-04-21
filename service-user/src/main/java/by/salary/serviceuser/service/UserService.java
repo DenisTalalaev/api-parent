@@ -273,11 +273,10 @@ public class UserService {
             throw new UserNotFoundException("User with id " + user_id + " not found", HttpStatus.NOT_FOUND);
         }
         User user2 = userOpt2.get();
-        user2.setIsAccountNonExpired(false);
-        user2.setUserEmail(null);
-        user2.setIsAccountNonLocked(false);
-        user2.setIsEnabled(false);
-        user2.setUsername(null);
+        user2.getAuthorities().clear();;
+        user2.getPermissions().clear();
+        user2.setOrganisation(null);
+
         userRepository.save(user2);
         return new UserResponseDTO(user2);
     }
