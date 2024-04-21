@@ -11,6 +11,7 @@ import by.salary.serviceuser.model.user.UserResponseDTO;
 import by.salary.serviceuser.repository.AuthorityRepository;
 import by.salary.serviceuser.repository.OrganisationRepository;
 import by.salary.serviceuser.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,7 @@ public class UserService {
         return new UserResponseDTO(optUser.get());
     }
 
+    @Transactional
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         Optional<Organisation> optionalOrganisation = organisationRepository.findById(userRequestDTO.getOrganisationId());
@@ -240,6 +242,7 @@ public class UserService {
         return String.valueOf(Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.valueOf(permission)));
     }
 
+    @Transactional
     public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, String email) {
         Optional<User> userOpt = userRepository.findByUserEmail(email);
         if (userOpt.isEmpty()) {
@@ -259,6 +262,7 @@ public class UserService {
         return new UserResponseDTO(user2);
     }
 
+    @Transactional
     public UserResponseDTO expireUser(BigInteger user_id, String email) {
         Optional<User> userOpt = userRepository.findByUserEmail(email);
         if (userOpt.isEmpty()) {
@@ -281,6 +285,7 @@ public class UserService {
         return new UserResponseDTO(user2);
     }
 
+    @Transactional
     public AuthenticationChangePasswordResponseDto changePassword(AuthenticationChangePasswordRequestDto authenticationChangePasswordRequestDto) {
         Optional<User> optionalUser = userRepository.findByUserEmail(authenticationChangePasswordRequestDto.getEmail());
         if (optionalUser.isEmpty()) {
