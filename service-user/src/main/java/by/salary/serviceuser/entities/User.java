@@ -169,6 +169,7 @@ public class User {
         this.userFirstName = userRequestDTO.getUserFirstName() == null? this.userFirstName : userRequestDTO.getUserFirstName();
         this.userSurname = userRequestDTO.getUserSurname() == null? this.userSurname : userRequestDTO.getUserSurname();
         this.userSecondName = userRequestDTO.getUserSecondName() == null? this.userSecondName : userRequestDTO.getUserSecondName();
+        this.is2FEnabled = userRequestDTO.getIs2FAEnabled() == null ? this.is2FEnabled : userRequestDTO.getIs2FAEnabled();
     }
 
     public void addPermission(Permission permission) {

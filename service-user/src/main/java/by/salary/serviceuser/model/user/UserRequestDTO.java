@@ -48,6 +48,8 @@ public class UserRequestDTO {
 
     private String invitationCode;
 
+    private Boolean is2FAEnabled;
+
 
     public Boolean isEnabled() {
         return isEnabled;
