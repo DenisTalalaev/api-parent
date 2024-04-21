@@ -3,6 +3,8 @@ package by.salary.serviceuser.service;
 import by.salary.serviceuser.entities.*;
 import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
+import by.salary.serviceuser.model.changeemail.ChangeEmailRequestDto;
+import by.salary.serviceuser.model.changeemail.ChangeEmailResponseDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordRequestDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordResponseDto;
 import by.salary.serviceuser.model.user.UserPromoteRequestDTO;
@@ -291,6 +293,20 @@ public class UserService {
         user.setUserPassword(authenticationChangePasswordRequestDto.getPassword());
         userRepository.save(user);
         return new AuthenticationChangePasswordResponseDto(HttpStatus.OK, "Password changed successfully");
+    }
+
+    public ChangeEmailResponseDto changeEmail(ChangeEmailRequestDto changeEmailRequestDto, String email) {
+        Optional<User> optionalUser = userRepository.findByUserEmail(email);
+        if (optionalUser.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        User user = optionalUser.get();
+        user.setUserEmail(changeEmailRequestDto.getEmail());
+        user.setIs2FEnabled(changeEmailRequestDto.is2FEnabled());
+        userRepository.save(user);
+        return ChangeEmailResponseDto.builder()
+                .status(HttpStatus.OK)
+                .message("Email changed successfully").build();
     }
 
     public List<Authority> getAllAuthorities() {

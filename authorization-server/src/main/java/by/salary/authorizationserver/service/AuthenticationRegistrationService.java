@@ -13,20 +13,26 @@ import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.util.AuthenticationUtils;
 import lombok.AllArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
+
 public class AuthenticationRegistrationService {
 
     JwtService jwtService;
@@ -42,6 +48,28 @@ public class AuthenticationRegistrationService {
     AuthenticationUtils authenticationUtils;
 
     LogoutHandler logoutHandler;
+
+    String frontendUrl;
+
+    @Autowired
+    public AuthenticationRegistrationService(JwtService jwtService,
+                                             AuthorizationRepository authorizationRepository,
+                                             PasswordEncoder passwordEncoder,
+                                             TokenRegistrationService tokenRegistrationService,
+                                             MailService mailService,
+                                             AuthenticationUtils authenticationUtils,
+                                             LogoutHandler logoutHandler,
+                                             @Value("${frontend.redirect.url}") String frontendUrl) {
+        this.jwtService = jwtService;
+        this.authorizationRepository = authorizationRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenRegistrationService = tokenRegistrationService;
+        this.mailService = mailService;
+        this.authenticationUtils = authenticationUtils;
+        this.logoutHandler = logoutHandler;
+        this.frontendUrl = frontendUrl;
+    }
+
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
 
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
@@ -130,6 +158,87 @@ public class AuthenticationRegistrationService {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    public ResponseEntity<?> changeEmail(ChangeEmailRequestDto changeEmailRequestDto,
+                                         String oldEmail, String jwt) {
+
+        //TODO: generate update token
+
+        AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .userEmail(oldEmail)
+                .build();
+
+        Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequest);
+
+        if (responseDto.isEmpty()){
+            RestError error = RestError.builder().httpStatus(HttpStatus.NOT_FOUND).message("User not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        UserInfoDTO userInfoDTO = UserInfoDTO.builder()
+                .name(responseDto.get().getUserName())
+                .email(oldEmail)
+                .authorities(List.of("CHANGE_EMAIL=" + changeEmailRequestDto.getEmail(),
+                        "IS2F_ENABLED=" + changeEmailRequestDto.is2FEnabled()))
+                .build();
+
+        String token = tokenRegistrationService.generateToken(userInfoDTO);
+
+        UriBuilder uriBuilder = UriComponentsBuilder.fromUriString(frontendUrl).queryParam("token", token);
+
+        //TODO: send to old old email
+        MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
+                        .message(uriBuilder.toUriString())
+                        .mailTo(oldEmail)
+                        .build();
+
+        mailService.sendMessage(mailRequestDTO, jwt);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+    public ResponseEntity<?> changeEmail(String jwt,
+                                         List<GrantedAuthority> authorities) {
+
+        String changeEmailAuthority = null;
+        String hasIs2FEnabledAuthority = null;
+        for(GrantedAuthority authority : authorities){
+            if(authority.getAuthority().contains("CHANGE_EMAIL")){
+               changeEmailAuthority = authority.getAuthority();
+            }
+            if(authority.getAuthority().contains("IS2F_ENABLED")){
+                hasIs2FEnabledAuthority = authority.getAuthority();
+            }
+        }
+
+        if (changeEmailAuthority == null && hasIs2FEnabledAuthority == null){
+            RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("Incorrect token authorities").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+
+
+        String email = extractEmail(changeEmailAuthority);
+        Boolean is2FEnabled = extractIs2FEnabled(hasIs2FEnabledAuthority);
+        ChangeVerifiedEmailRequestDto changeVerifiedEmailRequestDto = ChangeVerifiedEmailRequestDto.builder()
+                .email(email)
+                .is2FEnabled(is2FEnabled)
+                .build();
+
+        ChangeEmailResponseDto changeEmailResponseDto = authorizationRepository.changeEmail(changeVerifiedEmailRequestDto, jwt);
+
+
+        return ResponseEntity.status(changeEmailResponseDto.getStatus()).body(changeEmailResponseDto);
+    }
+
+    private String extractEmail(String changeEmailAuthorizationCode) {
+        return changeEmailAuthorizationCode.replace("CHANGE_EMAIL=", "");
+    }
+
+    private Boolean extractIs2FEnabled(String has2FAuthoruty) {
+        String is2FEnabled = has2FAuthoruty.replace("IS2F_ENABLED=", "");
+        return is2FEnabled.equals("true");
+    }
 
     private RegisterRequestDto mapToRegisterDto(RegisterLocalUserRequest registerLocalUserRequest){
         return RegisterRequestDto.builder()
