@@ -64,8 +64,7 @@ public class WebSecurityConfig {
                                 .requestMatchers("/auth/register", "/auth/token").permitAll()
                                 .requestMatchers("/oauth2/**").permitAll()
                                 .requestMatchers("/login/**").permitAll()
-                                .requestMatchers("/auth/logout").authenticated()
-                                .requestMatchers("/auth/verify/code").authenticated()
+                                .requestMatchers("/auth/forgot/password").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .addFilter(new JWTAuthenticationFilter(

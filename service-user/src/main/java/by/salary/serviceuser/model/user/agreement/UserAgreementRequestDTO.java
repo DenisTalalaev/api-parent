@@ -1,6 +1,7 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.user.agreement;
 
 import by.salary.serviceuser.entities.User;
+import by.salary.serviceuser.model.SelectionCriteria;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,4 +23,5 @@ public class UserAgreementRequestDTO {
     private BigDecimal count;
     private Date time;
     private BigDecimal currentBaseReward;
+
 }

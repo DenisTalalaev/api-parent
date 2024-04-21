@@ -1,7 +1,7 @@
 package by.salary.serviceuser.entities;
 
 
-import by.salary.serviceuser.model.OrganisationRequestDTO;
+import by.salary.serviceuser.model.organisation.OrganisationRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 

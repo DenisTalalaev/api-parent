@@ -1,9 +1,12 @@
 package by.salary.serviceuser.controller;
 
-import by.salary.serviceuser.entities.Organisation;
-import by.salary.serviceuser.model.*;
+import by.salary.serviceuser.model.user.authentication.UserAuthenticationRequestDTO;
+import by.salary.serviceuser.model.user.authentication.UserAuthenticationResponseDTO;
+import by.salary.serviceuser.model.user.organisation.UserJoinOrganisationRequestDTO;
+import by.salary.serviceuser.model.user.organisation.UserJoinOrganisationResponseDTO;
+import by.salary.serviceuser.model.user.registration.UserRegistrationRequestDTO;
+import by.salary.serviceuser.model.user.registration.UserRegistrationResponseDTO;
 import by.salary.serviceuser.service.UserAuthenticationService;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

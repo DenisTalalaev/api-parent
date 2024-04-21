@@ -21,7 +21,18 @@ public class AuthenticationUtils {
             String token = (String) authentication.getPrincipal();
             return jwtService.extractUserName(token);
         }else {
-            throw new UnsupportedOperationException("Unsupported authentication mechanism. Cannot logout");
+            throw new UnsupportedOperationException("Unsupported authentication mechanism. Cannot extract username");
+        }
+    }
+
+    public String extractEmail(Authentication authentication) {
+        if (authentication instanceof UsernameEmailPasswordAuthenticationToken){
+            return ((UsernameEmailPasswordAuthenticationToken) authentication).getUserEmail();
+        }else if (authentication instanceof JwtAuthenticationToken){
+            String token = (String) authentication.getPrincipal();
+            return jwtService.extractEmail(token);
+        }else {
+            throw new UnsupportedOperationException("Unsupported authentication mechanism. Cannot extract email");
         }
     }
 }

@@ -1,7 +1,7 @@
 package by.salary.serviceuser.entities;
 
 
-import by.salary.serviceuser.model.UserAgreementRequestDTO;
+import by.salary.serviceuser.model.user.agreement.UserAgreementRequestDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +13,6 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
-import java.sql.Time;
 
 /**
  * User agreement

@@ -1,6 +1,8 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.user;
 
 import by.salary.serviceuser.entities.*;
+import by.salary.serviceuser.model.premission.PermissionResponseDTO;
+import by.salary.serviceuser.model.user.agreement.UserAgreementResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

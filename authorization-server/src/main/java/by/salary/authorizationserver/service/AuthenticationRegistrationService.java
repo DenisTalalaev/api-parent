@@ -3,6 +3,7 @@ package by.salary.authorizationserver.service;
 import by.salary.authorizationserver.exception.EmailNotFoundException;
 import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
+import by.salary.authorizationserver.model.RestError;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.model.entity.Authority;
@@ -10,12 +11,17 @@ import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
+import by.salary.authorizationserver.util.AuthenticationUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,10 @@ public class AuthenticationRegistrationService {
     TokenRegistrationService tokenRegistrationService;
 
     MailService mailService;
+
+    AuthenticationUtils authenticationUtils;
+
+    LogoutHandler logoutHandler;
     public RegisterResponseDto register(RegisterLocalUserRequest registerLocalUserRequest) {
 
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
@@ -69,6 +79,55 @@ public class AuthenticationRegistrationService {
         String token = tokenRegistrationService.generateToken(mapToUserInfoDto(authentication.get()));
 
         return mapToConnValidationResponse(authentication.get(), token);
+    }
+
+    public AuthenticationChangePasswordResponseDto changePassword(String email, ChangePasswordRequestDto changePasswordRequestDto) {
+        AuthenticationChangePasswordRequestDto requestDto = AuthenticationChangePasswordRequestDto.builder()
+                .email(email)
+                .password(passwordEncoder.encode(changePasswordRequestDto.getPassword()))
+                .build();
+
+        return authorizationRepository.changePassword(requestDto);
+    }
+
+    public ResponseEntity<?> forgotPassword(ForgetPasswordRequestDto forgotPasswordRequestDto) {
+
+        AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .userEmail(forgotPasswordRequestDto.getEmail())
+                .build();
+
+        Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequest);
+
+        if (responseDto.isEmpty()){
+            RestError error = RestError.builder().httpStatus(HttpStatus.NOT_FOUND).message("User not found").build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        }
+
+        if (!responseDto.get().is2FEnabled()){
+            RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("2FA is not enabled").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+        List<String> authorities = List.of("CHANGE_PASSWORD");
+        UserInfoDTO userInfoDTO = UserInfoDTO.builder()
+                .email(forgotPasswordRequestDto.getEmail())
+                .name(responseDto.get().getUserName())
+                .authorities(authorities)
+                .is2FEnabled(true)
+                .is2FVerified(false)
+                .build();
+
+        String token = tokenRegistrationService.generateToken(userInfoDTO);
+        ConnValidationResponse response = ConnValidationResponse.builder()
+                .token(token)
+                .is2FEnabled(true)
+                .is2FVerified(false)
+                .authorities(authorities)
+                .methodType("Bearer")
+                .status(HttpStatus.OK)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
 

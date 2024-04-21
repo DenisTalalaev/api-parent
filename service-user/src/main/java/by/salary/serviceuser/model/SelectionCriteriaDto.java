@@ -1,19 +1,21 @@
 package by.salary.serviceuser.model;
 
-import by.salary.serviceuser.entities.Authority;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPromoteRequestDTO {
+public class SelectionCriteriaDto {
 
-    private Authority authority;
+    Map<String, Map<String, String>> filter;
 
-    private String username;
+    Map<String, String>  order;
 
+    Map<String, String> pagination;
 }

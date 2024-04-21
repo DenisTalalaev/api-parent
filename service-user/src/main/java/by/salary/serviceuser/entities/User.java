@@ -2,13 +2,12 @@ package by.salary.serviceuser.entities;
 
 
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
-import by.salary.serviceuser.model.UserRequestDTO;
+import by.salary.serviceuser.model.user.UserRequestDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -41,8 +40,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
-
-
 
     @Size(min = 2, max = 50)
     private String userFirstName;
