@@ -174,4 +174,32 @@ public class User {
     public void addPermission(Permission permission) {
         permissions.add(permission);
     }
+
+    public void newUser(User user2) {
+        this.userPassword = user2.getUserPassword();
+        this.userEmail = user2.getUserEmail();
+        this.username = user2.getUsername();
+
+        this.userAuthorisationAttributeKey = user2.getUserAuthorisationAttributeKey();
+        this.authenticationRegistrationId = user2.getAuthenticationRegistrationId();
+
+        this.isEnabled = user2.isEnabled();
+        this.isAccountNonExpired = user2.isAccountNonExpired();
+        this.isAccountNonLocked = user2.isAccountNonLocked();
+        this.isCredentialsNonExpired = user2.isCredentialsNonExpired();
+
+    }
+
+    public void clear() {
+        this.userPassword = null;
+        this.userEmail = null;
+        this.username = null;
+
+        this.userAuthorisationAttributeKey = null;
+        this.authenticationRegistrationId = null;
+
+        this.isEnabled = false;
+        this.isAccountNonExpired = false;
+        this.isAccountNonLocked = false;
+    }
 }
