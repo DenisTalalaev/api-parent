@@ -81,7 +81,7 @@ public class InvitationService {
         return Boolean.valueOf(Objects.requireNonNull(webClientBuilder
                 .build()
                 .get()
-                .uri("http://service-user:8080/users/ispermitted/" + directorEmail)
+                .uri("http://service-user:8080/users/ispermitted/" + directorEmail + "/" + PermissionsEnum.INVITE_USER)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block()));
