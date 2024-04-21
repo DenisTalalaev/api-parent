@@ -7,13 +7,10 @@ import by.salary.authorizationserver.exception.UserNotFoundException;
 import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.RestError;
 import by.salary.authorizationserver.model.UserInfoDTO;
-import by.salary.authorizationserver.model.dto.AuthenticationChangePasswordResponseDto;
-import by.salary.authorizationserver.model.dto.ChangePasswordRequestDto;
-import by.salary.authorizationserver.model.dto.ForgetPasswordRequestDto;
+import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.model.entity.Authority;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
-import by.salary.authorizationserver.model.dto.RegisterResponseDto;
 import by.salary.authorizationserver.model.userrequest.VerificationCodeRequest;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
 import by.salary.authorizationserver.service.AuthenticationRegistrationService;
@@ -150,6 +147,23 @@ public class IdentityProviderController {
         }
 
         return ResponseEntity.status(responseDto.getStatus()).body(responseDto);
+    }
+
+    @PutMapping(value = "/change/email")
+    public ResponseEntity<?> changeEmail(@RequestBody ChangeEmailRequestDto changeEmailRequestDto, HttpServletRequest request, HttpServletResponse response) {
+        String oldEmail = (String) request.getAttribute("email");
+        String jwt = (String) request.getAttribute("jwt");
+
+        return authenticationRegistrationService.changeEmail(changeEmailRequestDto, oldEmail, jwt);
+    }
+
+    @PostMapping(value = "/change/email")
+    public ResponseEntity<?> changeEmail(HttpServletRequest request, HttpServletResponse response) {
+        String jwt = (String) request.getAttribute("jwt");
+        List<GrantedAuthority> authorities = (List<GrantedAuthority>) request.getAttribute("authorities");
+
+
+        return authenticationRegistrationService.changeEmail(jwt, authorities);
     }
 
 }

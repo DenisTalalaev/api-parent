@@ -3,6 +3,8 @@ package by.salary.serviceuser.controller;
 
 import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Permission;
+import by.salary.serviceuser.model.changeemail.ChangeEmailRequestDto;
+import by.salary.serviceuser.model.changeemail.ChangeEmailResponseDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordRequestDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordResponseDto;
 import by.salary.serviceuser.model.user.UserPromoteRequestDTO;
@@ -12,6 +14,7 @@ import by.salary.serviceuser.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -135,13 +138,18 @@ public class UserController {
     }
 
 
-    @PutMapping("/changepassword")
+    @PutMapping("/change/password")
     @ResponseStatus(HttpStatus.OK)
     public AuthenticationChangePasswordResponseDto renewUser(@RequestBody AuthenticationChangePasswordRequestDto authenticationChangePasswordRequestDto
     ) {
         return userService.changePassword(authenticationChangePasswordRequestDto);
     }
 
-
+    @PutMapping("/change/email")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> changeEmail(@RequestBody ChangeEmailRequestDto changeEmailRequestDto,
+                                      @RequestAttribute String email) {
+        return ResponseEntity.ok(userService.changeEmail(changeEmailRequestDto, email));
+    }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import javax.swing.text.html.Option;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -68,7 +69,7 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
     public AuthenticationChangePasswordResponseDto changePassword(AuthenticationChangePasswordRequestDto changePasswordRequestDto) {
         Optional<AuthenticationChangePasswordResponseDto> response = webClientBuilder.build()
                 .put()
-                .uri("lb://service-user/users/changepassword")
+                .uri("lb://service-user/users/change/password")
                 .body(Mono.just(changePasswordRequestDto), AuthenticationChangePasswordRequestDto.class)
                 .retrieve()
                 .bodyToMono(AuthenticationChangePasswordResponseDto.class)
@@ -76,6 +77,25 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
         if (response.isEmpty()) {
             throw new UserAlreadyExistsException("User not found");
         }
+        return response.get();
+    }
+
+    @Override
+    public ChangeEmailResponseDto changeEmail(ChangeVerifiedEmailRequestDto changeVerifiedEmailRequestDto, String jwt) {
+        Optional<ChangeEmailResponseDto> response = webClientBuilder.build()
+                .put()
+                .uri("lb://service-user/users/change/email")
+                .header("Authorization", "Bearer " + jwt)
+                .body(Mono.just(changeVerifiedEmailRequestDto), ChangeVerifiedEmailRequestDto.class)
+                .retrieve()
+                .bodyToMono(ChangeEmailResponseDto.class)
+                .blockOptional(Duration.ofSeconds(10));
+
+
+        if (response.isEmpty()) {
+            throw new UserAlreadyExistsException("User not found");
+        }
+
         return response.get();
     }
 }

@@ -47,10 +47,6 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
 
         AuthenticationResponseDto response = responseDto.get();
 
-        if (service.is2FEnabled(jwt) != response.is2FEnabled()) {
-            throw new AuthenticationCredentialsNotFoundException("Jwt token is not valid: 2FA is not matched");
-        }
-
         if (service.isTokenValid(jwt, mapToUserInfoDto(responseDto.get()))) {
             Collection<? extends GrantedAuthority> grantedAuthorities = responseDto.get().getAuthorities().stream().map((a) ->
                     new SimpleGrantedAuthority(a.getAuthority())).toList();

@@ -14,4 +14,6 @@ public interface AuthorizationRepository {
 
     AuthenticationChangePasswordResponseDto changePassword(AuthenticationChangePasswordRequestDto changePasswordRequestDto);
 
+    ChangeEmailResponseDto changeEmail(ChangeVerifiedEmailRequestDto changeVerifiedEmailRequestDto, String jwt);
+
 }
