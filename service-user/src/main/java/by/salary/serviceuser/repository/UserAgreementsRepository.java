@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.math.BigInteger;
 
-public interface UserAgreementsRepository extends CrudRepository<UserAgreement, BigInteger> {
+public interface UserAgreementsRepository extends CrudRepository<UserAgreement, BigInteger>, CustomUserAgreementsRepository{
 }

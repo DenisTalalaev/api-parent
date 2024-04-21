@@ -1,4 +1,4 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.user.registration;
 
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import lombok.AllArgsConstructor;

@@ -1,9 +1,9 @@
 package by.salary.serviceuser.controller;
 
-import by.salary.serviceuser.entities.Permission;
-import by.salary.serviceuser.entities.UserAgreement;
-import by.salary.serviceuser.model.UserAgreementRequestDTO;
-import by.salary.serviceuser.model.UserAgreementResponseDTO;
+import by.salary.serviceuser.model.SelectionCriteria;
+import by.salary.serviceuser.model.SelectionCriteriaDto;
+import by.salary.serviceuser.model.user.agreement.UserAgreementRequestDTO;
+import by.salary.serviceuser.model.user.agreement.UserAgreementResponseDTO;
 import by.salary.serviceuser.service.UserAgreementsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,8 +28,13 @@ public class UserAgreementsController {
     @GetMapping("/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public List<UserAgreementResponseDTO> getAllUserAgreements(@PathVariable BigInteger user_id,
+                                                               @RequestBody(required = false) SelectionCriteriaDto selection,
                                                                @RequestAttribute String email) {
-        return userAgreementsService.getAllUserAgreements(user_id, email);
+        if (selection == null){
+          return userAgreementsService.getAllUserAgreements(user_id, email);
+        }else {
+            return userAgreementsService.getAllUserAgreements(user_id, email, selection);
+        }
     }
 
     @PostMapping("/{user_id}")

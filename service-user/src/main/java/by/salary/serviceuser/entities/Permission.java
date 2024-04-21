@@ -1,13 +1,11 @@
 package by.salary.serviceuser.entities;
 
-import by.salary.serviceuser.model.PermissionResponseDTO;
+import by.salary.serviceuser.model.premission.PermissionResponseDTO;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.NaturalIdCache;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.Size;
 import java.math.BigInteger;

@@ -1,4 +1,4 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.user;
 
 import by.salary.serviceuser.entities.Authority;
 import by.salary.serviceuser.entities.Organisation;

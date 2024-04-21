@@ -1,8 +1,8 @@
 package by.salary.serviceuser.controller;
 
-import by.salary.serviceuser.model.OrganisationRequestDTO;
-import by.salary.serviceuser.model.OrganisationResponseDTO;
-import by.salary.serviceuser.model.UserResponseDTO;
+import by.salary.serviceuser.model.organisation.OrganisationRequestDTO;
+import by.salary.serviceuser.model.organisation.OrganisationResponseDTO;
+import by.salary.serviceuser.model.user.UserResponseDTO;
 import by.salary.serviceuser.service.OrganisationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

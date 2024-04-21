@@ -1,4 +1,4 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.premission;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

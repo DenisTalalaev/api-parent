@@ -1,4 +1,4 @@
-package by.salary.serviceuser.model;
+package by.salary.serviceuser.model.user.organisation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
