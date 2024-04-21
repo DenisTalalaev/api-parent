@@ -45,6 +45,8 @@ public class UserResponseDTO {
 
     private List<UserAgreementResponseDTO> userAgreementList;
 
+    private Boolean is2FAEnabled;
+
     public UserResponseDTO(User user) {
 
         Organisation organisation = user.getOrganisation();
@@ -69,6 +71,7 @@ public class UserResponseDTO {
         user.getPermissions().forEach(permission -> this.permissions.add(new PermissionResponseDTO(permission)));
         this.userAgreementList = new ArrayList<>();
         user.getUserAgreementList().forEach(userAgreement -> this.userAgreementList.add(new UserAgreementResponseDTO(userAgreement)));
+        this.is2FAEnabled = user.getIs2FEnabled();
     }
 
     @Override

@@ -104,10 +104,10 @@ public class AuthenticationRegistrationService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
         }
 
-        if (!responseDto.get().is2FEnabled()){
+        /*if (!responseDto.get().is2FEnabled()){
             RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("2FA is not enabled").build();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
-        }
+        }*/
         List<String> authorities = List.of("CHANGE_PASSWORD");
         UserInfoDTO userInfoDTO = UserInfoDTO.builder()
                 .email(forgotPasswordRequestDto.getEmail())
