@@ -7,6 +7,7 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -88,6 +89,14 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
                 .header("Authorization", "Bearer " + jwt)
                 .body(Mono.just(changeVerifiedEmailRequestDto), ChangeVerifiedEmailRequestDto.class)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                {
+                    if (resp.statusCode().equals(HttpStatus.BAD_REQUEST)){
+                        return Mono.error(new UserAlreadyExistsException("Email can not be used"));
+                    }
+                    return Mono.error(new InternalServerErrorException("Internal server error"));
+                }
+                )
                 .bodyToMono(ChangeEmailResponseDto.class)
                 .blockOptional(Duration.ofSeconds(10));
 

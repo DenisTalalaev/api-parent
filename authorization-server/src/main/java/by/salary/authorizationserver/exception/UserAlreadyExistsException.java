@@ -2,7 +2,6 @@ package by.salary.authorizationserver.exception;
 
 import org.springframework.http.HttpStatus;
 
-import javax.naming.AuthenticationException;
 
 public class UserAlreadyExistsException extends AbstractAuthenticationException {
 

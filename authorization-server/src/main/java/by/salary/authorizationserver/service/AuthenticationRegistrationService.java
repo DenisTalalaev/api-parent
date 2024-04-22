@@ -162,6 +162,17 @@ public class AuthenticationRegistrationService {
                                          String oldEmail, String jwt) {
 
         //TODO: generate update token
+        AuthenticationRequestDto newEmailCheck = AuthenticationRequestDto.builder()
+                .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                .userEmail(changeEmailRequestDto.getEmail())
+                .build();
+
+        Optional<AuthenticationResponseDto> newEmailResponseDto = authorizationRepository.find(newEmailCheck);
+
+        if (newEmailResponseDto.isPresent()){
+            RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("Email already exists").build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
 
         AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
                 .authenticationRegistrationId(AuthenticationRegistrationId.local)
@@ -170,6 +181,7 @@ public class AuthenticationRegistrationService {
 
         Optional<AuthenticationResponseDto> responseDto = authorizationRepository.find(authenticationRequest);
 
+
         if (responseDto.isEmpty()){
             RestError error = RestError.builder().httpStatus(HttpStatus.NOT_FOUND).message("User not found").build();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
@@ -177,7 +189,7 @@ public class AuthenticationRegistrationService {
 
         UserInfoDTO userInfoDTO = UserInfoDTO.builder()
                 .name(responseDto.get().getUserName())
-                .email(changeEmailRequestDto.getEmail())
+                .email(responseDto.get().getUserEmail())
                 .authorities(List.of("CHANGE_EMAIL=" + changeEmailRequestDto.getEmail(),
                         "IS2F_ENABLED=" + changeEmailRequestDto.is2FEnabled()))
                 .build();
@@ -189,7 +201,7 @@ public class AuthenticationRegistrationService {
         //TODO: send to old old email
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
                         .message(uriBuilder.toUriString())
-                        .mailTo(oldEmail)
+                        .mailTo(changeEmailRequestDto.getEmail())
                         .build();
 
         mailService.sendMessage(mailRequestDTO, jwt);
@@ -202,7 +214,7 @@ public class AuthenticationRegistrationService {
 
         String changeEmailAuthority = null;
         String hasIs2FEnabledAuthority = null;
-        for(GrantedAuthority authority : authorities){
+        for(GrantedAuthority authority : authorities) {
             if(authority.getAuthority().contains("CHANGE_EMAIL")){
                changeEmailAuthority = authority.getAuthority();
             }
