@@ -1,7 +1,7 @@
 package by.salary.serviceagreement.entities;
 
 import by.salary.serviceagreement.model.AgreementListRequestDTO;
-import by.salary.serviceuser.util.AttributeEncryptor;
+import by.salary.serviceagreement.util.AttributeEncryptor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
