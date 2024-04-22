@@ -6,7 +6,6 @@ public enum PermissionsEnum {
 
     //ADMINISTRATOR
     REDACT_ORGANISATION_INFO,
-    GRANT_ORGANISATION,
     PROMOTE_USER,
     DEMOTE_USER,
 
