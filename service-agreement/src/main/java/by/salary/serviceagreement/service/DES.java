@@ -1,5 +1,6 @@
-package by.salary.serviceagreement.util;
+package by.salary.serviceagreement.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,7 @@ public class DES {
 
    private String SECRET;
 
+   @Autowired
     public DES(@Value("${database.secret}") String secret) {
         SECRET = secret;
         SecretKeySpec desKey = new SecretKeySpec(

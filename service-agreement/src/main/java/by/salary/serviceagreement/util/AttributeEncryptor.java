@@ -1,5 +1,6 @@
 package by.salary.serviceagreement.util;
 
+import by.salary.serviceagreement.service.DES;
 import jakarta.persistence.AttributeConverter;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
