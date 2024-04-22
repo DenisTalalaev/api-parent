@@ -50,9 +50,10 @@ public class UserAgreementResponseDTO {
         this.agreementStateId = agreementStateId;
         this.agreementStateName = agreementStateName;
         this.agreementStateInfo = agreementStateInfo;
+
         this.id = userAgreement.getId();
         this.userId = userAgreement.getUser().getId();
-        this.agreementId = userAgreement.getAgreementId();
+        this.agreementId = agreementStateName + ": " + agreementStateInfo;
         this.moderatorName = userAgreement.getModeratorName();
         this.moderatorComment = userAgreement.getModeratorComment();
         this.count = userAgreement.getCount();
