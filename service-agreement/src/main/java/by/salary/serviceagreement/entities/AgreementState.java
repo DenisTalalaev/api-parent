@@ -1,6 +1,7 @@
 package by.salary.serviceagreement.entities;
 
 import by.salary.serviceagreement.model.AgreementStateRequestDTO;
+import by.salary.serviceuser.util.AttributeEncryptor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,9 @@ public class AgreementState {
     @ManyToOne
     private AgreementList agreementLists;
 
+    @Convert(converter = AttributeEncryptor.class)
     private String stateName;
+    @Convert(converter = AttributeEncryptor.class)
     private String stateInfo;
 
     public AgreementState(String stateName, String stateInfo, AgreementList agreementList) {

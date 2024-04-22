@@ -3,6 +3,7 @@ package by.salary.serviceuser.entities;
 
 import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import by.salary.serviceuser.model.user.UserRequestDTO;
+import by.salary.serviceuser.util.AttributeEncryptor;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,18 +43,22 @@ public class User {
     private BigInteger id;
 
     @Size(min = 2, max = 50)
+    @Convert(converter = AttributeEncryptor.class)
     private String userFirstName;
 
     @Size(min = 2, max = 50)
+    @Convert(converter = AttributeEncryptor.class)
     private String userSurname;
 
     @Size(min = 2, max = 50)
+    @Convert(converter = AttributeEncryptor.class)
     private String userSecondName;
 
 
 
     @Size(min = 8, max = 50)
     @Column(unique = true)
+    @Convert(converter = AttributeEncryptor.class)
     private String username;
 
     private String userPassword;
@@ -63,6 +68,7 @@ public class User {
 
     @Email
     @Column(unique = true)
+    @Convert(converter = AttributeEncryptor.class)
     private String userEmail;
 
 

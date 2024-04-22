@@ -1,6 +1,7 @@
 package by.salary.serviceagreement.entities;
 
 import by.salary.serviceagreement.model.AgreementListRequestDTO;
+import by.salary.serviceuser.util.AttributeEncryptor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class AgreementList {
     @OneToMany(mappedBy = "agreementLists", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AgreementState> agreementListStates = new ArrayList<>();
 
+    @Convert(converter = AttributeEncryptor.class)
     private String listName;
 
     public AgreementList(String stateListName, Agreement agreement) {

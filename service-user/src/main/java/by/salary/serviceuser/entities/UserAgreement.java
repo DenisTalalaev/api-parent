@@ -2,6 +2,7 @@ package by.salary.serviceuser.entities;
 
 
 import by.salary.serviceuser.model.user.agreement.UserAgreementRequestDTO;
+import by.salary.serviceuser.util.AttributeEncryptor;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,11 +39,14 @@ public class UserAgreement {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
     @NotNull
+    @Convert(converter = AttributeEncryptor.class)
     private String agreementId;
 
     @Size(min = 1, max = 50)
+    @Convert(converter = AttributeEncryptor.class)
     private String moderatorName;
     @Size(min = 1, max = 2000)
+    @Convert(converter = AttributeEncryptor.class)
     private String moderatorComment;
     @NotNull
     private BigDecimal count;
