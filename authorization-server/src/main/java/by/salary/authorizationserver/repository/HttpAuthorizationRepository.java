@@ -27,22 +27,26 @@ public class HttpAuthorizationRepository implements AuthorizationRepository {
 
     @Override
     public Optional<AuthenticationResponseDto> find(AuthenticationRequestDto authenticationRequestDto) {
-        Optional<AuthenticationResponseDto> response = webClientBuilder.build()
-                .post()
-                .uri("lb://service-user/account/auth")
-                .body(Mono.just(authenticationRequestDto), AuthenticationRequestDto.class)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
-                .bodyToMono(AuthenticationResponseDto.class)
-                .blockOptional();
-
-        if (response.isPresent()){
-            if (response.get().getUserEmail() == null) {
-                return Optional.empty();
+        try {
+            Optional<AuthenticationResponseDto> response = webClientBuilder.build()
+                    .post()
+                    .uri("lb://service-user/account/auth")
+                    .body(Mono.just(authenticationRequestDto), AuthenticationRequestDto.class)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
+                    .bodyToMono(AuthenticationResponseDto.class)
+                    .blockOptional();
+            if (response.isPresent()){
+                if (response.get().getUserEmail() == null) {
+                    return Optional.empty();
+                }
             }
+
+            return response;
+        }catch(Exception e){
+            return Optional.empty();
         }
 
-        return response;
     }
 
     @Override
