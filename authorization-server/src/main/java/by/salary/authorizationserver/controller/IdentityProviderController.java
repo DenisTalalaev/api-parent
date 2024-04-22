@@ -163,7 +163,14 @@ public class IdentityProviderController {
         List<GrantedAuthority> authorities = (List<GrantedAuthority>) request.getAttribute("authorities");
 
 
-        return authenticationRegistrationService.changeEmail(jwt, authorities);
+        ResponseEntity<?> result = authenticationRegistrationService.changeEmail(jwt, authorities);
+
+        if (result.getStatusCode().is2xxSuccessful()){
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            logoutHandler.logout(request, response, authentication);
+        }
+
+        return result;
     }
 
 }
