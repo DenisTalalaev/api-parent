@@ -42,6 +42,8 @@ public class UserAgreement {
     @Convert(converter = AttributeEncryptor.class)
     private String agreementId;
 
+    private BigInteger agreementStateId;
+
     @Size(min = 1, max = 50)
     @Convert(converter = AttributeEncryptor.class)
     private String moderatorName;

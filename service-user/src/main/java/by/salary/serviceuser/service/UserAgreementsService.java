@@ -54,7 +54,7 @@ public class UserAgreementsService {
         List<UserAgreementResponseDTO> userAgreements = new ArrayList<>();
         userAgreementsRepository.findAll().forEach(userAgreement -> {
             if (userAgreement.getUser().getId().equals(userId)) {
-                String[] data = getAgreementState(userAgreement.getId()).split("\n");
+                String[] data = getAgreementState(userAgreement.getAgreementStateId()).split("\n");
                 userAgreements.add(new UserAgreementResponseDTO(userAgreement,
                         BigInteger.valueOf(Integer.parseInt(data[0])),
                         data[1],
@@ -94,7 +94,7 @@ public class UserAgreementsService {
         try {
             userAgreementsRepository.findWithCriteria(selectionCriteria).forEach(userAgreement -> {
                 if (userAgreement.getUser().getId().equals(userId)) {
-                    String[] data = getAgreementState(userAgreement.getId()).split("\n");
+                    String[] data = getAgreementState(userAgreement.getAgreementStateId()).split("\n");
                     userAgreements.add(new UserAgreementResponseDTO(userAgreement,
                             BigInteger.valueOf(Integer.parseInt(data[0])),
                             data[1],
@@ -147,7 +147,9 @@ public class UserAgreementsService {
                 userRepository.findById(userId).get(),
                 optUser.get(),
                 getAgreementState(userAgreementRequestDTO.getAgreementId()));
-        String[] data = getAgreementState(userAgreement.getId()).split("\n");
+        userAgreement.setAgreementStateId(userAgreementRequestDTO.getAgreementId());
+        userAgreementsRepository.save(userAgreement);
+        String[] data = getAgreementState(userAgreement.getAgreementStateId()).split("\n");
         return new UserAgreementResponseDTO(userAgreement,
                 BigInteger.valueOf(Integer.parseInt(data[0])),
                 data[1],
@@ -158,6 +160,7 @@ public class UserAgreementsService {
     }
 
     private String getAgreementState(BigInteger id) {
+
         return Objects.requireNonNull(webClientBuilder
                 .build()
                 .get()
