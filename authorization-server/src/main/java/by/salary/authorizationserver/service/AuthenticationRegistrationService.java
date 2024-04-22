@@ -184,7 +184,7 @@ public class AuthenticationRegistrationService {
 
         String token = tokenRegistrationService.generateToken(userInfoDTO);
 
-        UriBuilder uriBuilder = UriComponentsBuilder.fromUriString(frontendUrl).queryParam("token", token);
+        UriBuilder uriBuilder = UriComponentsBuilder.fromUriString(frontendUrl + "/verifyEmail").queryParam("token", token);
 
         //TODO: send to old old email
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
