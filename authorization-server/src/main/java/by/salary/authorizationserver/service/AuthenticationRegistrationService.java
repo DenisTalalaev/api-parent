@@ -177,7 +177,7 @@ public class AuthenticationRegistrationService {
 
         UserInfoDTO userInfoDTO = UserInfoDTO.builder()
                 .name(responseDto.get().getUserName())
-                .email(oldEmail)
+                .email(changeEmailRequestDto.getEmail())
                 .authorities(List.of("CHANGE_EMAIL=" + changeEmailRequestDto.getEmail(),
                         "IS2F_ENABLED=" + changeEmailRequestDto.is2FEnabled()))
                 .build();
