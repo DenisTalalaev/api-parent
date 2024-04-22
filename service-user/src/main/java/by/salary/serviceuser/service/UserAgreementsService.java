@@ -54,7 +54,14 @@ public class UserAgreementsService {
         List<UserAgreementResponseDTO> userAgreements = new ArrayList<>();
         userAgreementsRepository.findAll().forEach(userAgreement -> {
             if (userAgreement.getUser().getId().equals(userId)) {
-                userAgreements.add(new UserAgreementResponseDTO(userAgreement));
+                String[] data = getAgreementState(userAgreement.getId()).split("\n");
+                userAgreements.add(new UserAgreementResponseDTO(userAgreement,
+                        BigInteger.valueOf(Integer.parseInt(data[0])),
+                        data[1],
+                        BigInteger.valueOf(Integer.parseInt(data[2])),
+                        data[3],
+                        data[4]
+                        ));
             }
         });
 
@@ -87,7 +94,14 @@ public class UserAgreementsService {
         try {
             userAgreementsRepository.findWithCriteria(selectionCriteria).forEach(userAgreement -> {
                 if (userAgreement.getUser().getId().equals(userId)) {
-                    userAgreements.add(new UserAgreementResponseDTO(userAgreement));
+                    String[] data = getAgreementState(userAgreement.getId()).split("\n");
+                    userAgreements.add(new UserAgreementResponseDTO(userAgreement,
+                            BigInteger.valueOf(Integer.parseInt(data[0])),
+                            data[1],
+                            BigInteger.valueOf(Integer.parseInt(data[2])),
+                            data[3],
+                            data[4]
+                    ));
                 }
             });
         } catch (ParseException e) {
@@ -133,7 +147,14 @@ public class UserAgreementsService {
                 userRepository.findById(userId).get(),
                 optUser.get(),
                 getAgreementState(userAgreementRequestDTO.getAgreementId()));
-        return new UserAgreementResponseDTO(userAgreementsRepository.save(userAgreement));
+        String[] data = getAgreementState(userAgreement.getId()).split("\n");
+        return new UserAgreementResponseDTO(userAgreement,
+                BigInteger.valueOf(Integer.parseInt(data[0])),
+                data[1],
+                BigInteger.valueOf(Integer.parseInt(data[2])),
+                data[3],
+                data[4]
+        );
     }
 
     private String getAgreementState(BigInteger id) {

@@ -18,6 +18,15 @@ public class UserAgreementResponseDTO {
 
     private BigInteger id;
     private BigInteger userId;
+
+    private BigInteger agreementListId;
+    private String agreementListName;
+
+    private BigInteger agreementStateId;
+    private String agreementStateName;
+    private String agreementStateInfo;
+
+
     private String agreementId;
     private String moderatorName;
     private String moderatorComment;
@@ -25,7 +34,15 @@ public class UserAgreementResponseDTO {
     private Date time;
     private BigDecimal currentBaseReward;
 
-    public UserAgreementResponseDTO(UserAgreement userAgreement) {
+    public UserAgreementResponseDTO(UserAgreement userAgreement,
+
+                                    BigInteger agreementListId,
+                                    String agreementListName,
+
+                                    BigInteger agreementStateId,
+                                    String agreementStateName,
+                                    String agreementStateInfo
+    ) {
         this.id = userAgreement.getId();
         this.userId = userAgreement.getUser().getId();
         this.agreementId = userAgreement.getAgreementId();
