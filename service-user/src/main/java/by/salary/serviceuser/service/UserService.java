@@ -318,4 +318,6 @@ public class UserService {
         authorityRepository.findAll().forEach(authority -> authorities.add(authority));
         return authorities;
     }
+
+
 }
