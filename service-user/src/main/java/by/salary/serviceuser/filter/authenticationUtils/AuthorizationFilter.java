@@ -17,7 +17,7 @@ import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
 
 @Component
 @AllArgsConstructor
-@Order(HIGHEST_PRECEDENCE)
+@Order(HIGHEST_PRECEDENCE + 1)
 public class AuthorizationFilter extends OncePerRequestFilter {
 
     JwtService jwtService;
