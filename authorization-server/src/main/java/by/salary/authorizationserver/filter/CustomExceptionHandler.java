@@ -1,5 +1,6 @@
 package by.salary.authorizationserver.filter;
 
+import by.salary.authorizationserver.exception.AbstractAuthenticationException;
 import by.salary.authorizationserver.model.RestError;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -37,5 +38,16 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 "Authentication failed");
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(re);
+    }
+
+    @ExceptionHandler(value = {AbstractAuthenticationException.class})
+    @ResponseBody
+    protected ResponseEntity<Object> handleAbstractAuthenticationException(Exception ex) {
+
+        AbstractAuthenticationException ae = (AbstractAuthenticationException) ex;
+        RestError re = new RestError(ae.getCode(),
+                ae.getMessage());
+
+        return ResponseEntity.status(ae.getCode()).body(re);
     }
 }
