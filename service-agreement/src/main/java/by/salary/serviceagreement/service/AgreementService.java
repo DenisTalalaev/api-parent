@@ -230,7 +230,11 @@ public class AgreementService {
             throw new AgreementNotFoundException("Agreement state not found", HttpStatus.NOT_FOUND);
         }
         AgreementState agreementState = optAgreementState.get();
-        return agreementState.getStateName() + ": " + agreementState.getStateInfo();
+        return agreementState.getAgreementLists().getId() + "\n" +
+                agreementState.getAgreementLists().getListName() +"\n" +
+                agreementState.getId() + "\n" +
+                agreementState.getStateName() + "\n" +
+                agreementState.getStateInfo();
     }
 
     private Boolean isPermitted(String email, PermissionsEnum permission) {
