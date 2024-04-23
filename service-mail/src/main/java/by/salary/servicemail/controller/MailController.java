@@ -18,13 +18,11 @@ public class MailController {
         this.mailService = mailService;
     }
 
-
     @PostMapping
     @RequestMapping("/notification")
     public MailResponseDTO sendMail(@RequestBody MailRequestDTO mailRequestDTO, @RequestAttribute String email) {
         return mailService.sendMail(mailRequestDTO, email);
     }
-
 
     /**
      * endpoint to send mail to all users with specific authority
@@ -40,6 +38,35 @@ public class MailController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void checkMail(@RequestBody  MailRequestDTO mailRequestDTO) {
         mailService.checkMail(mailRequestDTO);
+    }
+
+
+    @PostMapping
+    @RequestMapping("/resetpassword")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public MailResponseDTO resetPassword(@RequestBody  MailRequestDTO mailRequestDTO) {
+        return mailService.resetPassword(mailRequestDTO);
+    }
+
+    @PostMapping
+    @RequestMapping("/newpayment")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public MailResponseDTO newPayment(@RequestBody  MailRequestDTO mailRequestDTO) {
+        return mailService.newPayment(mailRequestDTO);
+    }
+
+    @PostMapping
+    @RequestMapping("/agreementchange")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public MailResponseDTO agreementChange(@RequestBody  MailRequestDTO mailRequestDTO) {
+        return mailService.agreementChange(mailRequestDTO);
+    }
+
+    @PostMapping
+    @RequestMapping("/2FAmail")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public MailResponseDTO _2FAMail(@RequestBody  MailRequestDTO mailRequestDTO) {
+        return mailService._2FAMail(mailRequestDTO);
     }
 
 }

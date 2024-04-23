@@ -12,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class MailRequestDTO {
     String message;
-
     String mailTo;
+    MailType mailType;
+
+
 }

@@ -3,6 +3,7 @@ package by.salary.servicemail.service;
 import by.salary.servicemail.exceptions.MailSendingException;
 import by.salary.servicemail.model.MailRequestDTO;
 import by.salary.servicemail.model.MailResponseDTO;
+import by.salary.servicemail.model.MailType;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.hibernate.validator.internal.constraintvalidators.bv.EmailValidator;
@@ -31,15 +32,17 @@ public class MailService {
         if(!isValidEmailAddress(mailRequestDTO.getMailTo()) || !isValidEmailAddress(userEmail)){
             throw new MailSendingException("Invalid email address", HttpStatus.BAD_REQUEST);
         }
-        return new MailResponseDTO(send(mailRequestDTO.getMailTo(), mailRequestDTO.getMessage()));
+        return new MailResponseDTO(send(mailRequestDTO.getMailType(), mailRequestDTO.getMailTo(), mailRequestDTO.getMessage()));
     }
 
     public MailResponseDTO broadcastMail(MailRequestDTO mailRequestDTO, String userEmail) {
-        getAllMails(userEmail).forEach(mail -> send(mail, mailRequestDTO.getMessage()));
+        switch (mailRequestDTO.getMailTo()){
+
+        }
         return new MailResponseDTO(true);
     }
 
-    public boolean send(String mail, String code){
+    public boolean send(MailType mailType, String mail, String code){
         if(!isValidEmailAddress(mail)){
             throw new MailSendingException("Invalid email address", HttpStatus.BAD_REQUEST);
         }
@@ -57,6 +60,83 @@ public class MailService {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    public static boolean isValidEmailAddress(String email) {
+        EmailValidator validator = new EmailValidator();
+        return validator.isValid(email, null);
+    }
+
+    private ArrayList<String> getAllMails(String userEmail) {
+        ArrayList<String> mails = new ArrayList<>();
+        Collections.addAll(mails, webClientBuilder.build()
+                .post()
+                .uri("lb://service-invitation/users/getallmails/" + userEmail)
+                .retrieve()
+                .bodyToMono(String.class).block().split("\n"));
+        if(mails.isEmpty()){
+            throw new MailSendingException("There are no users to send mail", HttpStatus.NOT_FOUND);
+        }
+        if(mails.size() == 1 && mails.get(0).equals("nopermissions")){
+            throw new MailSendingException("You have not enough permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        return mails;
+    }
+
+
+    public void checkMail(MailRequestDTO mailRequestDTO) {
+        if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
+            throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public MailResponseDTO resetPassword(MailRequestDTO mailRequestDTO) {
+        if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
+            throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
+        }
+        return new MailResponseDTO(send(
+                mailRequestDTO.getMailType(),
+                mailRequestDTO.getMailTo(),
+                formatPasswordResetMessage(mailRequestDTO.getMessage())
+        ));
+    }
+
+    private String formatPaymentNotification(String paymentDetails) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Уведомление о поступлении новой выплаты на Salary.by</title>\n" +
+                "</head>\n" +
+                "<body style=\"font-family: Arial, sans-serif;\">\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#ffffff\">\n" +
+                "    <tr>\n" +
+                "        <td style=\"padding: 40px 20px;\">\n" +
+                "            <h2 style=\"color: #333333;\">Поступление новой выплаты</h2>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Уважаемый пользователь,</p>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Получено новое платежное уведомление:</p>\n" +
+                "            <div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;\">\n" +
+                "                <p style=\"font-size: 16px; color: #333333; margin: 0;\">Детали платежа:</p>\n" +
+                "                <p style=\"font-size: 16px; color: #666666; margin-top: 10px;\">" + paymentDetails + "</p>\n" +
+                "            </div>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Если у вас возникли вопросы, не стесняйтесь связаться с нами по адресу <a href=\"mailto:help@salary.by\" style=\"color: #007bff;\">help@salary.by</a>.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#f0f0f0\">\n" +
+                "    <tr>\n" +
+                "        <td align=\"center\" style=\"padding: 20px 0;\">\n" +
+                "            <p style=\"font-size: 14px; color: #666666;\">Вы получили это уведомление, так как зарегистрированы на сайте Salary.by.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
     }
 
     private String formatMessage(String code) {
@@ -104,32 +184,150 @@ public class MailService {
                 "</html>";
     }
 
-
-    public static boolean isValidEmailAddress(String email) {
-        EmailValidator validator = new EmailValidator();
-        return validator.isValid(email, null);
+    private String formatPasswordResetMessage(String code) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Восстановление пароля на Salary.by</title>\n" +
+                "</head>\n" +
+                "<body style=\"font-family: Arial, sans-serif;\">\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#ffffff\">\n" +
+                "    <tr>\n" +
+                "        <td style=\"padding: 40px 20px;\">\n" +
+                "            <h2 style=\"color: #333333;\">Восстановление пароля на Salary.by</h2>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Для восстановления пароля вашей учетной записи, используйте следующий код:</p>\n" +
+                "            <div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;\">\n" +
+                "                <h3 style=\"font-size: 24px; color: #333333; margin: 0;\">Код восстановления пароля:</h3>\n" +
+                "                <p style=\"font-size: 32px; color: #007bff; margin-top: 10px;\">" + code + "</p>\n" +
+                "            </div>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Пожалуйста, не передавайте данный код никому, включая сотрудников компании.</p>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Если вы не запрашивали восстановление пароля, проигнорируйте это сообщение.</p>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Если у вас возникли какие-либо вопросы, свяжитесь с нами по адресу <a href=\"mailto:help@salary.by\" style=\"color: #007bff;\">help@salary.by</a>.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#f0f0f0\">\n" +
+                "    <tr>\n" +
+                "        <td align=\"center\" style=\"padding: 20px 0;\">\n" +
+                "            <p style=\"font-size: 14px; color: #666666;\">Вы получили это сообщение, так как запросили восстановление пароля на сайте Salary.by. Если это были не вы, пожалуйста, проигнорируйте это письмо.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
     }
 
-    private ArrayList<String> getAllMails(String userEmail) {
-        ArrayList<String> mails = new ArrayList<>();
-        Collections.addAll(mails, webClientBuilder.build()
-                .post()
-                .uri("lb://service-invitation/users/getallmails/" + userEmail)
-                .retrieve()
-                .bodyToMono(String.class).block().split("\n"));
-        if(mails.isEmpty()){
-            throw new MailSendingException("There are no users to send mail", HttpStatus.NOT_FOUND);
-        }
-        if(mails.size() == 1 && mails.get(0).equals("nopermissions")){
-            throw new MailSendingException("You have not enough permissions to perform this action", HttpStatus.FORBIDDEN);
-        }
-        return mails;
+    private String formatCollectiveAgreementNotification(String changes) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Уведомление об изменении коллективного договора на Salary.by</title>\n" +
+                "</head>\n" +
+                "<body style=\"font-family: Arial, sans-serif;\">\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#ffffff\">\n" +
+                "    <tr>\n" +
+                "        <td style=\"padding: 40px 20px;\">\n" +
+                "            <h2 style=\"color: #333333;\">Изменение коллективного договора</h2>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Уважаемый пользователь,</p>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Хотим сообщить вам об изменениях в коллективном договоре:</p>\n" +
+                "            <div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;\">\n" +
+                "                <p style=\"font-size: 16px; color: #333333; margin: 0;\">Изменения:</p>\n" +
+                "                <p style=\"font-size: 16px; color: #666666; margin-top: 10px;\">" + changes + "</p>\n" +
+                "            </div>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Если у вас возникли вопросы, не стесняйтесь связаться с нами по адресу <a href=\"mailto:help@salary.by\" style=\"color: #007bff;\">help@salary.by</a>.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#f0f0f0\">\n" +
+                "    <tr>\n" +
+                "        <td align=\"center\" style=\"padding: 20px 0;\">\n" +
+                "            <p style=\"font-size: 14px; color: #666666;\">Вы получили это уведомление, так как зарегистрированы на сайте Salary.by.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
+    }
+
+    private String formatTwoFactorAuthCode(String code) {
+        return "<!DOCTYPE html>\n" +
+                "<html lang=\"en\">\n" +
+                "<head>\n" +
+                "    <meta charset=\"UTF-8\">\n" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+                "    <title>Код подтверждения входа на Salary.by</title>\n" +
+                "</head>\n" +
+                "<body style=\"font-family: Arial, sans-serif;\">\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#ffffff\">\n" +
+                "    <tr>\n" +
+                "        <td style=\"padding: 40px 20px;\">\n" +
+                "            <h2 style=\"color: #333333;\">Код подтверждения входа</h2>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Уважаемый пользователь,</p>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Для завершения входа на вашу учетную запись введите следующий код подтверждения:</p>\n" +
+                "            <div style=\"background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 20px;\">\n" +
+                "                <h3 style=\"font-size: 24px; color: #333333; margin: 0;\">Код подтверждения:</h3>\n" +
+                "                <p style=\"font-size: 32px; color: #007bff; margin-top: 10px;\">" + code + "</p>\n" +
+                "            </div>\n" +
+                "            <p style=\"font-size: 16px; line-height: 1.5; color: #666666;\">Пожалуйста, не передавайте данный код никому.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "<table cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" bgcolor=\"#f0f0f0\">\n" +
+                "    <tr>\n" +
+                "        <td align=\"center\" style=\"padding: 20px 0;\">\n" +
+                "            <p style=\"font-size: 14px; color: #666666;\">Это сообщение было отправлено вам в связи с попыткой входа на сайт Salary.by. Если это были не вы, проигнорируйте это сообщение.</p>\n" +
+                "        </td>\n" +
+                "    </tr>\n" +
+                "</table>\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
     }
 
 
-    public void checkMail(MailRequestDTO mailRequestDTO) {
+    public MailResponseDTO newPayment(MailRequestDTO mailRequestDTO) {
         if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
             throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
         }
+        return new MailResponseDTO(send(
+                mailRequestDTO.getMailType(),
+                mailRequestDTO.getMailTo(),
+                formatPaymentNotification(mailRequestDTO.getMessage())
+        ));
+    }
+
+
+    public MailResponseDTO agreementChange(MailRequestDTO mailRequestDTO) {
+        if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
+            throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
+        }
+        return new MailResponseDTO(send(
+                mailRequestDTO.getMailType(),
+                mailRequestDTO.getMailTo(),
+                formatCollectiveAgreementNotification(mailRequestDTO.getMessage())
+        ));
+    }
+
+    public MailResponseDTO _2FAMail(MailRequestDTO mailRequestDTO) {
+        if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
+            throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
+        }
+        return new MailResponseDTO(send(
+                mailRequestDTO.getMailType(),
+                mailRequestDTO.getMailTo(),
+                formatTwoFactorAuthCode(mailRequestDTO.getMessage())
+        ));
     }
 }
