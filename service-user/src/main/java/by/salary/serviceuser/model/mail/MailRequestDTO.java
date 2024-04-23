@@ -1,4 +1,4 @@
-package by.salary.servicemail.model;
+package by.salary.serviceuser.model.mail;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MailRequestDTO {
-    String message;
     String mailTo;
+    String message;
     MailType mailType;
-
-
 }
