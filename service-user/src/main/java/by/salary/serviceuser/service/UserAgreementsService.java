@@ -181,7 +181,7 @@ public class UserAgreementsService {
         return Objects.requireNonNull(webClientBuilder
                 .build()
                 .get()
-                .uri("http://service-agreement:8080/agreements/getagreementstate/" + id)
+                .uri("http://service-mail:8080/mail/" + id)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block());
