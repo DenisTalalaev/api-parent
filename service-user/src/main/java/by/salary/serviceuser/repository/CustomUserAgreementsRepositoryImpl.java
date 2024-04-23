@@ -9,6 +9,7 @@ import by.salary.serviceuser.model.SelectionCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.text.ParseException;
@@ -23,13 +24,14 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
     public static List<String> columns;
     private static SimpleDateFormat formatter;
 
-    private final static String DATE_FORMAT = "E MMM dd yyyy HH:mm:ss 'GMT'Z";
+    private final String dateFormat;
 
-    CustomUserAgreementsRepositoryImpl(EntityManager entityManager) {
+    CustomUserAgreementsRepositoryImpl(EntityManager entityManager,
+    @Value("${spring.mvc.format.time}") String dateFormat) {
         this.entityManager = entityManager;
-        columns = List.of("agreement_id", "count", "current_base_reward", "moderator_comment", "moderator_name", "time", "user_id", "state");
-        formatter = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT+3"));
+        this.dateFormat = dateFormat;
+        columns = List.of("agreementId", "count", "currentBaseReward", "moderatorComment", "moderatorName", "time", "state");
+        formatter = new SimpleDateFormat(dateFormat, Locale.US);
     }
 
     @Override
@@ -91,9 +93,11 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
                 }
                 switch (filterType.getKey()) {
                     case EQUALS -> {
+                        String value = filterType.getValue()[0];
+
                         predicates.add(
                                 criteriaBuilder
-                                        .equal(uar.get(column), filterType.getValue())
+                                        .equal(uar.<String>get(column), value)
                         );
                     }
                     case AFTER -> {
@@ -135,7 +139,7 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
                             firstDate = formatter.parse(filterType.getValue()[0]);
                             secondDate = formatter.parse(filterType.getValue()[1]);
                         }catch (ParseException e){
-                            throw new IllegalArgumentException("Invalid date format, required: " + DATE_FORMAT);
+                            throw new IllegalArgumentException("Invalid date format, required: " + dateFormat);
                         }
 
                         java.sql.Date firstDateSql = new java.sql.Date(firstDate.getTime());
