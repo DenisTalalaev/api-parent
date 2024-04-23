@@ -100,7 +100,7 @@ public class AgreementService {
     }
 
     public AgreementState createAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, String email) {
-        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         BigInteger agreementId = getAgreementId(email);
@@ -144,7 +144,7 @@ public class AgreementService {
     }
 
     public void deleteAgreementState(BigInteger listId, BigInteger stateId, String email) {
-        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
 
@@ -174,7 +174,7 @@ public class AgreementService {
     }
 
     public void updateAgreementState(AgreementStateRequestDTO agreementStateListRequestDTO, BigInteger listId, BigInteger stateId, String email) {
-        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_STATE)) {
+        if(!isPermitted(email, PermissionsEnum.CRUD_AGREEMENT_LIST)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
 

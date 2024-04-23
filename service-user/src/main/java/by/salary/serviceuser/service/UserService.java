@@ -193,7 +193,6 @@ public class UserService {
 
     private boolean addModeratorPermissions(User user) {
         addUserPermissions(user);
-        user.addPermission(new Permission(PermissionsEnum.CRUD_AGREEMENT_STATE));
 
         user.addPermission(new Permission(PermissionsEnum.CRUD_AGREEMENT_LIST));
 
