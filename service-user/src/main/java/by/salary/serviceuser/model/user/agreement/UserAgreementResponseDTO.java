@@ -24,7 +24,7 @@ public class UserAgreementResponseDTO {
     private String moderatorComment;
     private BigDecimal count;
 
-    @JsonFormat(pattern = "E MMM dd yyyy HH:mm:ss 'GMT'Z", timezone = "GMT+3", locale = "US")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", locale = "US")
     private Date time;
     private BigDecimal currentBaseReward;
 

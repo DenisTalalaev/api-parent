@@ -26,7 +26,7 @@ public class UserAgreementsController {
         this.userAgreementsService = userAgreementsService;
     }
 
-    @GetMapping("/{user_id}")
+    @PostMapping("/search/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public List<UserAgreementResponseDTO> getAllUserAgreements(@PathVariable BigInteger user_id,
                                                                @RequestBody(required = false) SelectionCriteriaDto selection,
