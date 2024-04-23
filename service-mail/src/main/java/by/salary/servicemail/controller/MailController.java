@@ -2,6 +2,7 @@ package by.salary.servicemail.controller;
 
 import by.salary.servicemail.model.MailRequestDTO;
 import by.salary.servicemail.model.MailResponseDTO;
+import by.salary.servicemail.model.MailType;
 import by.salary.servicemail.service.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,33 +41,12 @@ public class MailController {
         mailService.checkMail(mailRequestDTO);
     }
 
-
     @PostMapping
-    @RequestMapping("/resetpassword")
+    @RequestMapping()
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public MailResponseDTO resetPassword(@RequestBody  MailRequestDTO mailRequestDTO) {
-        return mailService.resetPassword(mailRequestDTO);
+    public MailResponseDTO mail(@RequestBody  MailRequestDTO mailRequestDTO) {
+        return mailService.mail(mailRequestDTO);
     }
 
-    @PostMapping
-    @RequestMapping("/newpayment")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public MailResponseDTO newPayment(@RequestBody  MailRequestDTO mailRequestDTO) {
-        return mailService.newPayment(mailRequestDTO);
-    }
-
-    @PostMapping
-    @RequestMapping("/agreementchange")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public MailResponseDTO agreementChange(@RequestBody  MailRequestDTO mailRequestDTO) {
-        return mailService.agreementChange(mailRequestDTO);
-    }
-
-    @PostMapping
-    @RequestMapping("/2FAmail")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public MailResponseDTO _2FAMail(@RequestBody  MailRequestDTO mailRequestDTO) {
-        return mailService._2FAMail(mailRequestDTO);
-    }
 
 }

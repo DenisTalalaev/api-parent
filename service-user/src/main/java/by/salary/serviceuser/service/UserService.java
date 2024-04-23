@@ -7,6 +7,9 @@ import by.salary.serviceuser.model.changeemail.ChangeEmailRequestDto;
 import by.salary.serviceuser.model.changeemail.ChangeEmailResponseDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordRequestDto;
 import by.salary.serviceuser.model.changepassword.AuthenticationChangePasswordResponseDto;
+import by.salary.serviceuser.model.mail.MailRequestDTO;
+import by.salary.serviceuser.model.mail.MailResponseDTO;
+import by.salary.serviceuser.model.mail.MailType;
 import by.salary.serviceuser.model.user.UserPromoteRequestDTO;
 import by.salary.serviceuser.model.user.UserRequestDTO;
 import by.salary.serviceuser.model.user.UserResponseDTO;
@@ -17,7 +20,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -31,10 +37,12 @@ public class UserService {
     UserRepository userRepository;
 
     AuthorityRepository authorityRepository;
+    private WebClient.Builder webClientBuilder;
     private OrganisationRepository organisationRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository, AuthorityRepository authorityRepository) {
+    public UserService(UserRepository userRepository, OrganisationRepository organisationRepository, AuthorityRepository authorityRepository, WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
         this.authorityRepository = authorityRepository;
         this.userRepository = userRepository;
         this.organisationRepository = organisationRepository;
@@ -281,6 +289,7 @@ public class UserService {
         User user = optionalUser.get();
         user.setUserPassword(authenticationChangePasswordRequestDto.getPassword());
         userRepository.save(user);
+
         return new AuthenticationChangePasswordResponseDto(HttpStatus.OK, "Password changed successfully");
     }
 
@@ -293,10 +302,28 @@ public class UserService {
         user.setUserEmail(changeEmailRequestDto.getEmail());
         user.setIs2FEnabled(changeEmailRequestDto.is2FEnabled());
         userRepository.save(user);
+        mail(new MailRequestDTO("Email changed", "Email changed", MailType.CHANGE_EMAIL));
         return ChangeEmailResponseDto.builder()
                 .status(HttpStatus.OK)
                 .message("Email changed successfully").build();
     }
+
+    public Optional<MailResponseDTO> mail(MailRequestDTO mailRequestDTO) {
+        try {
+            Optional<MailResponseDTO> response = webClientBuilder.build()
+                    .post()
+                    .uri("lb://service-mail/mail")
+                    .body(Mono.just(mailRequestDTO), MailRequestDTO.class)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
+                    .bodyToMono(MailResponseDTO.class)
+                    .blockOptional();
+            return response;
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
 
     public List<Authority> getAllAuthorities() {
         ArrayList<Authority> authorities = new ArrayList<>();
