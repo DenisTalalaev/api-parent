@@ -2,6 +2,7 @@ package by.salary.serviceuser.model.user.agreement;
 
 import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.entities.UserAgreement;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -22,6 +23,8 @@ public class UserAgreementResponseDTO {
     private String moderatorName;
     private String moderatorComment;
     private BigDecimal count;
+
+    @JsonFormat(pattern = "E MMM dd yyyy HH:mm:ss 'GMT'Z", timezone = "GMT+3", locale = "US")
     private Date time;
     private BigDecimal currentBaseReward;
 
