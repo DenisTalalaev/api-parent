@@ -82,4 +82,8 @@ public class UserAgreement {
 
     }
 
+    @Override
+    public String toString() {
+        return moderatorName + "\n" + moderatorComment + "\n" + count + "\n" + time + "\n" + agreementId;
+    }
 }

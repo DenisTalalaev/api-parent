@@ -4,6 +4,7 @@ import by.salary.authorizationserver.authentication.VerificationCodeHandler;
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.MailRequestDTO;
+import by.salary.authorizationserver.model.entity.MailType;
 import com.netflix.discovery.converters.Auto;
 import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
@@ -82,6 +83,7 @@ public class TokenRegistrationService {
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
                 .mailTo(userInfo.getEmail())
                 .message(verificationCode)
+                .mailType(MailType._2FA)
                 .build();
 
         mailService.sendMessage(mailRequestDTO, token);

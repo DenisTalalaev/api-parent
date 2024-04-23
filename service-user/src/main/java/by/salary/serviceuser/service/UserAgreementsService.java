@@ -181,7 +181,7 @@ public class UserAgreementsService {
         return Objects.requireNonNull(webClientBuilder
                 .build()
                 .get()
-                .uri("http://service-mail:8080/mail/" + id)
+                .uri("lb://service-agreement/agreements/getagreementstate/" + id)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block());
@@ -192,7 +192,7 @@ public class UserAgreementsService {
         try {
             Optional<MailResponseDTO> response = webClientBuilder.build()
                     .post()
-                    .uri("lb://service-user/account/auth")
+                    .uri("lb://service-mail/mail")
                     .body(Mono.just(mailRequestDTO), MailRequestDTO.class)
                     .retrieve()
                     .onStatus(HttpStatusCode::isError, resp -> Mono.empty())

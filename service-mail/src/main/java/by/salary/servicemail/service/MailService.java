@@ -51,8 +51,26 @@ public class MailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
             helper.setTo(mail);
             helper.setFrom("no-reply@salary.by");
-            helper.setSubject("Подтверждение регистрации");
-            String htmlBody = formatMessage(code);
+            switch (mailType){
+                case _2FA:
+                    helper.setSubject("Двухфакторная аутентификация");
+                    break;
+                case RESET_PASSWORD:
+                    helper.setSubject("Сброс пароля");
+                    break;
+                case CHANGE_EMAIL:
+                    helper.setSubject("Изменение почты");
+                    break;
+                case NEW_PAYMENT:
+                    helper.setSubject("Новая выплата");
+                    break;
+                case AGREEMENT_CHANGE:
+                    helper.setSubject("Изменение коллективного договора");
+                    break;
+                default:
+                    throw new MailSendingException("Wrong mail type", HttpStatus.BAD_REQUEST);
+            }
+            String htmlBody = code;
             helper.setText(htmlBody, true);
             emailSender.send(message);
             return true;

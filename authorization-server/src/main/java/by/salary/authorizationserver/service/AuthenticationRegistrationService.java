@@ -7,6 +7,7 @@ import by.salary.authorizationserver.model.RestError;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.dto.*;
 import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.model.entity.MailType;
 import by.salary.authorizationserver.model.oauth2.AuthenticationRegistrationId;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.model.userrequest.RegisterLocalUserRequest;
@@ -207,6 +208,7 @@ public class AuthenticationRegistrationService {
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
                         .message(uriBuilder.toUriString())
                         .mailTo(changeEmailRequestDto.getEmail())
+                        .mailType(MailType.RESET_PASSWORD)
                         .build();
 
         mailService.sendMessage(mailRequestDTO, jwt);
