@@ -8,6 +8,9 @@ import by.salary.serviceuser.exceptions.CustomValidationException;
 import by.salary.serviceuser.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.model.*;
+import by.salary.serviceuser.model.mail.MailRequestDTO;
+import by.salary.serviceuser.model.mail.MailResponseDTO;
+import by.salary.serviceuser.model.mail.MailType;
 import by.salary.serviceuser.model.user.agreement.UserAgreementRequestDTO;
 import by.salary.serviceuser.model.user.agreement.UserAgreementResponseDTO;
 import by.salary.serviceuser.repository.UserAgreementsRepository;
@@ -15,8 +18,11 @@ import by.salary.serviceuser.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Mono;
 
 import javax.validation.ValidationException;
 import java.math.BigInteger;
@@ -61,7 +67,7 @@ public class UserAgreementsService {
                         BigInteger.valueOf(Integer.parseInt(data[2])),
                         data[3],
                         data[4]
-                        ));
+                ));
             }
         });
 
@@ -87,7 +93,7 @@ public class UserAgreementsService {
         SelectionCriteria selectionCriteria = null;
         try {
             selectionCriteria = mapToSelectionCriteria(selectionCriteriaDto);
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             throw new ValidationException("Wrong selection criteria");
         }
 
@@ -141,17 +147,26 @@ public class UserAgreementsService {
         if (!Permission.isPermitted(optUser.get(), PermissionsEnum.CRUD_USER_AGREEMENT)) {
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
-        if (!userRepository.existsById(userId)) {
+        Optional<User> user = userRepository.findById(userId);
+        if (user.isEmpty()) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
         UserAgreement userAgreement = new UserAgreement(
                 userAgreementRequestDTO,
-                userRepository.findById(userId).get(),
+                user.get(),
                 optUser.get(),
                 getAgreementState(userAgreementRequestDTO.getAgreementId()));
+
         userAgreement.setAgreementStateId(userAgreementRequestDTO.getAgreementId());
         userAgreementsRepository.save(userAgreement);
         String[] data = getAgreementState(userAgreement.getAgreementStateId()).split("\n");
+        mail(
+                new MailRequestDTO(
+                        user.get().getUserEmail(),
+                        userAgreement.toString(),
+                        MailType.NEW_PAYMENT
+                ));
+
         return new UserAgreementResponseDTO(userAgreement,
                 BigInteger.valueOf(Integer.parseInt(data[0])),
                 data[1],
@@ -172,6 +187,23 @@ public class UserAgreementsService {
                 .block());
 
     }
+
+    public Optional<MailResponseDTO> mail(MailRequestDTO mailRequestDTO) {
+        try {
+            Optional<MailResponseDTO> response = webClientBuilder.build()
+                    .post()
+                    .uri("lb://service-user/account/auth")
+                    .body(Mono.just(mailRequestDTO), MailRequestDTO.class)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
+                    .bodyToMono(MailResponseDTO.class)
+                    .blockOptional();
+            return response;
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
 
     private SelectionCriteria mapToSelectionCriteria(SelectionCriteriaDto selectionCriteriaDto) {
         SelectionCriteria selectionCriteria = new SelectionCriteria();
