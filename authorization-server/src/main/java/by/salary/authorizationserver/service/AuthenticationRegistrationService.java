@@ -162,16 +162,21 @@ public class AuthenticationRegistrationService {
                                          String oldEmail, String jwt) {
 
         //TODO: generate update token
-        AuthenticationRequestDto newEmailCheck = AuthenticationRequestDto.builder()
-                .authenticationRegistrationId(AuthenticationRegistrationId.local)
-                .userEmail(changeEmailRequestDto.getEmail())
-                .build();
 
-        Optional<AuthenticationResponseDto> newEmailResponseDto = authorizationRepository.find(newEmailCheck);
+        //check if user want to change to email that already exists
+        if (!changeEmailRequestDto.getEmail().equals(oldEmail)){
+            AuthenticationRequestDto newEmailCheck = AuthenticationRequestDto.builder()
+                    .authenticationRegistrationId(AuthenticationRegistrationId.local)
+                    .userEmail(changeEmailRequestDto.getEmail())
+                    .build();
 
-        if (newEmailResponseDto.isPresent()){
-            RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("Email already exists").build();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            Optional<AuthenticationResponseDto> newEmailResponseDto = authorizationRepository.find(newEmailCheck);
+
+            //if user want to change to email that already exists
+            if (newEmailResponseDto.isPresent()){
+                RestError error = RestError.builder().httpStatus(HttpStatus.BAD_REQUEST).message("Email already exists").build();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
         }
 
         AuthenticationRequestDto authenticationRequest = AuthenticationRequestDto.builder()
