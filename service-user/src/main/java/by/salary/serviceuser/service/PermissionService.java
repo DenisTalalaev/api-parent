@@ -113,7 +113,7 @@ public class PermissionService {
         }
 
 
-        if(!permissions.contains(new Permission(PermissionsEnum.DEMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
+        if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(

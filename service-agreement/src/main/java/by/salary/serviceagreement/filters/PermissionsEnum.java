@@ -1,13 +1,12 @@
 package by.salary.serviceagreement.filters;
 
+
 public enum PermissionsEnum {
     ALL_PERMISSIONS,
 
     //ADMINISTRATOR
     REDACT_ORGANISATION_INFO,
-    GRANT_ORGANISATION,
     PROMOTE_USER,
-    DEMOTE_USER,
 
     //MODERATOR
     INVITE_USER,
@@ -17,10 +16,9 @@ public enum PermissionsEnum {
 
     CRUD_AGREEMENT_LIST,
 
-    CRUD_AGREEMENT_STATE,
     //USER
 
     READ_ALL_USERS,
+    REDACT_USER_INFO,
     AUTHORITY_REDACTION
-
 }

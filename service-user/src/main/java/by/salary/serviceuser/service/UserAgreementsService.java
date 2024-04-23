@@ -47,16 +47,20 @@ public class UserAgreementsService {
 
 
     public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email, List<Permission> permissions) {
-        if (!userRepository.existsById(userId)) {
+        Optional<User> sender = userRepository.findByUserEmail(email);
+        Optional<User> reciever = userRepository.findById(userId);
+
+        if (sender.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        }
+        if(reciever.isEmpty()){
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
-
-        if (!userId.equals(userRepository.findByUserEmail(email).get().getId())
-                & !Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)
-        ) {
-            throw new NotEnoughtPermissionsException("You have not enough permissions to perform this action for user with id " + userId, HttpStatus.FORBIDDEN);
+        if(!sender.get().getId().equals(reciever.get().getId())){
+            if(!Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)){
+                throw new NotEnoughtPermissionsException("User with email " + email + " has not enough permissions", HttpStatus.FORBIDDEN);
+            }
         }
-
         List<UserAgreementResponseDTO> userAgreements = new ArrayList<>();
         userAgreementsRepository.findAll().forEach(userAgreement -> {
             if (userAgreement.getUser().getId().equals(userId)) {
@@ -84,11 +88,13 @@ public class UserAgreementsService {
         if (user.isEmpty()) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
-
-        if (!Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)
-        ) {
-            throw new NotEnoughtPermissionsException("You have not enough permissions to perform this action for user with id " + userId, HttpStatus.FORBIDDEN);
+        if(!email.equals(user.get().getUserEmail())){
+            if (!Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)
+            ) {
+                throw new NotEnoughtPermissionsException("You have not enough permissions to perform this action for user with id " + userId, HttpStatus.FORBIDDEN);
+            }
         }
+
 
         SelectionCriteria selectionCriteria = null;
         try {

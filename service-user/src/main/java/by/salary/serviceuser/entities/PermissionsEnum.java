@@ -7,7 +7,6 @@ public enum PermissionsEnum {
     //ADMINISTRATOR
     REDACT_ORGANISATION_INFO,
     PROMOTE_USER,
-    DEMOTE_USER,
 
     //MODERATOR
     INVITE_USER,
@@ -17,7 +16,6 @@ public enum PermissionsEnum {
 
     CRUD_AGREEMENT_LIST,
 
-    CRUD_AGREEMENT_STATE,
     //USER
 
     READ_ALL_USERS,
