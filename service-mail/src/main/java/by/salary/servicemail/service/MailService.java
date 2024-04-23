@@ -32,7 +32,8 @@ public class MailService {
         if(!isValidEmailAddress(mailRequestDTO.getMailTo()) || !isValidEmailAddress(userEmail)){
             throw new MailSendingException("Invalid email address", HttpStatus.BAD_REQUEST);
         }
-        return new MailResponseDTO(send(mailRequestDTO.getMailType(), mailRequestDTO.getMailTo(), mailRequestDTO.getMessage()));
+        boolean sent = send(mailRequestDTO.getMailType(), mailRequestDTO.getMailTo(), mailRequestDTO.getMessage());
+        return new MailResponseDTO(sent);
     }
 
     public MailResponseDTO broadcastMail(MailRequestDTO mailRequestDTO, String userEmail) {
@@ -386,20 +387,16 @@ public class MailService {
     }
 
     public MailResponseDTO mail(MailRequestDTO mailRequestDTO) {
-        switch (mailRequestDTO.getMailType()){
-            case NEW_PAYMENT:
-                return newPayment(mailRequestDTO);
-            case AGREEMENT_CHANGE:
-                return agreementChange(mailRequestDTO);
-            case _2FA:
-                return _2FAMail(mailRequestDTO);
-            case CHANGE_EMAIL:
-                return changeEmail(mailRequestDTO);
-            case RESET_PASSWORD:
-                return resetPassword(mailRequestDTO);
-            default:
-                throw new MailSendingException("Invalid mail type", HttpStatus.NOT_FOUND);
-        }
+        MailResponseDTO response =  switch (mailRequestDTO.getMailType()) {
+            case NEW_PAYMENT -> newPayment(mailRequestDTO);
+            case AGREEMENT_CHANGE -> agreementChange(mailRequestDTO);
+            case _2FA -> _2FAMail(mailRequestDTO);
+            case CHANGE_EMAIL -> changeEmail(mailRequestDTO);
+            case RESET_PASSWORD -> resetPassword(mailRequestDTO);
+            default -> throw new MailSendingException("Invalid mail type", HttpStatus.NOT_FOUND);
+        };
+
+        return response;
     }
 
     private MailResponseDTO changeEmail(MailRequestDTO mailRequestDTO) {

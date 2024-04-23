@@ -32,7 +32,7 @@ public class UserAgreementsController {
                                                                @RequestBody(required = false) SelectionCriteriaDto selection,
                                                                @RequestAttribute String email,
                                                                @RequestAttribute List<Permission> permissions) {
-        if (selection == null){
+        if (selection == null) {
           return userAgreementsService.getAllUserAgreements(user_id, email, permissions);
         }else {
             return userAgreementsService.getAllUserAgreements(user_id, email, selection, permissions);
