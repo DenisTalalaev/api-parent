@@ -30,7 +30,7 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
     @Value("${spring.mvc.format.time}") String dateFormat) {
         this.entityManager = entityManager;
         this.dateFormat = dateFormat;
-        columns = List.of("agreementId", "count", "currentBaseReward", "moderatorComment", "moderatorName", "time", "state");
+        columns = List.of("agreementStateId", "agreementId", "count", "currentBaseReward", "moderatorComment", "moderatorName", "time", "state");
         formatter = new SimpleDateFormat(dateFormat, Locale.US);
     }
 
