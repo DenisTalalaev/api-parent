@@ -39,7 +39,7 @@ public class MailRepository {
     public Optional<MailResponseDTO> sendMessage(MailRequestDTO mailRequestDTO, String jwt){
         Optional<MailResponseDTO> response = webClientBuilder.build()
                 .post()
-                .uri("lb://service-mail/mail/notification")
+                .uri("lb://service-mail/mail")
                 .header("Authorization", "Bearer " + jwt)
                 .body(Mono.just(mailRequestDTO), MailRequestDTO.class)
                 .retrieve()
