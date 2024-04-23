@@ -1,5 +1,6 @@
 package by.salary.serviceuser.controller;
 
+import by.salary.serviceuser.entities.Permission;
 import by.salary.serviceuser.model.SelectionCriteria;
 import by.salary.serviceuser.model.SelectionCriteriaDto;
 import by.salary.serviceuser.model.user.agreement.UserAgreementRequestDTO;
@@ -29,11 +30,12 @@ public class UserAgreementsController {
     @ResponseStatus(HttpStatus.OK)
     public List<UserAgreementResponseDTO> getAllUserAgreements(@PathVariable BigInteger user_id,
                                                                @RequestBody(required = false) SelectionCriteriaDto selection,
-                                                               @RequestAttribute String email) {
+                                                               @RequestAttribute String email,
+                                                               @RequestAttribute List<Permission> permissions) {
         if (selection == null){
-          return userAgreementsService.getAllUserAgreements(user_id, email);
+          return userAgreementsService.getAllUserAgreements(user_id, email, permissions);
         }else {
-            return userAgreementsService.getAllUserAgreements(user_id, email, selection);
+            return userAgreementsService.getAllUserAgreements(user_id, email, selection, permissions);
         }
     }
 

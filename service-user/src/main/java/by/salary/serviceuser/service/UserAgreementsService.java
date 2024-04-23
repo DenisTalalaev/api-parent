@@ -40,15 +40,15 @@ public class UserAgreementsService {
     }
 
 
-    public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email) {
+    public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email, List<Permission> permissions) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
 
         if (!userId.equals(userRepository.findByUserEmail(email).get().getId())
-                & !Permission.isPermitted(userRepository.findByUserEmail(email).get(), PermissionsEnum.CRUD_USER_AGREEMENT)
+                & !Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)
         ) {
-            throw new NotEnoughtPermissionsException("User with id " + userId + " not found", HttpStatus.FORBIDDEN);
+            throw new NotEnoughtPermissionsException("You have not enough permissions to perform this action for user with id " + userId, HttpStatus.FORBIDDEN);
         }
 
         List<UserAgreementResponseDTO> userAgreements = new ArrayList<>();
@@ -63,9 +63,19 @@ public class UserAgreementsService {
     }
 
     public List<UserAgreementResponseDTO> getAllUserAgreements(BigInteger userId, String email,
-                                                               SelectionCriteriaDto selectionCriteriaDto) {
+                                                               SelectionCriteriaDto selectionCriteriaDto,
+                                                               List<Permission> permissions) {
 
         Optional<User> user = userRepository.findById(userId);
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
+        }
+
+        if (!Permission.isPermitted(permissions, PermissionsEnum.CRUD_USER_AGREEMENT)
+        ) {
+            throw new NotEnoughtPermissionsException("You have not enough permissions to perform this action for user with id " + userId, HttpStatus.FORBIDDEN);
+        }
 
         SelectionCriteria selectionCriteria = null;
         try {
@@ -73,15 +83,7 @@ public class UserAgreementsService {
         }catch (IllegalArgumentException e){
             throw new ValidationException("Wrong selection criteria");
         }
-        if (user.isEmpty()) {
-            throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
-        }
 
-        if (!user.get().getUserEmail().equals(email)
-                & !Permission.isPermitted(user.get(), PermissionsEnum.CRUD_USER_AGREEMENT)
-        ) {
-            throw new NotEnoughtPermissionsException("User with id " + userId + " not found", HttpStatus.FORBIDDEN);
-        }
 
         List<UserAgreementResponseDTO> userAgreements = new ArrayList<>();
         try {
@@ -151,9 +153,9 @@ public class UserAgreementsService {
         SelectionCriteria selectionCriteria = new SelectionCriteria();
 
         if (selectionCriteriaDto.getFilter() != null) {
-            Map<String, Map<FilterCriteria.FilterCriteriaType, String>> filter = new HashMap<>();
+            Map<String, Map<FilterCriteria.FilterCriteriaType, String[]>> filter = new HashMap<>();
             for (var filterEntry : selectionCriteriaDto.getFilter().entrySet()) {
-                Map<FilterCriteria.FilterCriteriaType, String> value = new HashMap<>();
+                Map<FilterCriteria.FilterCriteriaType, String[]> value = new HashMap<>();
                 for (var filterTypeEntry : filterEntry.getValue().entrySet()) {
                     value.put(FilterCriteria.FilterCriteriaType.valueOfString(filterTypeEntry.getKey()), filterTypeEntry.getValue());
                 }

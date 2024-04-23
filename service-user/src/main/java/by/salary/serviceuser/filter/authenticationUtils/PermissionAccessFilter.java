@@ -1,5 +1,7 @@
 package by.salary.serviceuser.filter.authenticationUtils;
 
+import by.salary.serviceuser.entities.Permission;
+import by.salary.serviceuser.entities.PermissionsEnum;
 import by.salary.serviceuser.entities.User;
 import by.salary.serviceuser.exceptions.UserNotFoundException;
 import by.salary.serviceuser.repository.UserRepository;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.core.Ordered.HIGHEST_PRECEDENCE;
@@ -35,6 +38,7 @@ public class PermissionAccessFilter extends OncePerRequestFilter {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
         User user = optUser.get();
+
         request.setAttribute("permissions", user.getPermissions());
         filterChain.doFilter(request, response);
     }
