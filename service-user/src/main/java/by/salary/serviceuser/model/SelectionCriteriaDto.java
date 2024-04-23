@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class SelectionCriteriaDto {
 
-    Map<String, Map<String, String>> filter;
+    Map<String, Map<String, String[]>> filter;
 
     Map<String, String>  order;
 

@@ -24,12 +24,12 @@ public class FilterCriteria {
         }
      }
      */
-    Map<String, Map<FilterCriteriaType, String>> filterMap;
+    Map<String, Map<FilterCriteriaType, String[]>> filterMap;
 
     public boolean hasColumn(String columnName) {
         return filterMap.containsKey(columnName);
     }
-    public Map<FilterCriteriaType, String> getColumn(String columnName) {
+    public Map<FilterCriteriaType, String[]> getColumn(String columnName) {
         return filterMap.get(columnName);
     }
 
@@ -43,7 +43,8 @@ public class FilterCriteria {
         GREATER_THAN("greaterThan"),
         LESS_THAN("lessThan"),
         AFTER("after"),
-        BEFORE("before");
+        BEFORE("before"),
+        DATE_RANGE("dateRange");
         final String value;
         FilterCriteriaType(String value) {
             this.value = value;

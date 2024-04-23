@@ -13,10 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsRepository {
@@ -24,11 +21,15 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
     EntityManager entityManager;
 
     public static List<String> columns;
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy", Locale.ENGLISH);
+    private static SimpleDateFormat formatter;
+
+    private final static String DATE_FORMAT = "E MMM dd yyyy HH:mm:ss 'GMT'Z";
 
     CustomUserAgreementsRepositoryImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
         columns = List.of("agreement_id", "count", "current_base_reward", "moderator_comment", "moderator_name", "time", "user_id", "state");
+        formatter = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT+3"));
     }
 
     @Override
@@ -44,7 +45,11 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
         criteriaQuery.select(uar);
         if (selectionCriteria.hasFilter()) {
             FilterCriteria filter = selectionCriteria.getFilter();
-            addFilter(predicates, filter, criteriaBuilder, uar);
+            try {
+                addFilter(predicates, filter, criteriaBuilder, uar);
+            }catch (IllegalArgumentException e){
+                throw new ParseException(e.getMessage(), 0);
+            }
             criteriaQuery.where(predicates.toArray(new Predicate[0]));
         }
         OrderCriteria order = selectionCriteria.getOrder();
@@ -79,8 +84,11 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
             if (!filter.hasColumn(column)) {
                 continue;
             }
-            Map<FilterCriteriaType, String> columnFilter = filter.getColumn(column);
+            Map<FilterCriteriaType, String[]> columnFilter = filter.getColumn(column);
             for (var filterType : columnFilter.entrySet()) {
+                if (filterType.getValue().length == 0) {
+                    throw new IllegalArgumentException("Filter value cannot be empty");
+                }
                 switch (filterType.getKey()) {
                     case EQUALS -> {
                         predicates.add(
@@ -89,14 +97,14 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
                         );
                     }
                     case AFTER -> {
-                        java.util.Date date = formatter.parse(filterType.getValue());
+                        java.util.Date date = formatter.parse(filterType.getValue()[0]);
                         java.sql.Date dateSql = new java.sql.Date(date.getTime());
                         predicates.add(
                                 criteriaBuilder.greaterThan(uar.<java.sql.Date>get(column), dateSql)
                         );
                     }
                     case BEFORE -> {
-                        java.util.Date date = formatter.parse(filterType.getValue());
+                        java.util.Date date = formatter.parse(filterType.getValue()[0]);
                         java.sql.Date dateSql = new java.sql.Date(date.getTime());
                         predicates.add(
                                 criteriaBuilder.lessThanOrEqualTo(uar.<java.sql.Date>get(column), dateSql)
@@ -104,17 +112,37 @@ public class CustomUserAgreementsRepositoryImpl implements CustomUserAgreementsR
                     }
                     case LESS_THAN -> {
                         predicates.add(
-                                criteriaBuilder.lessThan(uar.get(column), filterType.getValue())
+                                criteriaBuilder.lessThan(uar.get(column), filterType.getValue()[0])
                         );
                     }
                     case NOT_EQUALS -> {
                         predicates.add(
-                                criteriaBuilder.notEqual(uar.get(column), filterType.getValue())
+                                criteriaBuilder.notEqual(uar.get(column), filterType.getValue()[0])
                         );
                     }
                     case GREATER_THAN -> {
                         predicates.add(
-                                criteriaBuilder.greaterThan(uar.get(column), filterType.getValue())
+                                criteriaBuilder.greaterThan(uar.get(column), filterType.getValue()[0])
+                        );
+                    }
+                    case DATE_RANGE -> {
+                        if (filterType.getValue().length != 2){
+                            throw new IllegalArgumentException("Invalid date range");
+                        }
+                        java.util.Date firstDate;
+                        java.util.Date secondDate;
+                        try {
+                            firstDate = formatter.parse(filterType.getValue()[0]);
+                            secondDate = formatter.parse(filterType.getValue()[1]);
+                        }catch (ParseException e){
+                            throw new IllegalArgumentException("Invalid date format, required: " + DATE_FORMAT);
+                        }
+
+                        java.sql.Date firstDateSql = new java.sql.Date(firstDate.getTime());
+                        java.sql.Date secondDateSql = new java.sql.Date(secondDate.getTime());
+
+                        predicates.add(
+                            criteriaBuilder.between(uar.<java.sql.Date>get(column), firstDateSql, secondDateSql)
                         );
                     }
                 }

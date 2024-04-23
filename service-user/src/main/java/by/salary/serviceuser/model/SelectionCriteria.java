@@ -10,7 +10,7 @@ import java.util.Map;
 @Builder
 public class SelectionCriteria {
 
-    Map<String, Map<FilterCriteria.FilterCriteriaType, String>> filter;
+    Map<String, Map<FilterCriteria.FilterCriteriaType, String[]>> filter;
 
     Map<String, OrderCriteria.OrderCriteriaType>  order;
 

@@ -51,7 +51,11 @@ public class Permission {
     }
 
     public static boolean isPermitted(User user, PermissionsEnum permissionsEnum) {
-        for (Permission permission : user.getPermissions()) {
+        return isPermitted(user.getPermissions(), permissionsEnum);
+    }
+
+    public static boolean isPermitted(List<Permission> permissions, PermissionsEnum permissionsEnum) {
+        for (Permission permission : permissions) {
             if (permission.getName().equals(permissionsEnum.name()) || permission.getName().equals(PermissionsEnum.ALL_PERMISSIONS.name())) {
                 return true;
             }
