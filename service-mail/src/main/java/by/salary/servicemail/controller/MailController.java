@@ -43,7 +43,7 @@ public class MailController {
 
     @PostMapping
     @RequestMapping()
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     public MailResponseDTO mail(@RequestBody  MailRequestDTO mailRequestDTO) {
         return mailService.mail(mailRequestDTO);
     }
