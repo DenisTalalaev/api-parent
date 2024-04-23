@@ -40,13 +40,13 @@ public class UserService {
         this.organisationRepository = organisationRepository;
     }
 
-    public List<UserResponseDTO> getAllUsers(String email) {
+    public List<UserResponseDTO> getAllUsers(String email, List<Permission> permissions) {
 
         Optional<User> optUser = userRepository.findByUserEmail(email);
         if (optUser.isEmpty()) {
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
-        if (!Permission.isPermitted(optUser.get(), PermissionsEnum.READ_ALL_USERS)) {
+        if (!Permission.isPermitted(permissions, PermissionsEnum.READ_ALL_USERS)) {
             throw new NotEnoughtPermissionsException("User with email " + email + " has not enough permissions", HttpStatus.FORBIDDEN);
         }
         BigInteger organisationId = optUser.get().getOrganisation().getId();
@@ -214,13 +214,8 @@ public class UserService {
         return new UserResponseDTO(userRepository.findByUserEmail(email).get());
     }
 
-    public UserResponseDTO setUserAuthority(BigInteger userId, BigInteger authorityId, String email) {
-        Optional<User> userOpt = userRepository.findByUserEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
-        }
-        User user = userOpt.get();
-        if (!Permission.isPermitted(user, PermissionsEnum.AUTHORITY_REDACTION)) {
+    public UserResponseDTO setUserAuthority(BigInteger userId, BigInteger authorityId, List<Permission> permissions) {
+        if (!Permission.isPermitted(permissions, PermissionsEnum.AUTHORITY_REDACTION)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<Authority> authorityOpt = authorityRepository.findById(authorityId);
@@ -245,13 +240,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, String email) {
-        Optional<User> userOpt = userRepository.findByUserEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
-        }
-        User user = userOpt.get();
-        if (!Permission.isPermitted(user, PermissionsEnum.REDACT_USER_INFO)) {
+    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, List<Permission> permissions) {
+        if (!Permission.isPermitted(permissions, PermissionsEnum.REDACT_USER_INFO)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> userOpt2 = userRepository.findById(userRequestDTO.getId());
@@ -265,13 +255,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO expireUser(BigInteger user_id, String email) {
-        Optional<User> userOpt = userRepository.findByUserEmail(email);
-        if (userOpt.isEmpty()) {
-            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
-        }
-        User user = userOpt.get();
-        if (!Permission.isPermitted(user, PermissionsEnum.EXPIRE_USER)) {
+    public UserResponseDTO expireUser(BigInteger user_id, List<Permission> permissions) {
+        if (!Permission.isPermitted(permissions, PermissionsEnum.EXPIRE_USER)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
         Optional<User> userOpt2 = userRepository.findById(user_id);

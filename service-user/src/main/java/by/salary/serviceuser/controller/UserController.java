@@ -32,8 +32,9 @@ public class UserController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<UserResponseDTO> getAllUsers(@RequestAttribute String email) {
-        return userService.getAllUsers(email);
+    public List<UserResponseDTO> getAllUsers(@RequestAttribute String email,
+                                             @RequestAttribute List<Permission> permissions) {
+        return userService.getAllUsers(email, permissions);
     }
 
     @GetMapping("/getallmails/{userEmail}")
@@ -104,9 +105,9 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDTO updateUser(@PathVariable BigInteger user_id,
                                       @PathVariable BigInteger authority_id,
-                                      @RequestAttribute String email
+                                      @RequestAttribute List<Permission> permissions
     ) {
-        return userService.setUserAuthority(user_id, authority_id, email);
+        return userService.setUserAuthority(user_id, authority_id, permissions);
     }
 
     @GetMapping("/authority")
@@ -124,17 +125,16 @@ public class UserController {
     @PutMapping("/expire/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDTO expireUser(@PathVariable BigInteger user_id,
-                                      @RequestAttribute String email
+                                      @RequestAttribute List<Permission> permissions
     ) {
-        return userService.expireUser(user_id, email);
+        return userService.expireUser(user_id, permissions);
     }
 
     @PutMapping()
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDTO renewUser(@RequestBody UserRequestDTO userRequestDTO,
-                                     @RequestAttribute String email
-    ) {
-        return userService.updateUser(userRequestDTO, email);
+                                     @RequestAttribute List<Permission> permissions) {
+        return userService.updateUser(userRequestDTO, permissions);
     }
 
 
