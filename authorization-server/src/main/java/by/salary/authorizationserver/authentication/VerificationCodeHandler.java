@@ -5,6 +5,7 @@ import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.model.entity.MailType;
 import by.salary.authorizationserver.model.userrequest.VerificationCodeRequest;
 import by.salary.authorizationserver.repository.TokenRepository;
 import by.salary.authorizationserver.service.JwtService;
@@ -57,7 +58,7 @@ public class VerificationCodeHandler {
     }
 
     public ConnValidationResponse generateNewToken(UserInfoDTO userInfoDTO) {
-        String token = tokenRegistrationService.generateToken(userInfoDTO);
+        String token = tokenRegistrationService.generateToken(userInfoDTO, MailType._2FA);
 
         return ConnValidationResponse.builder()
                 .status(HttpStatus.OK)

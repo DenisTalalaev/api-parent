@@ -39,14 +39,14 @@ public class TokenRegistrationService {
         BILLION = BigInteger.valueOf(999_999_999L);
     }
 
-    public String generateToken(UserInfoDTO userInfo){
+    public String generateToken(UserInfoDTO userInfo, MailType mailType) {
         //generate verification code
         if(!userInfo.is2FEnabled()){
             return is2FDisabled(userInfo);
         }
 
         if (!userInfo.is2FVerified()){
-            return is2FEnabledNotVerified(userInfo);
+            return is2FEnabledNotVerified(userInfo, mailType);
         }
 
         return is2FVerified(userInfo);
@@ -66,7 +66,7 @@ public class TokenRegistrationService {
         return token;
     }
 
-    private String is2FEnabledNotVerified(UserInfoDTO userInfo){
+    private String is2FEnabledNotVerified(UserInfoDTO userInfo, MailType mailType){
         userInfo.setAuthorities(Collections.emptyList());
         //generate jwt
         String token = jwtService.generateToken(userInfo);
@@ -83,7 +83,7 @@ public class TokenRegistrationService {
         MailRequestDTO mailRequestDTO = MailRequestDTO.builder()
                 .mailTo(userInfo.getEmail())
                 .message(verificationCode)
-                .mailType(MailType._2FA)
+                .mailType(mailType)
                 .build();
 
         mailService.sendMessage(mailRequestDTO, token);

@@ -5,6 +5,7 @@ import by.salary.authorizationserver.model.ConnValidationResponse;
 import by.salary.authorizationserver.model.TokenEntity;
 import by.salary.authorizationserver.model.UserInfoDTO;
 import by.salary.authorizationserver.authentication.token.UsernameEmailPasswordAuthenticationToken;
+import by.salary.authorizationserver.model.entity.MailType;
 import by.salary.authorizationserver.model.userrequest.AuthenticationLocalUserRequest;
 import by.salary.authorizationserver.service.JwtService;
 import by.salary.authorizationserver.service.TokenRegistrationService;
@@ -78,7 +79,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         UserInfoDTO userInfo = mapToUserDetails(authToken);
 
 
-        String token = tokenRegistrationService.generateToken(userInfo);
+        String token = tokenRegistrationService.generateToken(userInfo, MailType._2FA);
 
 
         //preparing response

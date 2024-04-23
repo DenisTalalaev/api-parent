@@ -6,6 +6,7 @@ import by.salary.authorizationserver.model.dto.AuthenticationResponseDto;
 import by.salary.authorizationserver.model.dto.RegisterRequestDto;
 import by.salary.authorizationserver.model.dto.RegisterResponseDto;
 import by.salary.authorizationserver.model.entity.Authority;
+import by.salary.authorizationserver.model.entity.MailType;
 import by.salary.authorizationserver.model.oauth2.AuthenticationUserInfo;
 import by.salary.authorizationserver.model.oauth2.FactoryAuthenticationRegistration;
 import by.salary.authorizationserver.repository.AuthorizationRepository;
@@ -131,7 +132,7 @@ public class OAuth2AuthenticationSuccessHandler extends SavedRequestAwareAuthent
             );
             SecurityContextHolder.getContext().setAuthentication(securityAuthentication);
 
-            return tokenRegistrationService.generateToken(mapToUserInfoDto(user));
+            return tokenRegistrationService.generateToken(mapToUserInfoDto(user), MailType._2FA);
     }
 
     RegisterRequestDto mapToRegisterDto(AuthenticationUserInfo authUserInfo){

@@ -105,7 +105,7 @@ public class AuthenticationRegistrationService {
             throw new UserNotFoundException("Authentication failed");
         }
 
-        String token = tokenRegistrationService.generateToken(mapToUserInfoDto(authentication.get()));
+        String token = tokenRegistrationService.generateToken(mapToUserInfoDto(authentication.get()), MailType._2FA);
 
         return mapToConnValidationResponse(authentication.get(), token);
     }
@@ -146,9 +146,10 @@ public class AuthenticationRegistrationService {
                 .is2FVerified(false)
                 .build();
 
-        String token = tokenRegistrationService.generateToken(userInfoDTO);
+        String token = tokenRegistrationService.generateToken(userInfoDTO, MailType.RESET_PASSWORD);
         ConnValidationResponse response = ConnValidationResponse.builder()
                 .token(token)
+                .email(forgotPasswordRequestDto.getEmail())
                 .is2FEnabled(true)
                 .is2FVerified(false)
                 .authorities(authorities)
@@ -200,7 +201,7 @@ public class AuthenticationRegistrationService {
                         "IS2F_ENABLED=" + changeEmailRequestDto.is2FEnabled()))
                 .build();
 
-        String token = tokenRegistrationService.generateToken(userInfoDTO);
+        String token = tokenRegistrationService.generateToken(userInfoDTO, MailType.CHANGE_EMAIL);
 
         UriBuilder uriBuilder = UriComponentsBuilder.fromUriString(frontendUrl + "/verifyEmail").queryParam("token", token);
 
