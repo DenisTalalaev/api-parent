@@ -125,9 +125,10 @@ public class UserController {
     @PutMapping("/expire/{user_id}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDTO expireUser(@PathVariable BigInteger user_id,
-                                      @RequestAttribute List<Permission> permissions
+                                      @RequestAttribute List<Permission> permissions,
+                                      @RequestAttribute String email
     ) {
-        return userService.expireUser(user_id, permissions);
+        return userService.expireUser(user_id, permissions, email);
     }
 
     @PutMapping()
