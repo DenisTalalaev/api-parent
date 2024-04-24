@@ -90,8 +90,8 @@ public class MailService {
     private ArrayList<String> getAllMails(String userEmail) {
         ArrayList<String> mails = new ArrayList<>();
         Collections.addAll(mails, webClientBuilder.build()
-                .post()
-                .uri("lb://service-invitation/users/getallmails/" + userEmail)
+                .get()
+                .uri("lb://service-user/users/getallmails/" + userEmail)
                 .retrieve()
                 .bodyToMono(String.class).block().split("\n"));
         if(mails.isEmpty()){
@@ -368,11 +368,16 @@ public class MailService {
         if (!isValidEmailAddress(mailRequestDTO.getMailTo())) {
             throw new MailSendingException("Invalid email address", HttpStatus.NOT_FOUND);
         }
-        return new MailResponseDTO(send(
-                mailRequestDTO.getMailType(),
-                mailRequestDTO.getMailTo(),
-                formatCollectiveAgreementNotification(mailRequestDTO.getMessage())
-        ));
+        for (String mail : getAllMails(mailRequestDTO.getMailTo())) {
+            if (isValidEmailAddress(mail)) {
+                send(
+                        mailRequestDTO.getMailType(),
+                        mail,
+                        formatCollectiveAgreementNotification(mailRequestDTO.getMessage())
+                );
+            }
+        }
+        return new MailResponseDTO(true);
     }
 
     public MailResponseDTO _2FAMail(MailRequestDTO mailRequestDTO) {

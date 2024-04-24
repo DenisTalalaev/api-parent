@@ -8,13 +8,18 @@ import by.salary.serviceagreement.exceptions.NotEnoughtPermissionsException;
 import by.salary.serviceagreement.filters.Permission;
 import by.salary.serviceagreement.filters.PermissionsEnum;
 import by.salary.serviceagreement.model.*;
+import by.salary.serviceagreement.model.mail.MailRequestDTO;
+import by.salary.serviceagreement.model.mail.MailResponseDTO;
+import by.salary.serviceagreement.model.mail.MailType;
 import by.salary.serviceagreement.repository.AgreementRepository;
 import by.salary.serviceagreement.repository.AgreementListRepository;
 import by.salary.serviceagreement.repository.AgreementStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -200,7 +205,18 @@ public class AgreementService {
         if (!listId.equals(agreementState.getAgreementLists().getId())) {
             throw new AgreementNotFoundException("Agreement state not found in this list", HttpStatus.NOT_FOUND);
         }
+        String res = agreementState.getStateName() + " " + agreementState.getStateInfo() + "<br> => <br>";
         agreementStateRepository.save(agreementState.update(agreementStateListRequestDTO));
+        res = res + agreementState.getStateName() + " " + agreementState.getStateInfo();
+        mail(
+                new MailRequestDTO(
+                        email,
+                        res,
+                        MailType.AGREEMENT_CHANGE
+                )
+        );
+
+
     }
 
     public void updateAgreementList(AgreementListRequestDTO agreementListResponseDTO, BigInteger listId, String email) {
@@ -212,7 +228,6 @@ public class AgreementService {
         if (optAgreement.isEmpty()) {
             throw new AgreementNotFoundException("Agreement not found", HttpStatus.NOT_FOUND);
         }
-        Agreement agreement = optAgreement.get();
         Optional<AgreementList> optAgreementList = agreementListRepository.findById(listId);
         if (optAgreementList.isEmpty()) {
             throw new AgreementNotFoundException("Agreement list not found", HttpStatus.NOT_FOUND);
@@ -221,7 +236,17 @@ public class AgreementService {
         if (!agreementId.equals(agreementList.getAgreement().getId())) {
             throw new AgreementNotFoundException("Agreement list not found in this organisation", HttpStatus.NOT_FOUND);
         }
+        Agreement agreement = optAgreement.get();
+        String res = agreementList.getListName() + "<br> => <br>";
         agreementListRepository.save(agreementList.update(agreementListResponseDTO));
+        res = res + agreementList.getListName();
+        mail(
+                new MailRequestDTO(
+                        "broadcast",
+                        res,
+                        MailType.AGREEMENT_CHANGE
+                )
+        );
     }
 
     public String getAgreementState(BigInteger id) {
@@ -248,5 +273,21 @@ public class AgreementService {
                         .block())
         );
 
+    }
+
+    public Optional<MailResponseDTO> mail(MailRequestDTO mailRequestDTO) {
+        try {
+            Optional<MailResponseDTO> response = webClientBuilder.build()
+                    .post()
+                    .uri("lb://service-mail/mail")
+                    .body(Mono.just(mailRequestDTO), MailRequestDTO.class)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, resp -> Mono.empty())
+                    .bodyToMono(MailResponseDTO.class)
+                    .blockOptional();
+            return response;
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }
