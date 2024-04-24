@@ -1,6 +1,5 @@
 package by.salary.serviceagreement.authenticationUtils;
 
-import by.salary.serviceuser.entities.Permission;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,12 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-
 import java.io.IOException;
-import java.util.Objects;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Component
 @AllArgsConstructor

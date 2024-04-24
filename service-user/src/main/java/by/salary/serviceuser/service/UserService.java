@@ -262,7 +262,17 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO expireUser(BigInteger user_id, List<Permission> permissions) {
+    public UserResponseDTO expireUser(BigInteger user_id, List<Permission> permissions, String email) {
+        Optional<User> requester = userRepository.findByUserEmail(email);
+        if (requester.isEmpty()) {
+            throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
+        } else {
+            if (requester.get().getOrganisation().getDirector().getId()
+                    .equals(user_id)) {
+                throw new UserNotFoundException("You can't fire this user", HttpStatus.NOT_FOUND);
+            }
+        }
+
         if (!Permission.isPermitted(permissions, PermissionsEnum.EXPIRE_USER)) {
             throw new NotEnoughtPermissionsException("Not enough permissions to perform this action", HttpStatus.FORBIDDEN);
         }
