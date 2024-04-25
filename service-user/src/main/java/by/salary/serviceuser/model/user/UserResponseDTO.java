@@ -1,6 +1,7 @@
 package by.salary.serviceuser.model.user;
 
 import by.salary.serviceuser.entities.*;
+import by.salary.serviceuser.interfaces.AuthenticationRegistrationId;
 import by.salary.serviceuser.model.premission.PermissionResponseDTO;
 import by.salary.serviceuser.model.user.agreement.UserAgreementResponseDTO;
 import lombok.AllArgsConstructor;
@@ -46,6 +47,8 @@ public class UserResponseDTO {
     private List<UserAgreement> userAgreementList;
 
     private Boolean is2FAEnabled;
+
+    private String  authenticationRegistrationId;
 
     public UserResponseDTO(User user) {
 

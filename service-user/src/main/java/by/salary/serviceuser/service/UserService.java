@@ -218,7 +218,10 @@ public class UserService {
     }
 
     public UserResponseDTO getUser(String email) {
-        return new UserResponseDTO(userRepository.findByUserEmail(email).get());
+        Optional<User> userOpt = userRepository.findByUserEmail(email);
+        UserResponseDTO userResponseDTO = new UserResponseDTO(userOpt.get());
+        userResponseDTO.setAuthenticationRegistrationId(userOpt.get().getAuthenticationRegistrationId().name());
+        return userResponseDTO;
     }
 
     public UserResponseDTO setUserAuthority(BigInteger userId, BigInteger authorityId, List<Permission> permissions) {
