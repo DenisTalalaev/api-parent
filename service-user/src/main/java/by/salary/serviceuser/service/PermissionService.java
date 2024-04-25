@@ -79,22 +79,32 @@ public class PermissionService {
 
     public PermissionResponseDTO addUserPermission(BigInteger userId, BigInteger permissionId, String email, List<Permission> permissions) {
 
-        if(!userRepository.existsById(userId)){
+        Optional<User> requiredUser = userRepository.findByUserEmail(email);
+        Optional<User> user = userRepository.findById(userId);
+        Optional<Permission> optPermission = permissionRepository.findById(permissionId);
+
+
+        if(user.isEmpty()){
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
-        if(!userRepository.existsByUserEmail(email)){
+        if(requiredUser.isEmpty()){
             throw new UserNotFoundException("User with email " + email + " not found", HttpStatus.NOT_FOUND);
         }
-        if(!permissionRepository.existsById(permissionId)){
+        if(optPermission.isEmpty()){
             throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
         }
         if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
-        if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
-                userRepository.findById(userId).get().getOrganisation().getId()
+        if(!requiredUser.get().getOrganisation().getId().equals(
+                user.get().getOrganisation().getId()
         )){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+        if(optPermission.get().equals(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
+            if(!requiredUser.get().getPermissions().contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
+                throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+            }
         }
         Permission permission = permissionRepository.findById(permissionId).get();
         permission.getUsers().add(userRepository.findById(userId).get());
@@ -104,7 +114,7 @@ public class PermissionService {
     public void deleteUserPermission(BigInteger userId, BigInteger permissionId, String email, List<Permission> permissions) {
         Optional<User> optUser = userRepository.findById(userId);
         Optional<Permission> optPermission = permissionRepository.findById(permissionId);
-
+        Optional<User> requester = userRepository.findByUserEmail(email);
         if(optUser.isEmpty()){
             throw new UserNotFoundException("User with id " + userId + " not found", HttpStatus.NOT_FOUND);
         }
@@ -112,14 +122,19 @@ public class PermissionService {
             throw new PermissionNotFoundException("Permission with id " + permissionId + " not found", HttpStatus.NOT_FOUND);
         }
 
-
         if(!permissions.contains(new Permission(PermissionsEnum.PROMOTE_USER)) && !permissions.contains(new Permission(PermissionsEnum.ALL_PERMISSIONS))){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
         }
-        if(!userRepository.findByUserEmail(email).get().getOrganisation().getId().equals(
-                userRepository.findById(userId).get().getOrganisation().getId()
+        if(!requester.get().getOrganisation().getId().equals(
+                optUser.get().getOrganisation().getId()
         )){
             throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+        }
+
+        if(optPermission.get().equals(new Permission(PermissionsEnum.ALL_PERMISSIONS))) {
+            if(!requester.get().getPermissions().contains(PermissionsEnum.ALL_PERMISSIONS)){
+                throw new NotEnoughtPermissionsException("You have not enought permissions to perform this action", HttpStatus.FORBIDDEN);
+            }
         }
 
         User user = optUser.get();
